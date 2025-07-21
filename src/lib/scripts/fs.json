@@ -1,0 +1,18 @@
+{
+    "cwd": "/home",
+    "files": {
+        "name": "",
+        "type": "dir",
+        "contents": [{
+            "name": "home",
+            "type": "dir",
+            "contents": [
+            {
+                "name": "README.txt",
+                "type": "reg",
+                "contents": "Hello world!"
+            }
+        ]
+        }]
+    }
+}
