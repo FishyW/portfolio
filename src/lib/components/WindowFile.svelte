@@ -11,9 +11,9 @@
 
 <script lang="ts">
     import { fileSystem } from "$scripts/fs.svelte";
-    import { show } from "./WindowFileContextMenu.svelte";
+    import { show } from "./ContextMenu.svelte";
     import FileElement from "./WindowFileElement.svelte";
-    import type { Component } from "svelte";
+    import ContextMenuFile from "./ContextMenuFile.svelte";
 
     export function backHandler(e: MouseEvent) {
         fileSystem.back();
@@ -29,8 +29,9 @@
 
     // bind an array to an each block
     // no clue why this isn't documented
-    let _refs: ReturnType<Component>[] = $state([])
-    let refs = $derived(_refs.filter(Boolean))
+    // for now not used
+    // let _refs: ReturnType<Component>[] = $state([])
+    // let refs = $derived(_refs.filter(Boolean))
 </script>
 
 
@@ -39,11 +40,12 @@
 class="w-[50vw] h-[80vh] flex flex-wrap p-4 content-start gap-4 overflow-y-auto" 
 oncontextmenu={e => {
     e.preventDefault();
-    show(e);
+    show(e, ContextMenuFile);
 }}>
 <div class="w-full m-0">{fileSystem.cwd.path}</div>
-    {#each wrapper as item, i (item)}
-        <FileElement file={item.file} bind:this={_refs[i]} componentThis={refs[i]} />
+    {#each wrapper as item (item)}
+        <FileElement file={item.file} />
     {/each}
     <!-- { console.log(defaultDirectory) } -->
 </div>
+

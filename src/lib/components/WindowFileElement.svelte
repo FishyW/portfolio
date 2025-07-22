@@ -4,7 +4,7 @@
 
     let fileToBeRenamed = $state("");
 
-    export function invokeRename(filename: string) {
+    export function renamePrompt(filename: string) {
         fileToBeRenamed = filename;
     }
 
@@ -14,25 +14,21 @@
 
 <script lang="ts">
     import { DirectoryFile, fileSystem, type BaseFile } from "$scripts/fs.svelte";
-    import { show } from "./WindowFileContextMenu.svelte";
+    import { show } from "./ContextMenu.svelte";
 
-    import { pasteBuffer } from "./WindowFileContextMenu.svelte";
+    import ContextMenuFile, { pasteBuffer } from "./ContextMenuFile.svelte";
 
     interface Props {
-        file: BaseFile,
-        componentThis: any
+        file: BaseFile
     }
-    let { file, componentThis }: Props = $props();
+    let { file }: Props = $props();
     
 
     let renaming = $state(false);
     // svelte-ignore non_reactive_update 
     let inputBox: HTMLElement;
 
-    export function invokeRename() {
-        renaming = true;
-    }
-    
+   
     let name = $state(file.name);
 
     $effect(() => {
@@ -126,7 +122,10 @@ ondragover = {e => {
 oncontextmenu={e => {
     e.preventDefault();
     e.stopPropagation();
-    show(e, file, componentThis);
+    show(e, ContextMenuFile, {selectedFile: file, renameCallback: () => {
+        renaming = true;
+    }
+    });
 }}
 >
         <div class="h-20 w-20 bg-black"></div>

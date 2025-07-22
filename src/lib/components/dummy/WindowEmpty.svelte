@@ -2,13 +2,12 @@
 
 <script lang="ts" module >
     
-    import type { Setting } from "./WindowManager.svelte";
+    import type { Setting } from "../WindowManager.svelte";
 
     export const setting: Setting = {
         id: "Empty",
         hasBack: false
     }
-
 </script>
 
 

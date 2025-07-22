@@ -5,7 +5,7 @@
 
     import type { Component } from "svelte";
     import Window from "./Window.svelte";
-    import EmptyWindow from "./WindowEmpty.svelte";
+    import EmptyWindow from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from 'svelte/reactivity';
 
     let childprops = $state({});
@@ -53,8 +53,6 @@
         return Math.random() * (max - min) + min; 
     }
 
-
-  
     
 </script>
 

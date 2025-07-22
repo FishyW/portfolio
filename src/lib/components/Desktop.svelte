@@ -1,6 +1,6 @@
 <script>
     import Dash from "./Dash.svelte"
-    import FileContextMenu from "./WindowFileContextMenu.svelte";
+    import ContextMenu from "./ContextMenu.svelte";
     import TopBar from "./TopBar.svelte"
     import WindowManager from "./WindowManager.svelte";
 </script>
@@ -19,5 +19,5 @@
 
 <!-- can't place the context menu as a child of the file menu -->
 <!-- position fixed apparently gets "reset" under transform -->
-<FileContextMenu />
+<ContextMenu />
 
