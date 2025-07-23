@@ -1,23 +1,17 @@
 
-<script module lang="ts">
-    import type { Setting } from "./WindowManager.svelte";
-
-    export const setting: Setting = {
-        id: "FileManager",
-        hasBack: true
-    };
-
-</script>
-
 <script lang="ts">
     import { fileSystem } from "$scripts/fs.svelte";
     import { show } from "./ContextMenu.svelte";
     import FileElement from "./WindowFileElement.svelte";
     import ContextMenuFile from "./ContextMenuFile.svelte";
+    import WindowTopBarFile from "./WindowTopBarFile.svelte";
 
-    export function backHandler(e: MouseEvent) {
-        fileSystem.back();
-    }
+    // all windows need to export this unique ID
+    // will be used by the window manager to 
+    // figure out 
+    export const ID = "File";
+
+   
 
     let wrapper = $derived(fileSystem
         .cwd.files.map(file => {
@@ -34,6 +28,7 @@
     // let refs = $derived(_refs.filter(Boolean))
 </script>
 
+<WindowTopBarFile />
 
 
 <div 
@@ -46,6 +41,5 @@ oncontextmenu={e => {
     {#each wrapper as item (item)}
         <FileElement file={item.file} />
     {/each}
-    <!-- { console.log(defaultDirectory) } -->
 </div>
 

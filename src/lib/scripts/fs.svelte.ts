@@ -271,38 +271,59 @@ class FileSystem {
         this.history = [cwd];
     }
     
+    // given a directory and a path
+    // find the file specified by the path
+    findFile(path: string) {
+        function helper(dir: DirectoryFile, path: string[]) {
+            const [first, ...rest] = path;
+            const final = dir.files.filter(file => file.name == first);
+            
+            if (final.length == 0) {
+                return null;
+            }
+
+            // no more items left
+            if (rest.length == 0) {
+                return final[0];
+            }
+        
+            if (!DirectoryFile.isDirectory(final[0])) {
+                return null
+            }
+
+            
+            return helper(final[0], rest);
+        }
+
+        const [first, ...rest]  = path.split("/");
+        const dir = first === "" ? this.root : this.cwd;
+        return helper(dir, rest);
+    }
 
     static fromJson(jsonFile: JSONFS) {
         const root = FileSystem.#parseJSONDirectory(jsonFile.files, null);
         if (!DirectoryFile.isDirectory(root)) {
             throw new Error("Root is not a directory!");
         }
-        const cwd = FileSystem.#findWorkingDirectory(root, jsonFile.cwd);
-        return new FileSystem(root, cwd);
-    }
 
-    // assume path starts from root
-    static #findWorkingDirectory(dir: DirectoryFile, path: string) {
-        function helper(dir: DirectoryFile, path: string[]) {
-            const [first, ...rest] = path;
-            const final = dir.files.filter(file => file.name == first);
-            if (final.length == 0) {
-                throw new Error(`Folder ${first} not found`);
-            }
-            if (!DirectoryFile.isDirectory(final[0])) {
-                throw new Error(`Folder ${first} not found`);
-            }
 
-            if (rest.length == 0) {
-                return final[0];
-            }
-
-            return helper(final[0], rest);
+        const fs = new FileSystem(root, root);
+        // the starting folder is not root
+        if (jsonFile.cwd.split("/").at(0) !== "") {
+            throw new Error("Invalid cwd path! Cwd needs to start with /.");
         }
 
-        const [_, ...other]  = path.split("/");
-        return helper(dir, other);
+        const cwd = fs.findFile(jsonFile.cwd);
+        if (cwd === null || !DirectoryFile.isDirectory(cwd)) {
+            throw new Error("Current working directory not found!");
+        }
+
+        fs.cwd = cwd;
+        fs.history = [cwd];
+
+        return fs;
     }
+
 
     serialize() {
         return {
@@ -351,6 +372,10 @@ class FileSystem {
     changeDirectory(dir: DirectoryFile) {
         this.cwd = dir;
         this.history.push(dir);
+    }
+
+    changeDirectoryByPath(path: string) {
+
     }
 
     getFile(filename: string) {
@@ -415,13 +440,12 @@ if (browser) {
 
 export const fileSystem = fs;
 
-// console.log(JSON.stringify(fs.serialize()))
 
+// alternatively use a "save decorator", 
+// I'll do it if I'm dilligent enough
 if (browser) {
     setInterval(() => {
     localStorage.setItem("fs", JSON.stringify(fs.serialize()));
     }, 1000);
 }
 
-// alternatively use a "save decorator", 
-// I'll do it if I'm dilligent enough

@@ -2,10 +2,10 @@
 // When opening a file, the function in the map is called
 import { RegFile } from "./fs.svelte";
 import { open } from "$components/WindowManager.svelte";
-import WindowTextEditor, { setting } from "$components/WindowTextEditor.svelte";
+import WindowTextEditor from "$components/WindowTextEditor.svelte";
 
 function openTxt(file: RegFile) {
-    open(WindowTextEditor, setting, { file });
+    open(WindowTextEditor, { file });
 }
 
 
