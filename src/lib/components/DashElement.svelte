@@ -8,7 +8,7 @@
 tabindex="0"
 role="button"
 on:dblclick={_ => {open(FileWindow)}}
-class="hover:bg-gray-100 p-1 select-none"
+class="hover:bg-slate-800 w-16 h-16 bg-slate-900"
 >
-Oks 
+
 </div>

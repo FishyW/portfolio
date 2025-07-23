@@ -2,7 +2,7 @@
 import { BaseFile, DirectoryFile } from './fs.svelte';
 import { fileSystem } from "./fs.svelte";
 import { renamePrompt } from '$components/WindowFileElement.svelte';
-import { selected } from "$components/WindowFile.svelte"
+import { focus as windowFileFocus, selected } from "$components/WindowFile.svelte"
 
 
 type Operation = "MOVE" | "COPY";
@@ -23,7 +23,18 @@ export function newFolder() {
 
 export function removeFile() {
     if (selected.file === null) return;
-    fileSystem.removeFile(selected.file);
+    const removedFile = selected.file;
+    const idx = fileSystem.getIndex(removedFile);
+    if (idx == -1) {
+        throw new Error("Selected file does not exist");
+    }
+    if (idx + 1 < fileSystem.cwd.files.length) {
+        selected.file = fileSystem.cwd.files[idx + 1];
+    } else if (idx - 1 >= 0) {
+        selected.file = fileSystem.cwd.files[idx - 1];
+    }
+    
+    fileSystem.removeFile(removedFile);
 }
 
 export function rename() {
@@ -36,6 +47,7 @@ export function copy() {
     pasteBuffer.file = selected.file;
     pasteBuffer.operation = "COPY";
     pasteBuffer.active = true;
+    windowFileFocus();
 }
 
 export function move() {
@@ -43,20 +55,23 @@ export function move() {
     pasteBuffer.file = selected.file;
     pasteBuffer.operation = "MOVE";
     pasteBuffer.active = true;
+    windowFileFocus();
 }
 
 
 export function paste() {
-    const targetDir = (selected.file && DirectoryFile.isDirectory(selected.file)) 
-        ? selected.file : fileSystem.cwd;
-    
+    if (pasteBuffer.file === undefined) {
+        return;
+    }
+
+    const targetDir = fileSystem.cwd;
+
     if (targetDir.path === pasteBuffer.file!.parent?.path 
         && pasteBuffer.operation === "MOVE") {
         pasteBuffer.file = undefined;
         pasteBuffer.active = false;
         return;
     }
-    
 
     if (pasteBuffer.operation === "COPY") {
         fileSystem.copy(pasteBuffer.file!, targetDir);
@@ -65,3 +80,5 @@ export function paste() {
     }
     pasteBuffer.active = false;
 }
+
+

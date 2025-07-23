@@ -1,16 +1,14 @@
-<script module>
-    export let fileRename = $state("");
+<script module lang="ts">
 
-
-    let fileToBeRenamed = $state("");
+    let fileToRename = $state("");
+    
 
     export function renamePrompt(filename: string) {
-        fileToBeRenamed = filename;
+        fileToRename = filename;
     }
 
-   
    import { pasteBuffer } from "$scripts/operations.svelte";
-
+   
 </script>
 
 
@@ -22,24 +20,35 @@
 
     interface Props {
         file: BaseFile,
-        fileselect: () => void
+        selected: BaseFile | null
     }
-    let { file, fileselect }: Props = $props();
-    
+    let { file, selected = $bindable() }: Props = $props();
+  
 
-    let renaming = $state(false);
+    let showRenameInputBox = $derived(
+            fileToRename === file.name
+        );
+
     // svelte-ignore non_reactive_update 
     let inputBox: HTMLElement;
 
    
-    let name = $state(file.name);
+    let editedName = $state(file.name);
+    let fileElement: HTMLElement;
 
     $effect(() => {
-        if (fileToBeRenamed === file.name) {
-            fileToBeRenamed = "";
-            renaming = true;
-        }
+        pasteBuffer.file;
+        fileElement?.blur();
     })
+
+
+    $effect(() => {
+        selected;
+        if (selected?.name === file.name)
+            fileElement.focus();
+    })
+
+   
 
     function inputMount(node: HTMLInputElement) {
         $effect(() => {
@@ -47,23 +56,22 @@
             node.setSelectionRange(0, node.value.lastIndexOf("."));
         })
     }
-
-   
+ 
    let aboveDropZone = $state(false);
 
+   
+
    function rename(revert: boolean) {
-    try {
-        file.rename(name);
-    } catch(error) {
-        if (!revert) {
-            return;
+        try {
+            file.rename(editedName);
+        } catch(error) {
+            if (!revert) {
+                return;
+            }
         }
-    }
-     renaming = false;
-     name = file.name;
+        fileToRename = ""; 
    }
 
-$inspect(renaming);
 
 
 </script>
@@ -72,10 +80,12 @@ $inspect(renaming);
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div 
 tabindex="0"
+bind:this={fileElement}
 draggable="true" 
-class={["h-38 w-32 p-4 \
+class={["w-32 p-4 \
 hover:bg-gray-500 \
 focus:bg-gray-500 \
+h-42 overflow-hidden \
 flex items-center flex-col",
 aboveDropZone && "dragging",
 pasteBuffer.file?.path === file.path 
@@ -84,18 +94,18 @@ pasteBuffer.file?.path === file.path
 
 ondragstart={
     e => {
-        fileselect();
+        selected = file;
         e.dataTransfer!.dropEffect = "move";
         e.dataTransfer!.setData("text/plain", file.name);
     }
 }
 
 onclick={(() => {
-    fileselect();
+    selected = file;
 })}
 
 ondblclick={() => {
-    fileselect();
+    selected = file;
     file.open();
 }}
 
@@ -132,25 +142,29 @@ ondragover = {e => {
 oncontextmenu={e => {
     e.preventDefault();
     e.stopPropagation();
-    fileselect();
+    selected = file;
     show(e, ContextMenuFile, {selectedFile: file});
 }}
 >
-        <div class="flex-1 w-full bg-black"></div>
+        <div class="aspect-square w-full bg-black"></div>
 
-        <div class="w-full h-fit">
-            {#if !renaming }
-            <div class="w-full overflow-hidden overflow-ellipsis"> { file.name } </div>
+        <div class="w-full mt-1 h-[2.6em]">
+            {#if !showRenameInputBox }
+            <div class="w-full text-center h-full overflow-hidden line-clamp-2 overflow-ellipsis"> { file.name } </div>
             {:else}
             <input 
+            class="w-full"
             onfocusout={() => rename(true)}
 
             onkeydown={e => {
                 if (e.key === 'Enter') {
                     rename(false)
+                } else if (e.key === "Escape") {
+                    fileToRename = "";
+
                 }
             }}
-             use:inputMount bind:this={inputBox} type="text" bind:value={name} />
+             use:inputMount bind:this={inputBox} type="text" bind:value={editedName} />
             {/if}
         </div>
 </div>

@@ -108,8 +108,7 @@ export class RegFile extends BaseFile {
         const extension = this.name.split(".").at(-1)!;
         const func = extensionMap.get(extension);
         if (func === undefined) {
-            console.error("Unknown file extension");
-            return;
+            throw new Error("Unknown file extension");
         }
         func(this);
     }
@@ -121,7 +120,6 @@ export class RegFile extends BaseFile {
     clone(parent: DirectoryFile) {
         const file = new RegFile(this.name, null, this.contents);
         parent.addFile(file, true);
-        console.log(parent.files);
         return file;
     }
 
@@ -180,7 +178,10 @@ export class DirectoryFile extends BaseFile {
 
         
         let highestIndex = 0;
-        const indices = unavailableIndices.sort();
+        
+        // this is so stupid (sort doesn't sort numbers by default)
+        const indices = unavailableIndices
+            .sort((a, b) => a - b);
 
         if (unavailableIndices[0] !== 0) {
             return `${curBase}${curHasExt ? "." : ""}${curExt}`;
@@ -292,7 +293,6 @@ class FileSystem {
             if (!DirectoryFile.isDirectory(final[0])) {
                 return null
             }
-
             
             return helper(final[0], rest);
         }
@@ -378,9 +378,6 @@ class FileSystem {
         this.backHistory = [];
     }
 
-    changeDirectoryByPath(path: string) {
-
-    }
 
     getFile(filename: string) {
         const arr = this.cwd.getFile(filename);
@@ -435,6 +432,11 @@ class FileSystem {
         this.cwd = this.backHistory.at(-1)!;
         this.history.push(this.cwd);
         this.backHistory.pop();
+    }
+
+    // get index of a file with a certain filename
+    getIndex(file: BaseFile) {
+        return fileSystem.cwd.files.findIndex(cmp => cmp.name == file.name);
     }
 
     static init(object: JSONFS) {

@@ -14,7 +14,6 @@
         <div class="flex w-full justify-center">
             <Dash />
         </div>
-
 </div>
 
 <!-- can't place the context menu as a child of the file menu -->

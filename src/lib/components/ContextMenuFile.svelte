@@ -21,7 +21,7 @@
 </script>
 
 <ul class="w-48 h-48 bg-green-500">
-        <li class="hover:bg-green-400 select-none">New File</li>
+        <li onclick={exitWrapper(newFile)} class="hover:bg-green-400 select-none">New File</li>
 
         <li class="hover:bg-green-400 select-none"
         onclick={exitWrapper(newFolder)}
