@@ -1,115 +1,55 @@
-<script lang="ts" module>
-
-    import { renamePrompt } from './WindowFileElement.svelte';
-    import { fileSystem } from "$scripts/fs.svelte";
-
-
-
-    type Operation = "MOVE" | "COPY";
-
-    type PasteBuffer = { file?: BaseFile, operation?:  Operation };
-
-    export let pasteBuffer: PasteBuffer = $state({});
-    
-    
-</script>
-
-
 <script lang="ts">
-    import { BaseFile, DirectoryFile } from '$scripts/fs.svelte';
+    
+    import { copy, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/operations.svelte';
+    import { selected } from './WindowFile.svelte';
 
     interface Props {
-        exit: () => void,
-        selectedFile?: BaseFile,
-        renameCallback?: () => void
+        exit: () => void
     }
 
-    let { exit, selectedFile, renameCallback }: Props = $props();
+    let { exit }: Props = $props();
 
-    $inspect(selectedFile);
+
+    function exitWrapper(func: Function) {
+            function wrapper(...args: any) {
+                const ret = func(...args);
+                exit();
+                return ret;
+            }
+            return wrapper;
+    }
 </script>
 
 <ul class="w-48 h-48 bg-green-500">
-        <li class="hover:bg-green-400 select-none" 
-        onclick={() => {
-            const file = fileSystem.addEmptyFile();
-            renamePrompt(file.name);
-            exit();
-        }}>New File</li>
+        <li class="hover:bg-green-400 select-none">New File</li>
 
         <li class="hover:bg-green-400 select-none"
-        onclick={() => {
-            const folder = fileSystem.addEmptyFolder();
-            renamePrompt(folder.name);
-            exit();
-        }}
+        onclick={exitWrapper(newFolder)}
         >New Folder</li>
 
-       
-
-        {#if selectedFile }
+        {#if selected.file}
             <li
-                onclick={() => {
-                fileSystem.removeFile(selectedFile!);
-                exit();
-            }}
+                onclick={exitWrapper(removeFile)}
                 class="hover:bg-green-400 select-none">Remove
             </li>
 
              <li class="hover:bg-green-400 select-none"
-                onclick={() => {
-                    renameCallback!();
-                    exit();
-                }}>Rename
-                </li>
+                onclick={exitWrapper(rename)}>Rename
+            </li>
 
             
              <li class="hover:bg-green-400 select-none"
-                onclick={() => {
-                  
-                    // prevent reassignment
-                    pasteBuffer.file = selectedFile!;
-                    pasteBuffer.operation = "COPY";
-                    exit();
-                }}>Copy
+                onclick={exitWrapper(copy)}>Copy
                 </li>
 
                 <li class="hover:bg-green-400 select-none"
-                onclick={() => {
-                  
-                    // prevent reassignment
-                    pasteBuffer.file = selectedFile!;
-                    pasteBuffer.operation = "MOVE";
-                    exit();
-
-                }}>Move
+                onclick={exitWrapper(move)}>Move
                 </li>
-             
         {/if}
 
         {#if pasteBuffer.file !== undefined}
             <li class="hover:bg-green-400 select-none"
-                    onclick={() => {
-                        const targetDir = (selectedFile && DirectoryFile.isDirectory(selectedFile)) 
-                            ? selectedFile : fileSystem.cwd;
-                        
-                        if (targetDir.path === pasteBuffer.file!.parent?.path 
-                            && pasteBuffer.operation === "MOVE") {
-                            pasteBuffer.file = undefined;
-                            exit();
-                            return;
-                        }
-                        
-
-                        if (pasteBuffer.operation === "COPY") {
-                            fileSystem.copy(pasteBuffer.file!, targetDir);
-                        } else if (pasteBuffer.operation === "MOVE") {
-                            fileSystem.move(pasteBuffer.file!, targetDir);
-                        }
-                        
-                        pasteBuffer.file = undefined;
-                        exit();
-                    }}>Paste
+                    onclick={exitWrapper(paste)}>Paste
             </li>
         {/if}
     </ul>

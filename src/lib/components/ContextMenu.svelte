@@ -92,6 +92,7 @@ onkeydown={(e => {
 
 {#if shown}
     <div 
+        onmousedown={e => e.preventDefault()}
         class="fixed z-50" 
         style:top="{pos.y}px"  
         style:left="{pos.x}px"

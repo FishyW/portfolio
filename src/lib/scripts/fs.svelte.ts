@@ -261,6 +261,7 @@ class FileSystem {
     cwd: DirectoryFile;
     
     history: DirectoryFile[];
+    backHistory: DirectoryFile[];
 
     // singleton pattern
     static fs: FileSystem;
@@ -269,6 +270,7 @@ class FileSystem {
         this.cwd = $state(cwd);
         this.root = root;
         this.history = [cwd];
+        this.backHistory = [];
     }
     
     // given a directory and a path
@@ -327,7 +329,8 @@ class FileSystem {
 
     serialize() {
         return {
-            cwd: this.cwd.path,
+            // don't save the working directory
+            cwd: "/home",
             files: this.root.serialize()
         }
     }
@@ -372,6 +375,7 @@ class FileSystem {
     changeDirectory(dir: DirectoryFile) {
         this.cwd = dir;
         this.history.push(dir);
+        this.backHistory = [];
     }
 
     changeDirectoryByPath(path: string) {
@@ -407,12 +411,30 @@ class FileSystem {
         file.clone(folder);
     }
 
+    hasBack() {
+        return this.history.length > 1;
+    }
+
+    hasForward() {
+        return this.backHistory.length != 0;
+    }
+
     back() {
         if (this.history.length <= 1) {
             return;
         }
+        this.backHistory.push(this.history.at(-1)!);
         this.history.pop();
         this.cwd = this.history.at(-1)!;
+    }
+
+    forward() {
+        if (this.backHistory.length == 0) {
+            return;
+        }
+        this.cwd = this.backHistory.at(-1)!;
+        this.history.push(this.cwd);
+        this.backHistory.pop();
     }
 
     static init(object: JSONFS) {

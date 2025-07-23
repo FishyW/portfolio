@@ -9,8 +9,6 @@
     }
 
    
-   import { pasteBuffer } from "$scripts/operations.svelte";
-
 </script>
 
 
@@ -18,13 +16,12 @@
     import { DirectoryFile, fileSystem, type BaseFile } from "$scripts/fs.svelte";
     import { show } from "./ContextMenu.svelte";
 
-    import ContextMenuFile from "./ContextMenuFile.svelte";
+    import ContextMenuFile, { pasteBuffer } from "./ContextMenuFile.svelte";
 
     interface Props {
-        file: BaseFile,
-        fileselect: () => void
+        file: BaseFile
     }
-    let { file, fileselect }: Props = $props();
+    let { file }: Props = $props();
     
 
     let renaming = $state(false);
@@ -62,10 +59,7 @@
      renaming = false;
      name = file.name;
    }
-
-$inspect(renaming);
-
-
+ 
 </script>
 
 
@@ -73,31 +67,27 @@ $inspect(renaming);
 <div 
 tabindex="0"
 draggable="true" 
-class={["h-38 w-32 p-4 \
+class={["h-fit p-4 \
 hover:bg-gray-500 \
 focus:bg-gray-500 \
-flex items-center flex-col",
+flex items-center flex-col \
+overflow-ellipsis overflow-hidden",
 aboveDropZone && "dragging",
-pasteBuffer.file?.path === file.path 
-    && pasteBuffer.active && "bg-gray-400"
+pasteBuffer.file?.path === file.path && "bg-gray-400"
 ]}
 
 ondragstart={
     e => {
-        fileselect();
         e.dataTransfer!.dropEffect = "move";
         e.dataTransfer!.setData("text/plain", file.name);
     }
 }
 
-onclick={(() => {
-    fileselect();
-})}
-
 ondblclick={() => {
-    fileselect();
     file.open();
 }}
+
+
 
 ondragleave = {() =>
     aboveDropZone = false
@@ -132,15 +122,17 @@ ondragover = {e => {
 oncontextmenu={e => {
     e.preventDefault();
     e.stopPropagation();
-    fileselect();
-    show(e, ContextMenuFile, {selectedFile: file});
+    show(e, ContextMenuFile, {selectedFile: file, renameCallback: () => {
+        renaming = true;
+    }
+    });
 }}
 >
-        <div class="flex-1 w-full bg-black"></div>
+        <div class="h-20 w-20 bg-black"></div>
 
-        <div class="w-full h-fit">
+        <div class="w-20">
             {#if !renaming }
-            <div class="w-full overflow-hidden overflow-ellipsis"> { file.name } </div>
+            <div> { file.name } </div>
             {:else}
             <input 
             onfocusout={() => rename(true)}

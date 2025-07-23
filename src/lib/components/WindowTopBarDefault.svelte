@@ -4,7 +4,7 @@
 </script>
 
 <WindowTopBarDraggable>
-    <div class="flex w-full h-full">
+    <div class="flex w-full h-full items-center">
         <div class="flex-1"></div>
         <div class="w-4 h-4 bg-white hover:bg-gray-700" 
             onclick={ dispatchClose }

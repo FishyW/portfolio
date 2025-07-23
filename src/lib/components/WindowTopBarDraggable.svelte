@@ -72,7 +72,7 @@ ondragstart={e => {
 ondragend={e => {
     isDragging = false;
         
-}} class="w-full h-8 bg-black">
+}} class="w-full h-10 p-2 bg-black">
 
     {@render children()}
     
