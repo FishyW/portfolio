@@ -10,7 +10,8 @@
             {
                 "name": "README.txt",
                 "type": "reg",
-                "contents": "Hello world!"
+                "contents": "Hello world!",
+                "binary": false
             }
         ]
         }]

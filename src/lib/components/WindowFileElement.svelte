@@ -123,6 +123,7 @@ ondragenter = {e =>  {
 }}
 
 ondrop = {e => {
+    aboveDropZone = false;
     if (!DirectoryFile.isDirectory(file)) {
         return;
     }
@@ -131,6 +132,8 @@ ondrop = {e => {
     if (selectedFile.name === file.name) {
         return;
     }
+
+    
     // move the selected file to the directory
     fileSystem.move(selectedFile, file);
 }}
@@ -148,9 +151,9 @@ oncontextmenu={e => {
 >
         <div class="aspect-square w-full bg-black"></div>
 
-        <div class="w-full mt-1 h-[2.6em]">
+        <div class="w-full mt-1 h-[3.0em]">
             {#if !showRenameInputBox }
-            <div class="w-full text-center h-full overflow-hidden line-clamp-2 overflow-ellipsis"> { file.name } </div>
+            <div class="w-full text-center h-full overflow-hidden line-clamp-2 overflow-ellipsis break-words"> { file.name } </div>
             {:else}
             <input 
             class="w-full"

@@ -1,9 +1,9 @@
 // file UI operations
-import { BaseFile, DirectoryFile } from './fs.svelte';
+import { BaseFile, DirectoryFile, RegFile } from './fs.svelte';
 import { fileSystem } from "./fs.svelte";
 import { renamePrompt } from '$components/WindowFileElement.svelte';
 import { focus as windowFileFocus, selected } from "$components/WindowFile.svelte"
-
+import { decrypt, encrypt } from './crypto';
 
 type Operation = "MOVE" | "COPY";
 
@@ -82,3 +82,45 @@ export function paste() {
 }
 
 
+export async function encryptFile() {
+    if (selected.file === null) {return;}
+    const password = window.prompt("Set a password");
+    if (password === null) {
+        return;
+    }
+    const serialized = JSON.stringify(await selected.file.serialize());
+    const encrypted = await encrypt(password, serialized);
+
+
+    const extension = DirectoryFile.isDirectory(selected.file) ? ".encdir" : ".enc";
+    // add extension
+    const newName = selected.file.name + extension;
+    // adds to working directory
+    fileSystem.addFile(new RegFile(newName, null, encrypted), true);
+}
+
+export async function decryptFile() {
+    if (selected.file === null) {return;}
+    const password = window.prompt("Enter password");
+    if (password === null) {
+        return;
+    }
+    if (!RegFile.isRegFile(selected.file)) {
+        throw new Error("Not a file!");
+    }
+
+    if (typeof(selected.file.contents) === "string") {
+        throw new Error("Not a valid encrypted file!");
+    }
+    
+    const serialized = await decrypt(password, selected.file.contents);
+    if (serialized === null) {
+        alert("Invalid password!");
+        return;
+    }
+    
+    const file = await BaseFile.deserialize(JSON.parse(serialized), null);
+    const [base, _1, _2] = selected.file.splitExtension();
+    file.rename(base);
+    fileSystem.addFile(file, true);
+}

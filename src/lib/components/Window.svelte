@@ -15,6 +15,7 @@
         = $state({window: null});
 
     setContext("window", ctx);
+
 </script>
 
 <div {onclick} bind:this={ctx.window} oncontextmenu={e => onclick(e)}

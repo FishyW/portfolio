@@ -1,6 +1,8 @@
 <script lang="ts">
+    import { DirectoryFile } from '$scripts/fs.svelte';
+
     
-    import { copy, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/operations.svelte';
+    import { copy, decryptFile, encryptFile, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/operations.svelte';
     import { selected } from './WindowFile.svelte';
 
     interface Props {
@@ -20,7 +22,7 @@
     }
 </script>
 
-<ul class="w-48 h-48 bg-green-500">
+<ul class="p-2 w-40 bg-green-500">
         <li onclick={exitWrapper(newFile)} class="hover:bg-green-400 select-none">New File</li>
 
         <li class="hover:bg-green-400 select-none"
@@ -42,14 +44,30 @@
                 onclick={exitWrapper(copy)}>Copy
                 </li>
 
-                <li class="hover:bg-green-400 select-none"
-                onclick={exitWrapper(move)}>Move
-                </li>
+            <li class="hover:bg-green-400 select-none"
+            onclick={exitWrapper(move)}>Move
+            </li>
+            
+           
         {/if}
 
         {#if pasteBuffer.file !== undefined}
             <li class="hover:bg-green-400 select-none"
                     onclick={exitWrapper(paste)}>Paste
+            </li>
+        {/if}
+
+        {#if selected.file}
+            <li class="hover:bg-green-400 select-none"
+            onclick={exitWrapper(encryptFile)}>Encrypt
+            </li>
+        {/if}
+
+        {#if selected.file && !DirectoryFile.isDirectory(selected.file) 
+            && (selected.file.getExtension() === "enc"
+            || selected.file.getExtension() === "encdir")}
+            <li class="hover:bg-green-400 select-none"
+            onclick={exitWrapper(decryptFile)}>Decrypt
             </li>
         {/if}
     </ul>

@@ -11,16 +11,39 @@ enum JSONFileContent {
 
 interface JSONFS {
     cwd: string,
-    files: JSONFileFormat
+    files: SerializedFile
 }
 
-interface JSONFileFormat {
+interface SerializedFile {
     name: string,
     type: JSONFileContent,
-    contents: JSONFileFormat[] | string
+    contents: SerializedFile[] | string,
+    binary?: boolean
 }
 
-export class BaseFile {
+
+
+// convert to base64 based on
+// https://stackoverflow.com/questions/12710001/how-to-convert-uint8-array-to-base64-encoded-string
+// likely the fastest solution since it uses native browser features
+// doesn't exactly convert to a base64 string, it converts to a base64 "url"
+async function toBase64(buffer: ArrayBuffer) {
+  // use a FileReader to generate a base64 data URI:
+  const base64url = await new Promise(r => {
+    const reader = new FileReader()
+    reader.onload = () => r(reader.result)
+    reader.readAsDataURL(new Blob([buffer]))
+  });
+  return base64url as string;
+}
+
+async function fromBase64(data: string) {
+    return (await (await fetch(data))
+        .arrayBuffer());
+}   
+
+
+export abstract class BaseFile {
     name = "";
     parent: DirectoryFile | null;
     idx: number;
@@ -74,31 +97,69 @@ export class BaseFile {
     }
 
 
-    clone(parent: DirectoryFile) {
-        const file = new BaseFile(this.name, null);
-        parent.addFile(file, true);
-        return file;
-    }
-    open() {}
+    abstract clone(parent: DirectoryFile): BaseFile;
+    abstract open(): void; 
 
     // [base, extension, hasExtension?]
     splitExtension(): [string, string, boolean] {
         const items = this.name.split(".");
+        
         if (items.length == 1) {
-            // no extensionn
+            // no extension
             return [items.at(-1)!, "", false];
         }
+
+        const base = items.slice(0, -1).join(".");
         // has extension
-        return [items.at(-2)!, items.at(-1)!, true];
+        return [base, items.at(-1)!, true];
     }
 
-    serialize() {}
+
+    getExtension() {
+        const [_1, extension, hasExtension] = this.splitExtension();
+        if (hasExtension) {
+            return extension;
+        }
+        return null;
+    }
+
+    abstract serialize(): Promise<SerializedFile>;
+
+    // first arg is the serialized file after calling JSON.parse() on the file
+    // second arg is the parent
+    static async deserialize(serialized: SerializedFile, parent: DirectoryFile | null) {
+        if (serialized.type == JSONFileContent.DIR) {
+            const currentFile = new DirectoryFile(serialized.name, parent);
+            for (const file of serialized.contents) {
+               if (typeof(file) === "string") {
+                    throw new Error("Wrong Content Type");
+               }
+                currentFile.addFile(await this.deserialize(file, currentFile));
+            }
+            return currentFile;
+        }
+
+        if (serialized.type == JSONFileContent.REG) {
+            
+            if (typeof(serialized.contents) !== "string" ) {
+                throw new Error("Wrong File Type");
+            }
+            let contents: string | ArrayBuffer = serialized.contents;
+            // if it is a binary data it's base64 encoded
+            if (serialized.binary) {
+                contents = await fromBase64(serialized.contents);
+            }
+
+            return new RegFile(serialized.name, parent, contents);
+        }
+        throw new Error("Unknown File Type");
+    }
 }
 
 export class RegFile extends BaseFile {
-   contents: string;
+   contents: string | ArrayBuffer;
    
-   constructor(name: string, parent: DirectoryFile | null, contents: string) {
+   constructor(name: string, parent: DirectoryFile | null, contents: string | ArrayBuffer) {
         super(name, parent);
 
         this.contents = contents;
@@ -124,13 +185,25 @@ export class RegFile extends BaseFile {
         return file;
     }
 
-    serialize() {
+    async serialize(): Promise<SerializedFile> {
+        let contents = this.contents;
+        let binary = typeof(contents) !== "string";
+        if (typeof(contents) !== "string") {
+            // convert to base64
+            contents = await toBase64(contents);
+        }
         return {
             name: this.name,
-            contents: this.contents,
-            type: JSONFileContent.REG
+            contents,
+            type: JSONFileContent.REG,
+            binary
         }
     }
+
+    static isRegFile(file: BaseFile): file is RegFile {
+        return (file as RegFile).contents !== undefined;
+    }
+
 }
 
 export class DirectoryFile extends BaseFile {
@@ -249,11 +322,13 @@ export class DirectoryFile extends BaseFile {
         return this.isAncestor(dir.parent);
     }
 
-    serialize() {
+    async serialize() {
         return {
             name: this.name,
             type: JSONFileContent.DIR,
-            contents: this.files.map(file => file.serialize())
+            contents: await Promise.all(
+                this.files.map(async (file) => file.serialize())
+            )
         }
     }
 }
@@ -303,8 +378,8 @@ class FileSystem {
         return helper(dir, rest);
     }
 
-    static fromJson(jsonFile: JSONFS) {
-        const root = FileSystem.#parseJSONDirectory(jsonFile.files, null);
+    static async fromJson(jsonFile: JSONFS) {
+        const root = await BaseFile.deserialize(jsonFile.files, null);
         if (!DirectoryFile.isDirectory(root)) {
             throw new Error("Root is not a directory!");
         }
@@ -328,34 +403,15 @@ class FileSystem {
     }
 
 
-    serialize() {
+    async serialize() {
         return {
             // don't save the working directory
             cwd: "/home",
-            files: this.root.serialize()
+            files: await this.root.serialize()
         }
     }
 
-    static #parseJSONDirectory(jsonFile: JSONFileFormat, parent: DirectoryFile | null) {
-        if (jsonFile.type == JSONFileContent.DIR) {
-            const currentFile = new DirectoryFile(jsonFile.name, parent);
-            for (const file of jsonFile.contents) {
-               if (typeof(file) === "string") {
-                    throw new Error("Wrong Content Type");
-               }
-                currentFile.addFile(this.#parseJSONDirectory(file, currentFile));
-            }
-            return currentFile;
-        }
-
-        if (jsonFile.type == JSONFileContent.REG) {
-            if (typeof(jsonFile.contents) !== "string" ) {
-                throw new Error("Wrong File Type");
-            }
-            return new RegFile(jsonFile.name, parent, jsonFile.contents);
-        }
-        throw new Error("Unknown File Type");
-    }
+    
 
     addEmptyFile(filename = "empty.txt") {
         const file = new RegFile(filename, null, "");
@@ -386,6 +442,11 @@ class FileSystem {
             throw new Error("File not found!");
         }
         return arr;
+    }
+
+    addFile(file: BaseFile, autorename: boolean) {
+        this.cwd.addFile(file, autorename);
+        return file;
     }
 
     rename(file: BaseFile, name: string) {
@@ -440,8 +501,8 @@ class FileSystem {
         return fileSystem.cwd.files.findIndex(cmp => cmp.name == file.name);
     }
 
-    static init(object: JSONFS) {
-        FileSystem.fs = FileSystem.fromJson(object);
+    static async init(object: JSONFS) {
+        FileSystem.fs = await FileSystem.fromJson(object);
         return FileSystem.fs;
     }
 }
@@ -453,12 +514,12 @@ import { browser } from "$app/environment";
 
 
 
-let fs = FileSystem.init(fsJson as JSONFS);
+let fs = await FileSystem.init(fsJson as JSONFS);
 
 if (browser) {
     const fsStorage = localStorage.getItem("fs");
     if (fsStorage !== null) {
-        fs = FileSystem.init(JSON.parse(fsStorage));   
+        fs = await FileSystem.init(JSON.parse(fsStorage));   
     }
 } 
 
@@ -469,8 +530,8 @@ export const fileSystem = fs;
 // alternatively use a "save decorator", 
 // I'll do it if I'm dilligent enough
 if (browser) {
-    setInterval(() => {
-    localStorage.setItem("fs", JSON.stringify(fs.serialize()));
+    setInterval(async () => {
+    localStorage.setItem("fs", JSON.stringify(await fs.serialize()));
     }, 1000);
 }
 
