@@ -4,6 +4,8 @@ import { fileSystem } from "./fs.svelte";
 import { renamePrompt } from '$components/WindowFileElement.svelte';
 import { focus as windowFileFocus, selected } from "$components/WindowFile.svelte"
 import { decrypt, encrypt } from './crypto';
+import saveAs from 'file-saver';
+import JSZip from 'jszip';
 
 type Operation = "MOVE" | "COPY";
 
@@ -123,4 +125,29 @@ export async function decryptFile() {
     const [base, _1, _2] = selected.file.splitExtension();
     file.rename(base);
     fileSystem.addFile(file, true);
+}
+
+
+function zipFolder(folder: DirectoryFile, dir: JSZip) {
+    for (const file of folder.files) {
+        if (RegFile.isRegFile(file)) {
+            dir.file(file.name, file.contents, {binary: file.isBinary()});
+            continue;
+        }
+        const newDir = dir.folder(file.name)!;
+        zipFolder(file as DirectoryFile, newDir);
+    }
+}
+
+export async function download() {
+    if (selected.file === null) {return;}
+    if (RegFile.isRegFile(selected.file)) {
+        saveAs(new File([selected.file.contents], selected.file.name));
+        return;
+    }
+
+    const zip = JSZip();
+    zipFolder(selected.file as DirectoryFile, zip);
+    const content = await zip.generateAsync({type:"blob"});
+    saveAs(content, selected.file.name + ".zip")
 }

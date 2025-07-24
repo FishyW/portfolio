@@ -204,6 +204,9 @@ export class RegFile extends BaseFile {
         return (file as RegFile).contents !== undefined;
     }
 
+    isBinary() {
+        return typeof(this.contents) !== "string";
+    }
 }
 
 export class DirectoryFile extends BaseFile {

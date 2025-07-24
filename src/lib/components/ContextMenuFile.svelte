@@ -2,7 +2,7 @@
     import { DirectoryFile } from '$scripts/fs.svelte';
 
     
-    import { copy, decryptFile, encryptFile, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/operations.svelte';
+    import { copy, decryptFile, download, encryptFile, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/operations.svelte';
     import { selected } from './WindowFile.svelte';
 
     interface Props {
@@ -29,6 +29,8 @@
         onclick={exitWrapper(newFolder)}
         >New Folder</li>
 
+        
+
         {#if selected.file}
             <li
                 onclick={exitWrapper(removeFile)}
@@ -47,8 +49,13 @@
             <li class="hover:bg-green-400 select-none"
             onclick={exitWrapper(move)}>Move
             </li>
-            
-           
+            <!-- No upload since there's no APIs that allows selections of both
+             directories and files in the same file picker -->
+             
+           <li
+            onclick={exitWrapper(download)}
+            class="hover:bg-green-400 select-none">Download
+            </li>
         {/if}
 
         {#if pasteBuffer.file !== undefined}

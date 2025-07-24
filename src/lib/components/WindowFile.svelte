@@ -23,6 +23,7 @@
     import ContextMenuFile from "./ContextMenuFile.svelte";
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
     import { copy, move, paste, rename, removeFile } from "$scripts/operations.svelte";
+    import { onFileDrop } from "$scripts/fsdropapi";
 
     
     // all windows need to export this unique ID
@@ -82,6 +83,25 @@ tabindex="0"
 use:bindShortcuts
 onclickcapture={deselect}
 ondblclickcapture={deselect}
+ondragenter={e => {
+    [...e.dataTransfer!.items].forEach(file => {
+        if (file.kind !== "file") {
+            return;
+        }
+
+    });
+}}
+
+ondragover={e => {
+    e.preventDefault();
+}}
+
+ondrop={e => {
+    e.preventDefault();
+    onFileDrop(e.dataTransfer!.items, fileSystem.cwd);
+}}
+
+
 class="h-[80vh] flex flex-wrap p-4 content-start overflow-y-auto" 
 oncontextmenu={e => {
     e.preventDefault();

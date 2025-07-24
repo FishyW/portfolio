@@ -17,6 +17,7 @@
     import { show } from "./ContextMenu.svelte";
 
     import ContextMenuFile from "./ContextMenuFile.svelte";
+    import { onFileDrop } from "$scripts/fsdropapi";
 
     interface Props {
         file: BaseFile,
@@ -127,13 +128,19 @@ ondrop = {e => {
     if (!DirectoryFile.isDirectory(file)) {
         return;
     }
+    e.stopPropagation();
+
+    if (e.dataTransfer!.files.length !== 0) {
+        e.preventDefault();
+        onFileDrop(e.dataTransfer!.items, file);
+        return;
+    }
     const filename = e.dataTransfer!.getData("text/plain");
     const selectedFile = fileSystem.getFile(filename);
     if (selectedFile.name === file.name) {
         return;
     }
 
-    
     // move the selected file to the directory
     fileSystem.move(selectedFile, file);
 }}
