@@ -2,7 +2,7 @@
 
 // create the file system
 
-import { extensionMap } from "./extension.svelte";
+import { defaultAction, extensionMap } from "./extension.svelte";
 
 enum JSONFileContent {
     REG = "reg",
@@ -106,9 +106,10 @@ export class RegFile extends BaseFile {
 
      open() {
         const extension = this.name.split(".").at(-1)!;
-        const func = extensionMap.get(extension);
+        let func = extensionMap.get(extension);
         if (func === undefined) {
-            throw new Error("Unknown file extension");
+            // attempt to open as a txt file
+            func = defaultAction;
         }
         func(this);
     }
