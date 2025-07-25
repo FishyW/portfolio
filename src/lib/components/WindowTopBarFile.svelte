@@ -2,8 +2,8 @@
 
 <script lang="ts">
     import { DirectoryFile, fileSystem } from "$scripts/fs.svelte";
-    import { dispatchClose } from "./WindowManager.svelte";
-    import WindowTopBarDraggable from "./WindowTopBarDraggable.svelte";
+    import WindowTopBar from "./WindowTopBar.svelte";
+    import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 
     const pathTuple = $derived.by(() => {
         const splittedPath = fileSystem
@@ -40,19 +40,20 @@
 </script>
 
 
-<WindowTopBarDraggable>
+<WindowTopBar>
     <div class="flex items-center h-full gap-1">
         {#if back}
-        <button class="w-4 h-4 bg-white hover:bg-slate-700" 
-        onclick={() => fileSystem.back()}></button>
+            <WindowTopBarIcon onclick={() => fileSystem.back()}/>
+        <!-- <button class="w-4 h-4 bg-white hover:bg-slate-700" 
+        onclick={() => fileSystem.back()}></button> -->
         {:else}
-        <button class="w-4 h-4 bg-slate-300"></button>
+            <WindowTopBarIcon disabled />
         {/if}
         {#if forward}
-        <button class="w-4 h-4 bg-white hover:bg-slate-700" 
-        onclick={() => fileSystem.forward()}></button>
+         <WindowTopBarIcon onclick={() => fileSystem.forward()}/>
+    
         {:else}
-        <button class="w-4 h-4 bg-slate-300"></button>
+        <WindowTopBarIcon disabled />
         {/if}
         <!-- <div class="w-4 h-4 bg-white hover:bg-gray-700" 
         onclick={() => fileSystem.forward()}></div> -->
@@ -66,14 +67,9 @@
                     fileSystem.changeDirectory(directory);
                 }} class="hover:bg-gray-50">{segment}</button>
             {/each}
-        </div>
-
-        <div class="w-4 h-4 bg-white hover:bg-gray-700" 
-            onclick={ dispatchClose }
-        ></div>     
+        </div>    
     </div>
-
-</WindowTopBarDraggable>
+</WindowTopBar>
 
 <style>
     .no-scrollbar {

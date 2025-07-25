@@ -1,4 +1,4 @@
-import { DirectoryFile, RegFile } from "./fs.svelte";
+import { DirectoryFile, fileSystem, RegFile } from "./fs.svelte";
 
 
 function isFile(entry: FileSystemEntry): entry is FileSystemFileEntry {
@@ -34,12 +34,35 @@ async function readFileEntry(entry: FileSystemEntry, directory: DirectoryFile) {
 }
 
 
+
+async function moveVirtualFile(item: DataTransferItem, directory: DirectoryFile) {
+    const filename = await new Promise<string>((res, _) => item.getAsString(res));
+    
+    const selectedFile = fileSystem.getFile(filename);
+    if (selectedFile === null) {
+        return;
+    }
+
+    // folder being moved to itself
+    if (selectedFile.name === directory.name) {
+        return;
+    }
+
+    // move the selected file to the directory
+    fileSystem.move(selectedFile, directory);
+}
+
 // process dragged files from the file system
 export async function onFileDrop(items: DataTransferItemList, directory: DirectoryFile) {
     for (const item of items) {
+        if (item.kind === "string") {
+            moveVirtualFile(item, directory);
+            continue;
+        }
+
         const entry = item.webkitGetAsEntry()!;
         try {
-            await readFileEntry(entry, directory);
+            readFileEntry(entry, directory);
         } catch(e) {
             console.log(e);
         }

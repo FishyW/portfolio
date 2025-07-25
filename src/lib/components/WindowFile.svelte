@@ -23,7 +23,7 @@
     import ContextMenuFile from "./ContextMenuFile.svelte";
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
     import { copy, move, paste, rename, removeFile } from "$scripts/operations.svelte";
-    import { onFileDrop } from "$scripts/fsdropapi";
+    import { onFileDrop } from "$scripts/filedrop";
 
     
     // all windows need to export this unique ID
@@ -79,7 +79,7 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div 
 bind:this={windowElement}
-tabindex="0"
+tabindex="-1"
 use:bindShortcuts
 onclickcapture={deselect}
 ondblclickcapture={deselect}
@@ -90,6 +90,7 @@ ondragenter={e => {
         }
 
     });
+    
 }}
 
 ondragover={e => {

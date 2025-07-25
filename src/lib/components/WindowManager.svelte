@@ -32,12 +32,16 @@
 
         const componentWindow = component as typeof EmptyWindow;
         const id = getID(componentWindow, childprops);
-        // do nothing if the window is already opened
+
+        // window is already opened, "destroy" and reopen the window
         if (windowMap.has(id)) {
+            // use a trigger map to do ^
+            triggerMap.set(id, !triggerMap.get(id));
             reorder(id);
             return;
         }
 
+        triggerMap.set(id, true);
         windowMap.set(id, componentWindow);
         openWindows.push(id);
     }
@@ -70,6 +74,7 @@
 
     // specify a map from id to window
     const windowMap: Map<string, typeof WindowEmpty> = new SvelteMap();
+    const triggerMap: Map<string, boolean> = new SvelteMap();
 
     function onclose(node: HTMLElement, id: string) {
         const handler = () => close(id);
@@ -94,11 +99,13 @@
 {#each openWindows as id (id) }
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
         <div class="h-fit pointer-events-none" style:translate="{random(-10, 10)}% {random(-10, 10)}%">
-            <Window 
-            component={windowMap.get(id)!} 
-            onclick={() => reorder(id)}
-            {childprops}
+            {#key triggerMap.get(id)}
+                <Window 
+                component={windowMap.get(id)!} 
+                onclick={() => reorder(id)}
+                {childprops}
         />
+            {/key}
         </div>
     </div>
 {/each}

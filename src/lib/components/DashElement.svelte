@@ -5,7 +5,7 @@
 
 <!-- Opens the File Window -->
 <div 
-tabindex="0"
+tabindex="-1"
 role="button"
 on:dblclick={_ => {open(FileWindow)}}
 class="hover:bg-slate-800 w-16 h-16 bg-slate-900"

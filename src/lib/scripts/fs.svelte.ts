@@ -207,7 +207,18 @@ export class RegFile extends BaseFile {
     isBinary() {
         return typeof(this.contents) !== "string";
     }
+
+    async intoURL(mimeType: string) {
+        let buffer: ArrayBuffer;
+        if (typeof(this.contents) === "string") {
+            buffer = new TextEncoder().encode(this.contents).buffer as ArrayBuffer;
+        } else {
+            buffer = this.contents;
+        }
+        return (await toBase64(buffer)).replace("application/octet-stream", mimeType);
+    }
 }
+
 
 export class DirectoryFile extends BaseFile {
     files: BaseFile[] = $state([])
@@ -338,7 +349,17 @@ export class DirectoryFile extends BaseFile {
 
 class FileSystem {
     root: DirectoryFile;
-    cwd: DirectoryFile;
+    #cwd!: DirectoryFile;
+
+    get cwd() {
+        return this.#cwd;
+    }
+    set cwd(dir: DirectoryFile) {
+        if (this.findFile(dir.path) === null) {
+            throw new Error("Can't change to a directory that does not exist!");
+        }
+        this.#cwd = dir;
+    }
     
     history: DirectoryFile[];
     backHistory: DirectoryFile[];
@@ -347,7 +368,7 @@ class FileSystem {
     static fs: FileSystem;
 
     constructor(root: DirectoryFile, cwd: DirectoryFile) {
-        this.cwd = $state(cwd);
+        this.#cwd = $state(cwd);
         this.root = root;
         this.history = [cwd];
         this.backHistory = [];
@@ -462,6 +483,10 @@ class FileSystem {
         // destination folder won't have ancestor
         if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
             throw new Error("Can't put a directory inside of itself");
+        }
+        // check if folder already contains the file
+        if (folder.getFile(file.name) !== null) {
+            return;
         }
         const parent = file.parent!;
         folder.addFile(file);

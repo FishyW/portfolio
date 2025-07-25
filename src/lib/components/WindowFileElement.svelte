@@ -17,7 +17,8 @@
     import { show } from "./ContextMenu.svelte";
 
     import ContextMenuFile from "./ContextMenuFile.svelte";
-    import { onFileDrop } from "$scripts/fsdropapi";
+    import { onFileDrop } from "$scripts/filedrop";
+    import { offscreenBuffer } from "./Desktop.svelte";
 
     interface Props {
         file: BaseFile,
@@ -80,7 +81,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div 
-tabindex="0"
+tabindex="-1"
 bind:this={fileElement}
 draggable="true" 
 class={["w-32 p-4 \
@@ -98,6 +99,16 @@ ondragstart={
         selected = file;
         e.dataTransfer!.dropEffect = "move";
         e.dataTransfer!.setData("text/plain", file.name);
+
+        const elem = fileElement.cloneNode(true) as HTMLElement;
+        if (offscreenBuffer.element == null) {
+            return;
+        }
+        // elem.style.backgroundColor = "green";
+        offscreenBuffer.element.replaceChildren(elem);
+        const rect = fileElement.getBoundingClientRect();
+        
+        e.dataTransfer!.setDragImage(elem, e.clientX - rect.left, e.clientY - rect.top);
     }
 }
 
@@ -130,19 +141,9 @@ ondrop = {e => {
     }
     e.stopPropagation();
 
-    if (e.dataTransfer!.files.length !== 0) {
-        e.preventDefault();
-        onFileDrop(e.dataTransfer!.items, file);
-        return;
-    }
-    const filename = e.dataTransfer!.getData("text/plain");
-    const selectedFile = fileSystem.getFile(filename);
-    if (selectedFile.name === file.name) {
-        return;
-    }
-
-    // move the selected file to the directory
-    fileSystem.move(selectedFile, file);
+    e.preventDefault();
+    onFileDrop(e.dataTransfer!.items, file);
+    
 }}
 
 ondragover = {e => {

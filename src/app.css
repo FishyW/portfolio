@@ -1,2 +1,19 @@
+@layer base;
 @import 'tailwindcss';
 
+
+@layer base {
+  .twp {
+    @import "tailwindcss/preflight.css";
+  }
+
+  .no-twp {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+      all: revert-layer;
+    }
+  }
+}
