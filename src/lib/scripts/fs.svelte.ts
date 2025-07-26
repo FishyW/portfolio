@@ -348,7 +348,7 @@ export class DirectoryFile extends BaseFile {
     }
 }
 
-class FileSystem {
+export class FileSystem {
     root: DirectoryFile;
     #cwd!: DirectoryFile;
 

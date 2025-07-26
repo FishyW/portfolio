@@ -74,6 +74,7 @@
 		"marked": "^16.1.1",
 		"pascal": "link:@codemirror/legacy-modes/mode/pascal",
 		"pdfjs-dist": "^5.3.93",
+		"show-open-file-picker": "^0.4.0",
 		"tailwindcss-scoped-preflight": "^3.4.12",
 		"view": "link:@types/@codemirror/view"
 	}

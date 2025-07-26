@@ -1,5 +1,9 @@
 <script>
+    import { fileSystem, FileSystem } from '$scripts/fs.svelte';
+    import saveAs from 'file-saver';
 	import { SvelteDate } from 'svelte/reactivity';
+	import { showOpenFilePicker } from 'show-open-file-picker'
+
 
     const date = new SvelteDate();
 
@@ -22,6 +26,35 @@
 			clearInterval(interval);
 		}
     });
+
+	async function uploadFileSystem() {
+		const files = await showOpenFilePicker({
+			types: [
+			{
+				description: "",
+				accept: {
+					"application/json": [".json"],
+				},
+			},
+			],
+		})
+		files.forEach(async file => {
+			const fileHandle = await file.getFile();
+			const contents = await fileHandle.text();
+			// check if it is valid
+			await FileSystem.init(JSON.parse(contents)); 
+			localStorage.setItem("fs", contents);
+			window.location.reload();			
+
+		})
+
+	}
+
+	async function downloadFileSystem() {
+		// reset
+		const file = await fileSystem.serialize();
+		saveAs(new File([JSON.stringify(file, null, 2)], "fs.json"));
+	}
 </script>
 
 <div class="absolute w-full bg-gray-500 text-center h-fit p-1 ">
@@ -31,6 +64,16 @@
 </div>
 
 <div class="pointer-events-none absolute w-full text-right h-fit  ">
+	<button 
+		class="pointer-events-auto hover:bg-gray-400 p-1 px-3 font-bold"
+		ondblclick={uploadFileSystem}
+		>L</button>
+
+
+	<button 
+		class="pointer-events-auto hover:bg-gray-400 p-1 px-3 font-bold"
+		ondblclick={downloadFileSystem}
+		>S</button>
 	<button 
 		class="pointer-events-auto hover:bg-gray-400 p-1 px-3 font-bold"
 		ondblclick={() => {
