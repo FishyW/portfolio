@@ -1,5 +1,7 @@
 <script lang="ts">
     import { type RegFile } from "$scripts/fs.svelte";
+    import { DocumentViewerInfo } from "$scripts/ui/windows";
+    import { openWindows } from "./WindowManager.svelte";
     import WindowTopBar from "./WindowTopBar.svelte";
 
 
@@ -21,13 +23,23 @@
     // } 
 
 
-    async function loadPDF() {
+    function loadPDF(node: HTMLEmbedElement) {
         if (typeof(file.contents) === "string") {
             throw new Error("Invalid file content!");
         }
-        return file.intoURL("application/pdf");
+        const url  = URL.createObjectURL(file.intoFile("application/pdf"));
+        node.src = url;
+        return () => {
+            URL.revokeObjectURL(url);
+        }
+
     }
   
+    $effect(() => {
+        hideOverlay = openWindows.at(-1) 
+            === DocumentViewerInfo.name;
+    })
+
  </script>
 
 <WindowTopBar 
@@ -38,9 +50,7 @@
 <div class="w-[50vw] h-[80vh] overflow-y-auto relative">
     <!-- <canvas use:loadPDF></canvas> -->
      
-     {#await loadPDF() then item} 
-        <embed src={item} class="w-full h-full" type="application/pdf"/>
-     {/await}
+    <embed {@attach loadPDF} class="w-full h-full" type="application/pdf"/>
      {#if !hideOverlay}
       <div class="absolute w-full h-full top-0"></div>
     {/if}

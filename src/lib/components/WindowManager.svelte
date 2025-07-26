@@ -17,7 +17,7 @@
 
 
     // specify the ordering of the windows
-    const openWindows: string[] = $state([]);
+    export const openWindows: string[] = $state([]);
 
     // same with open windows except elements are not reordered
     export const openWindowFixed: string[] = $state([]);
@@ -106,7 +106,7 @@
 
 
 {#each openWindows as id (id) }
-    {@const { component, propIndex } = windowMap.get(id)!}
+    {@const { component , propIndex } = windowMap.get(id)!}
    
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
         <div class="h-fit pointer-events-none" style:translate="{random(-10, 10)}% {random(-10, 10)}%">

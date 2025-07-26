@@ -12,10 +12,14 @@
 
     let { file }: Props = $props();
 
-    async function getImageData() {
+    function getImageData(node: HTMLImageElement) {
         const extension = file.getExtension()!;
         const mime = imageMimeMap[extension];
-        return file.intoURL(mime);
+        const url  = URL.createObjectURL(file.intoFile(mime));
+        node.src = url;
+        return () => {
+            URL.revokeObjectURL(url);
+        }
     }
 
  </script>
@@ -24,9 +28,7 @@
 
 <div class="max-w-[50vw] max-h-[80vh] p-4 overflow-y-auto flex justify-center items-center">
     <!-- <canvas use:loadPDF></canvas> -->
-     {#await getImageData() then data} 
-        <img src={data}  alt={file.name} />
-     {/await}
+        <img {@attach getImageData}  alt={file.name} />
       
 </div>
 

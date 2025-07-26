@@ -208,14 +208,15 @@ export class RegFile extends BaseFile {
         return typeof(this.contents) !== "string";
     }
 
-    async intoURL(mimeType: string) {
+    
+    intoFile(mimeType: string) {
         let buffer: ArrayBuffer;
         if (typeof(this.contents) === "string") {
             buffer = new TextEncoder().encode(this.contents).buffer as ArrayBuffer;
         } else {
             buffer = this.contents;
         }
-        return (await toBase64(buffer)).replace("application/octet-stream", mimeType);
+        return new File([buffer], this.name, {type: mimeType});
     }
 }
 

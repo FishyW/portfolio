@@ -23,11 +23,15 @@
 </script>
 
 <ul class="p-2 w-40 bg-green-500">
-        <li onclick={exitWrapper(newFile)} class="hover:bg-green-400 select-none">New File</li>
+
+    {#if !selected.file}
+        <li onclick={exitWrapper(newFile)} 
+            class="hover:bg-green-400 select-none">New File</li>
 
         <li class="hover:bg-green-400 select-none"
         onclick={exitWrapper(newFolder)}
         >New Folder</li>
+    {/if}
 
         
 
