@@ -4,7 +4,7 @@
        import Window from "./Window.svelte";
     import type WindowEmpty from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from "svelte/reactivity";    
-    import type { WindowInfo } from "$scripts/windows";
+    import type { WindowInfo } from "$scripts/ui/windows";
 
    
     interface WindowDetails {

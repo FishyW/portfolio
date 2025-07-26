@@ -24,8 +24,8 @@
     import FileElement from "./WindowFileElement.svelte";
     import ContextMenuFile from "./ContextMenuFile.svelte";
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
-    import { copy, move, paste, rename, removeFile } from "$scripts/operations.svelte";
-    import { onFileDrop } from "$scripts/filedrop";
+    import { copy, move, paste, rename, removeFile } from "$scripts/ui/operations.svelte";
+    import { onFileDrop } from "$scripts/ui/filedrop";
 
 
     function deselect() {

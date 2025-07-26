@@ -2,7 +2,7 @@
     import { DirectoryFile } from '$scripts/fs.svelte';
 
     
-    import { copy, decryptFile, download, encryptFile, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/operations.svelte';
+    import { copy, decryptFile, download, encryptFile, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/ui/operations.svelte';
     import { selected } from './WindowFile.svelte';
 
     interface Props {

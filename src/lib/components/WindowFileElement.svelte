@@ -7,7 +7,7 @@
         fileToRename = filename;
     }
 
-   import { pasteBuffer } from "$scripts/operations.svelte";
+   import { pasteBuffer } from "$scripts/ui/operations.svelte";
    
 </script>
 
@@ -17,7 +17,7 @@
     import { show } from "./ContextMenu.svelte";
 
     import ContextMenuFile from "./ContextMenuFile.svelte";
-    import { onFileDrop } from "$scripts/filedrop";
+    import { onFileDrop } from "$scripts/ui/filedrop";
     import { offscreenBuffer } from "./Desktop.svelte";
 
     interface Props {

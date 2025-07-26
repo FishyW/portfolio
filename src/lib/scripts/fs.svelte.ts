@@ -2,7 +2,7 @@
 
 // create the file system
 
-import { defaultAction, extensionMap } from "./extension.svelte";
+import { defaultAction, extensionMap } from "./ui/extension.svelte";
 
 enum JSONFileContent {
     REG = "reg",

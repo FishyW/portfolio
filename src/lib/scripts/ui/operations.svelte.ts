@@ -1,9 +1,9 @@
 // file UI operations
-import { BaseFile, DirectoryFile, RegFile } from './fs.svelte';
-import { fileSystem } from "./fs.svelte";
+import { BaseFile, DirectoryFile, RegFile } from '../fs.svelte';
+import { fileSystem } from "../fs.svelte";
 import { renamePrompt } from '$components/WindowFileElement.svelte';
 import { focus as windowFileFocus, selected } from "$components/WindowFile.svelte"
-import { decrypt, encrypt } from './crypto';
+import { decrypt, encrypt } from '../crypto';
 import saveAs from 'file-saver';
 import JSZip from 'jszip';
 
