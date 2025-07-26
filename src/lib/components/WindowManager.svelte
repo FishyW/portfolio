@@ -6,10 +6,7 @@
     import type { Component } from "svelte";
     import Window from "./Window.svelte";
     import EmptyWindow from "./dummy/WindowEmpty.svelte";
-    import { SvelteMap } from "svelte/reactivity";
-    import WindowEmpty from "./dummy/WindowEmpty.svelte";
-
-    let childprops = $state({});
+    import { SvelteMap } from "svelte/reactivity";    
 
     // very hacky way of getting the component ID
     // each component "type" has its own ID
@@ -19,30 +16,39 @@
         return component(document.createElement("div"), props).ID;
     }  
 
+    // trigger is used to force update the element
+    interface WindowDetails {
+        component: typeof EmptyWindow,
+        propIndex: number
+    }
+
+    const windowMap: Map<string, WindowDetails> = new SvelteMap();
+
+    // we need a prop array since SvelteMaps are not deeply reactive
+    const propArray: object[] = $state([]);
+
     export function open(
         component: Component<any>, 
-        props?: object
+        props = {}
     ) {
-
-        if (props !== undefined) {
-            childprops = props;
-        } else {
-            childprops = {};
-        }
-
+        
         const componentWindow = component as typeof EmptyWindow;
-        const id = getID(componentWindow, childprops);
+        const id = getID(componentWindow, props);
+
+        const details = windowMap.get(id);
 
         // window is already opened, "destroy" and reopen the window
-        if (windowMap.has(id)) {
-            // use a trigger map to do ^
-            triggerMap.set(id, !triggerMap.get(id));
+        if (details !== undefined) {
+            propArray[details.propIndex] = props;
             reorder(id);
             return;
         }
-
-        triggerMap.set(id, true);
-        windowMap.set(id, componentWindow);
+        
+        propArray.push(props);
+        windowMap.set(id, {
+            component: componentWindow, 
+            propIndex: propArray.length - 1
+        });
         openWindows.push(id);
     }
 
@@ -72,9 +78,7 @@
     let openWindows: string[] = $state([]);
 
 
-    // specify a map from id to window
-    const windowMap: Map<string, typeof WindowEmpty> = new SvelteMap();
-    const triggerMap: Map<string, boolean> = new SvelteMap();
+   
 
     function onclose(node: HTMLElement, id: string) {
         const handler = () => close(id);
@@ -92,20 +96,21 @@
             new CustomEvent("close", {bubbles: true})
         );
     }
-    
+  
 </script>
 
 
+
 {#each openWindows as id (id) }
+    {@const { component, propIndex } = windowMap.get(id)!}
+   
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
         <div class="h-fit pointer-events-none" style:translate="{random(-10, 10)}% {random(-10, 10)}%">
-            {#key triggerMap.get(id)}
                 <Window 
-                component={windowMap.get(id)!} 
+                {component}
                 onclick={() => reorder(id)}
-                {childprops}
+                props={propArray[propIndex]}
         />
-            {/key}
         </div>
     </div>
 {/each}

@@ -4,11 +4,11 @@
 
     interface Props {
         component: Component<any>,
-        childprops: any,
+        props: any,
         onclick: (arg: MouseEvent) => void
     };
 
-    let { component, childprops, onclick }: Props = $props();
+    let { component, props, onclick }: Props = $props();
     const ComponentWindow = component;
 
     let ctx: {window: null | HTMLElement} 
@@ -22,6 +22,6 @@
 class="bg-gray-600 flex-col pointer-events-auto"
 >
     <ComponentWindow 
-        {...childprops} 
+        {...props} 
     />
 </div>

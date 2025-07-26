@@ -1,8 +1,8 @@
 <script lang="ts">
     import { getContext } from "svelte";
 
-    
-    let { children } = $props();
+    const nothing = (e: DragEvent) => {};
+    let { children, ondragstart = nothing, ondragend = nothing} = $props();
 
     const ctx:  {window: HTMLElement | null } = getContext("window");
 
@@ -68,9 +68,11 @@ ondragstart={e => {
     e.dataTransfer!.setDragImage(document.createElement("div"), 0, 0);
     
     e.target!.dispatchEvent(new Event("click", {bubbles: true}));
+    ondragstart(e);
 }} 
 ondragend={e => {
     isDragging = false;
+    ondragend(e);
         
 }} class="w-full h-10 p-2 bg-black">
 

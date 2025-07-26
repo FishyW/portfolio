@@ -4,10 +4,12 @@
     import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 
     
-    let { children }: {children?: any} = $props();
+    let { children = undefined, 
+        ondragstart = undefined, 
+        ondragend = undefined } = $props();
 </script>
 
-<WindowTopBarDraggable>
+<WindowTopBarDraggable {ondragstart} {ondragend} >
     <div class="flex w-full h-full items-center gap-1">
         <div class="flex-1">
             {@render children?.()}

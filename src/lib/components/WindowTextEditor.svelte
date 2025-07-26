@@ -90,10 +90,8 @@
     import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 
 
-    let view: EditorView;
     
-    let showMarkdownViewer = $state(true);
-    let fileExtension = $state("");
+   
     
 
 function onViewChange(update: ViewUpdate) {
@@ -186,13 +184,26 @@ const extensions = [
         })
   ]
 
+  export const ID = "TextEditor";
+
+    interface Props {
+      file: RegFile
+    }
+
+    let { file }: Props = $props();
+      
+
+    const fileExtension = $derived(file.getExtension() ?? "");
+    let showMarkdownViewer = $state(true);
+
     function createEditor(node: HTMLElement) {
       $effect(() => {
+        
         const contents = typeof(file.contents) === "string" 
           ? file.contents : new TextDecoder().decode(file.contents);
-        
-        let extension = file.getExtension() ?? "";
-        
+
+        const extension = fileExtension;
+
         const extensionMap: {[name: string]: Extension | undefined} = {
           "js": javascript(),
           "ts": javascript({typescript: true}),
@@ -330,7 +341,7 @@ const extensions = [
           }
 
 
-        view = new EditorView({
+        new EditorView({
           doc: contents,
           parent: node,
           extensions: [...extensions, 
@@ -339,19 +350,12 @@ const extensions = [
             EditorView.editable.of(!file.isBinary())]
         });
 
-        fileExtension = extension;
+        
      
       })
     }
 
-    export const ID = "TextEditor";
-
-    interface Props {
-      file: RegFile
-    }
-
-    let { file }: Props = $props();
-
+    
     
 </script>
 
