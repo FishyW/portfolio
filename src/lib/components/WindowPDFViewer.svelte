@@ -2,7 +2,6 @@
     import { type RegFile } from "$scripts/fs.svelte";
     import WindowTopBar from "./WindowTopBar.svelte";
 
-    export const ID = "PDFViewer";
 
     interface Props {
       file: RegFile
@@ -39,7 +38,7 @@
 <div class="w-[50vw] h-[80vh] overflow-y-auto relative">
     <!-- <canvas use:loadPDF></canvas> -->
      
-     {#await loadPDF()}{:then item} 
+     {#await loadPDF() then item} 
         <embed src={item} class="w-full h-full" type="application/pdf"/>
      {/await}
      {#if !hideOverlay}

@@ -1,39 +1,44 @@
 <!-- Maintains a map of active windows-->
 
 <script module lang="ts">
-   
-
-    import type { Component } from "svelte";
-    import Window from "./Window.svelte";
-    import EmptyWindow from "./dummy/WindowEmpty.svelte";
+       import Window from "./Window.svelte";
+    import type WindowEmpty from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from "svelte/reactivity";    
+    import type { WindowInfo } from "$scripts/windows";
 
-    // very hacky way of getting the component ID
-    // each component "type" has its own ID
-    // the internal component function is called manually to get an instance
-    function getID(component: typeof EmptyWindow,
-        props = {}): string {
-        return component(document.createElement("div"), props).ID;
-    }  
-
-    // trigger is used to force update the element
+   
     interface WindowDetails {
-        component: typeof EmptyWindow,
-        propIndex: number
+        component: typeof WindowEmpty,
+        propIndex: number,
+        info: WindowInfo
     }
 
     const windowMap: Map<string, WindowDetails> = new SvelteMap();
 
+
+    // specify the ordering of the windows
+    const openWindows: string[] = $state([]);
+
+    // same with open windows except elements are not reordered
+    export const openWindowFixed: string[] = $state([]);
+
+    
+
+    export function intoWindowsInfo(ids: string[]) {
+        return ids.map(id => windowMap.get(id)!.info);
+    }
+
     // we need a prop array since SvelteMaps are not deeply reactive
     const propArray: object[] = $state([]);
+    
 
     export function open(
-        component: Component<any>, 
+        info: WindowInfo,
         props = {}
     ) {
         
-        const componentWindow = component as typeof EmptyWindow;
-        const id = getID(componentWindow, props);
+        const componentWindow = info.component as typeof WindowEmpty;
+        const id = info.name;
 
         const details = windowMap.get(id);
 
@@ -47,16 +52,21 @@
         propArray.push(props);
         windowMap.set(id, {
             component: componentWindow, 
-            propIndex: propArray.length - 1
+            propIndex: propArray.length - 1,
+            info
         });
         openWindows.push(id);
+        openWindowFixed.push(id);
     }
+
 
     function close(id: string) {
         // remove id
         const idx = openWindows.indexOf(id);
         openWindows.splice(idx, 1);
+        openWindowFixed.splice(idx, 1);
         windowMap.delete(id);
+        
     }
 
 
@@ -73,12 +83,6 @@
         openWindows.splice(idx, 1);
         openWindows.push(id);
     }
-    
-    // specify the ordering of the windows
-    let openWindows: string[] = $state([]);
-
-
-   
 
     function onclose(node: HTMLElement, id: string) {
         const handler = () => close(id);

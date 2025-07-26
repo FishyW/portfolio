@@ -2,20 +2,19 @@
 // When opening a file, the function in the map is called
 import { RegFile } from "./fs.svelte";
 import { open } from "$components/WindowManager.svelte";
-import WindowTextEditor from "$components/WindowTextEditor.svelte";
-import WindowPdfViewer from "$components/WindowPDFViewer.svelte";
-import WindowImageViewer from "$components/WindowImageViewer.svelte";
+import { DocumentViewerInfo, ImageViewerInfo, TextEditorInfo } from "./windows";
+
 
 function openTxt(file: RegFile) {
-    open(WindowTextEditor, { file });
+    open(TextEditorInfo, { file } );
 }
 
 function openPDF(file: RegFile) {
-    open(WindowPdfViewer, { file });
+    open(DocumentViewerInfo, { file });
 }
 
 function openImage(file: RegFile) {
-    open(WindowImageViewer, { file });
+    open(ImageViewerInfo, { file });
 }
 
 export const imageMimeMap: { [name: string]: string } = {

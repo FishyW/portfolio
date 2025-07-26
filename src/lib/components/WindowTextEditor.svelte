@@ -1,3 +1,5 @@
+
+
 <script lang="ts">
     import type { RegFile } from "$scripts/fs.svelte";
     import WindowTopBar from "./WindowTopBar.svelte";
@@ -184,7 +186,7 @@ const extensions = [
         })
   ]
 
-  export const ID = "TextEditor";
+  export const ID = "Text Editor";
 
     interface Props {
       file: RegFile

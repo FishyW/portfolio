@@ -1,5 +1,7 @@
 
 <script module lang="ts">
+    
+
     export let selected: {file: null | BaseFile} = $state({file: null});
     let windowElement: HTMLElement;
 
@@ -24,20 +26,6 @@
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
     import { copy, move, paste, rename, removeFile } from "$scripts/operations.svelte";
     import { onFileDrop } from "$scripts/filedrop";
-
-    
-    // all windows need to export this unique ID
-    // will be used by the window manager to 
-    // figure out 
-    export const ID = "File";
-
-    // let wrapper = $derived(fileSystem
-    //     .cwd.files.map(file => {
-    //     return {
-    //             file, 
-    //             component: null
-    //     }})
-    // );
 
 
     function deselect() {
