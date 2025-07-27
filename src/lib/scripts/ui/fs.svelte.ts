@@ -42,9 +42,6 @@ class ReactiveDirectory extends DirectoryFile {
                         (superGet() as any)[prop] = value;
                         (target as any)[prop] = value;
                         return true;
-                    }, get(_target, prop) {
-                        // getting the reactive state gives the parent object
-                        return (superGet() as any)[prop];
                     }
                 });
             },
