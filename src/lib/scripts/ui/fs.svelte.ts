@@ -5,6 +5,7 @@ import fsJson from "../fs.json";
 import { browser } from "$app/environment";
 import { BaseFile, DirectoryFile, FileSystem, type JSONFS } from "$scripts/fs";
 
+
 class ReactiveDirectory extends DirectoryFile {
     #filesInternal;
 
@@ -12,14 +13,22 @@ class ReactiveDirectory extends DirectoryFile {
         super(name, parent);
         this.#filesInternal = $state(files);
         
+        // superGet is likely not needed, but for symmetric reasons I'll have it here
+        // can be replaced by const superFiles = super.files;
+        // then in the code below superFiles[prop] = value;
         const superGet = Object.getOwnPropertyDescriptor(
             Object.getPrototypeOf(this).__proto__, 'files')!.get!
             .bind(this) as (() => BaseFile[]);
 
+        // superSet is necessary
+        // the set: function below can't be changed
+        // since we need to do super.files = value, i.e. we need to pass in "super"
+        // to the code block below, but this is not possible, so we need to pass in the setter
         const superSet = Object.getOwnPropertyDescriptor(
             Object.getPrototypeOf(this).__proto__, 'files')!.set!
             .bind(this) as ((files: BaseFile[]) => void);
         
+        // can likely be replaced by super.files = files
         superSet(files);
         
         // override instance property
