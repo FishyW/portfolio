@@ -2,7 +2,7 @@
 
 <script lang="ts">
     import { imageMimeMap } from "$scripts/ui/extension.svelte";
-    import { type RegFile } from "$scripts/fs.svelte";
+    import { type RegFile } from "$scripts/fs";
     import WindowTopBar from "./WindowTopBar.svelte";
 
 

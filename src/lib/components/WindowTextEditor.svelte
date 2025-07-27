@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-    import type { RegFile } from "$scripts/fs.svelte";
+    import type { RegFile } from "$scripts/fs";
     import WindowTopBar from "./WindowTopBar.svelte";
     import { EditorState, type Extension } from "@codemirror/state";
     import { lintKeymap } from "@codemirror/lint";

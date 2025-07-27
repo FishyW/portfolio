@@ -1,6 +1,6 @@
 // Several Extension Managers
 // When opening a file, the function in the map is called
-import { RegFile } from "../fs.svelte";
+import { RegFile } from "./fs.svelte";
 import { open } from "$components/WindowManager.svelte";
 import { DocumentViewerInfo, ImageViewerInfo, TextEditorInfo } from "./windows";
 

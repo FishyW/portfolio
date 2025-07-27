@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-    import { DirectoryFile, fileSystem } from "$scripts/fs.svelte";
+    import { DirectoryFile, fileSystem } from "$scripts/ui/fs.svelte";
     import WindowTopBar from "./WindowTopBar.svelte";
     import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 

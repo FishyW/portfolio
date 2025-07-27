@@ -19,7 +19,7 @@
 </script>
 
 <script lang="ts">
-    import { BaseFile, fileSystem } from "$scripts/fs.svelte";
+    import { BaseFile, fileSystem } from "$scripts/ui/fs.svelte";
     import { show } from "./ContextMenu.svelte";
     import FileElement from "./WindowFileElement.svelte";
     import ContextMenuFile from "./ContextMenuFile.svelte";

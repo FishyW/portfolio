@@ -1,5 +1,5 @@
 <script>
-    import { fileSystem, FileSystem } from '$scripts/fs.svelte';
+    import { fileSystem, FileSystem } from '$scripts/ui/fs.svelte';
     import saveAs from 'file-saver';
 	import { SvelteDate } from 'svelte/reactivity';
 	import { showOpenFilePicker } from 'show-open-file-picker'

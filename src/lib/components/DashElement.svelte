@@ -8,6 +8,7 @@
     }
     
     let { info, isOpened = false }: Props = $props();
+
 </script>
 
 <!-- Opens the File Window -->

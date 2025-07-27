@@ -3,13 +3,15 @@
 // create the file system
 
 import { defaultAction, extensionMap } from "./ui/extension.svelte";
+import { FileAttribute, tracked, VirtualFile } from "./virtual/virtual";
+import { IndexedDBVirtualSystem } from "./virtual/indexdb";
 
 enum JSONFileContent {
     REG = "reg",
     DIR = "dir"
 }
 
-interface JSONFS {
+export interface JSONFS {
     cwd: string,
     files: SerializedFile
 }
@@ -43,19 +45,22 @@ async function fromBase64(data: string) {
 }   
 
 
-export abstract class BaseFile {
-    name = "";
-    parent: DirectoryFile | null;
-    idx: number;
-    static counter = 0;
+
+
+export abstract class BaseFile extends VirtualFile {
+    @tracked(FileAttribute.NAME)
+    accessor name = "";
+
+    @tracked(FileAttribute.PARENT)
+    accessor parent: DirectoryFile | null;
     
     constructor(name: string, parent: DirectoryFile | null) {
+        super(new IndexedDBVirtualSystem());
         this.name = name;
         this.parent = parent;
         if (this.parent !== null) {
             this.parent.addFile(this);
         }
-        this.idx = BaseFile.counter++;
     }
 
     get path() {
@@ -157,9 +162,10 @@ export abstract class BaseFile {
 }
 
 export class RegFile extends BaseFile {
-   contents: string | ArrayBuffer;
-   
-   constructor(name: string, parent: DirectoryFile | null, contents: string | ArrayBuffer) {
+    @tracked(FileAttribute.FILE_CONTENTS)
+    accessor contents: string | ArrayBuffer;
+    
+    constructor(name: string, parent: DirectoryFile | null, contents: string | ArrayBuffer) {
         super(name, parent);
 
         this.contents = contents;
@@ -221,8 +227,10 @@ export class RegFile extends BaseFile {
 }
 
 
+
 export class DirectoryFile extends BaseFile {
-    files: BaseFile[] = $state([])
+    @tracked(FileAttribute.DIRECTORY_FILES)
+    accessor files: BaseFile[] = []
 
     constructor(name: string, parent: DirectoryFile | null) {
         super(name, parent);
@@ -369,7 +377,7 @@ export class FileSystem {
     static fs: FileSystem;
 
     constructor(root: DirectoryFile, cwd: DirectoryFile) {
-        this.#cwd = $state(cwd);
+        this.#cwd = cwd;
         this.root = root;
         this.history = [cwd];
         this.backHistory = [];
@@ -435,7 +443,6 @@ export class FileSystem {
             files: await this.root.serialize()
         }
     }
-
     
 
     addEmptyFile(filename = "empty.txt") {
@@ -527,7 +534,7 @@ export class FileSystem {
 
     // get index of a file with a certain filename
     getIndex(file: BaseFile) {
-        return fileSystem.cwd.files.findIndex(cmp => cmp.name == file.name);
+        return this.cwd.files.findIndex(cmp => cmp.name == file.name);
     }
 
     static async init(object: JSONFS) {
@@ -536,31 +543,4 @@ export class FileSystem {
     }
 }
 
-import fsJson from "./fs.json";
-
-// load 
-import { browser } from "$app/environment";
-
-
-
-let fs = await FileSystem.init(fsJson as JSONFS);
-
-if (browser) {
-    const fsStorage = localStorage.getItem("fs");
-    if (fsStorage !== null) {
-        fs = await FileSystem.init(JSON.parse(fsStorage));   
-    }
-} 
-
-
-export const fileSystem = fs;
-
-
-// alternatively use a "save decorator", 
-// I'll do it if I'm dilligent enough
-if (browser) {
-    setInterval(async () => {
-    localStorage.setItem("fs", JSON.stringify(await fs.serialize()));
-    }, 1000);
-}
 

@@ -1,4 +1,4 @@
-import { DirectoryFile, fileSystem, RegFile } from "../fs.svelte";
+import { DirectoryFile, fileSystem, RegFile } from "./fs.svelte";
 
 
 function isFile(entry: FileSystemEntry): entry is FileSystemFileEntry {

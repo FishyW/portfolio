@@ -12,12 +12,15 @@
     const openWindowsInfo = $derived(
        intoWindowsInfo(openWindowFixed)
     );
+
+
     
     const openWindowsInfoFiltered = $derived(
         openWindowsInfo.filter(info => 
-            pinnedApps.indexOf(info) === -1
+            !pinnedApps.includes(info)
         )
     );
+
 
 
 </script>
@@ -28,7 +31,7 @@
     {/each} 
     {#each pinnedApps as info}
         <DashElement {info} 
-            isOpened={openWindowFixed.indexOf(info.name) !== -1}
+            isOpened={openWindowFixed.includes(info.name)}
             />
     {/each} 
 </div>

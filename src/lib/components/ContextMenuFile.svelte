@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { DirectoryFile } from '$scripts/fs.svelte';
+    import { DirectoryFile } from '$scripts/ui/fs.svelte';
 
     
     import { copy, decryptFile, download, encryptFile, move, newFile, newFolder, paste, pasteBuffer, removeFile, rename } from '$scripts/ui/operations.svelte';

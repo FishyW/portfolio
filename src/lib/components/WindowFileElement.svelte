@@ -13,7 +13,7 @@
 
 
 <script lang="ts">
-    import { DirectoryFile, fileSystem, type BaseFile } from "$scripts/fs.svelte";
+    import { DirectoryFile, type BaseFile } from "$scripts/ui/fs.svelte";
     import { show } from "./ContextMenu.svelte";
 
     import ContextMenuFile from "./ContextMenuFile.svelte";
