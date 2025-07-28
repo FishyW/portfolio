@@ -2,25 +2,30 @@ import type { BaseFile, DirectoryFile, RegFile } from "$scripts/fs";
 import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } from "./virtual";
 
 
-export class IndexedDBVirtualSystem extends VirtualSystem {
+export class LoggerSystem extends VirtualSystem {
     fileMap = new Map<number, VirtualFile>();
     
     createFile(file: RegFile): void {
+        console.log(`CREATING FILE with index ${file.idx}`);
     }
 
     createFolder(file: DirectoryFile): void {
+        console.log(`CREATING FOLDER with index ${file.idx}`);
     }
 
     remove(file: VirtualFile): void {
+        console.log(`REMOVING FILE with index ${file.idx}`);
     }
 
     relocate(file: BaseFile, parent: DirectoryFile): void {
+        console.log(`MOVING FILE with index ${file.idx} TO ${parent.idx}`);
     }
 
     @register(FileAttribute.NAME)
     name(): Accessor<string, BaseFile> {
         return {
             set(value, file, set) {
+                console.log(`NAMING FILE TO ${value}`)
                 set.call(file, value);
             },
             get(file, get) {
@@ -35,6 +40,7 @@ export class IndexedDBVirtualSystem extends VirtualSystem {
     contents(): Accessor<string | ArrayBuffer, BaseFile> {
         return {
             set(value, file, set) {
+                console.log(`SETTING CONTENTS TO ${value}`);
                 set.call(file, value);
             },
             get(file, get) {

@@ -1,3 +1,4 @@
+import { FileType, type BaseFile, type DirectoryFile, type RegFile } from "$scripts/fs";
 
 export enum FileAttribute {
     NAME = "name",
@@ -37,17 +38,20 @@ type FSMap = Map<FileAttribute, () => Accessor<unknown, VirtualFile>>;
 // then the method is registered
 export abstract class VirtualSystem {
     #fsMap: FSMap;
+    disableTracking: boolean;
+
 
     constructor() {
         this.#fsMap = new Map<FileAttribute, () => Accessor<unknown, VirtualFile>>();
+        this.disableTracking = false;
     }
 
 
     operateGet<T>(attribute: FileAttribute, file: VirtualFile, get: () => T): T {
         const accessor = this.#fsMap.get(attribute);
         const func = accessor?.().get;
-        if (func === undefined) {
-            throw new Error(`This VFS does not implement getting attribute ${attribute}`);
+        if (func === undefined || this.disableTracking) {
+            return get.call(file);
         }
         return func(file, get) as T;
     }
@@ -55,8 +59,9 @@ export abstract class VirtualSystem {
     operateSet<T>(attribute: FileAttribute, value: T, file: VirtualFile, set: (val: T) => void) {
         const accessor = this.#fsMap.get(attribute);
         const func = accessor?.().set;
-        if (func === undefined) {
-            throw new Error(`This VFS does not implement setting attribute ${attribute}`);
+        if (func === undefined || this.disableTracking) {
+            set.call(file, value);
+            return;
         }
         func(value, file, set as (val: unknown) => void);
     }
@@ -66,6 +71,13 @@ export abstract class VirtualSystem {
         func = func.bind(this);
         this.#fsMap.set(attribute, func);
     }    
+
+    abstract createFile(file: RegFile): void;
+    abstract createFolder(file: DirectoryFile): void;
+
+    abstract relocate(file: BaseFile, parent: DirectoryFile): void;
+
+    abstract remove(file: VirtualFile): void;
 }
 
 
@@ -82,7 +94,14 @@ export class VirtualFile {
     constructor(vfs: VirtualSystem) {
         this.vfs = vfs;
         this.idx = VirtualFile.counter++;
+        this.vfs.disableTracking = true;
     }
+
+    // child needs to call create finished when done
+    createFinished() {
+        this.vfs.disableTracking = false;
+    }
+
 }
 
 

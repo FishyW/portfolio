@@ -97,7 +97,7 @@ export async function encryptFile() {
     // add extension
     const newName = selected.file.name + extension;
     // adds to working directory
-    fileSystem.addFile(new RegFile(newName, null, encrypted), true);
+    fileSystem.createFile(newName, encrypted);
 }
 
 export async function decryptFile() {
@@ -120,10 +120,12 @@ export async function decryptFile() {
         return;
     }
     
-    const file = await BaseFile.deserialize(JSON.parse(serialized), null);
+    const folder = fileSystem.addEmptyFolder("tmp");
+    const file = await BaseFile.deserialize(JSON.parse(serialized), folder);
     const [base, _1, _2] = selected.file.splitExtension();
     file.rename(base);
-    fileSystem.addFile(file, true);
+    fileSystem.move(file, fileSystem.cwd, true);
+    // fileSystem.removeFile(folder);
 }
 
 

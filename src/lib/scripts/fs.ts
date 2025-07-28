@@ -5,8 +5,9 @@
 import { defaultAction, extensionMap } from "./ui/extension.svelte";
 import { FileAttribute, tracked, VirtualFile } from "./virtual/virtual";
 import { IndexedDBVirtualSystem } from "./virtual/indexdb";
+import { LoggerSystem } from "./virtual/logger";
 
-enum JSONFileContent {
+export enum FileType {
     REG = "reg",
     DIR = "dir"
 }
@@ -18,7 +19,7 @@ export interface JSONFS {
 
 interface SerializedFile {
     name: string,
-    type: JSONFileContent,
+    type: FileType,
     contents: SerializedFile[] | string,
     binary?: boolean
 }
@@ -45,8 +46,6 @@ async function fromBase64(data: string) {
 }   
 
 
-
-
 export abstract class BaseFile extends VirtualFile {
     @tracked(FileAttribute.NAME)
     accessor name = "";
@@ -55,11 +54,11 @@ export abstract class BaseFile extends VirtualFile {
     accessor parent: DirectoryFile | null;
     
     constructor(name: string, parent: DirectoryFile | null) {
-        super(new IndexedDBVirtualSystem());
+        super(new LoggerSystem());
         this.name = name;
         this.parent = parent;
         if (this.parent !== null) {
-            this.parent.addFile(this);
+            this.parent._addFile(this);
         }
     }
 
@@ -106,8 +105,11 @@ export abstract class BaseFile extends VirtualFile {
     abstract open(): void; 
 
     // [base, extension, hasExtension?]
-    splitExtension(): [string, string, boolean] {
-        const items = this.name.split(".");
+    splitExtension(filename?: string): [string, string, boolean] {
+        if (filename === undefined) {
+            filename = this.name;
+        }
+        const items = filename.split(".");
         
         if (items.length == 1) {
             // no extension
@@ -128,23 +130,25 @@ export abstract class BaseFile extends VirtualFile {
         return null;
     }
 
+
     abstract serialize(): Promise<SerializedFile>;
 
+    // note that deserialize creates files to the file system
     // first arg is the serialized file after calling JSON.parse() on the file
     // second arg is the parent
     static async deserialize(serialized: SerializedFile, parent: DirectoryFile | null) {
-        if (serialized.type == JSONFileContent.DIR) {
+        if (serialized.type == FileType.DIR) {
             const currentFile = new DirectoryFile(serialized.name, parent);
             for (const file of serialized.contents) {
                if (typeof(file) === "string") {
                     throw new Error("Wrong Content Type");
                }
-                currentFile.addFile(await this.deserialize(file, currentFile));
+                await this.deserialize(file, currentFile);
             }
             return currentFile;
         }
 
-        if (serialized.type == JSONFileContent.REG) {
+        if (serialized.type == FileType.REG) {
             
             if (typeof(serialized.contents) !== "string" ) {
                 throw new Error("Wrong File Type");
@@ -153,6 +157,9 @@ export abstract class BaseFile extends VirtualFile {
             // if it is a binary data it's base64 encoded
             if (serialized.binary) {
                 contents = await fromBase64(serialized.contents);
+            }
+            if (parent === null) {
+                throw new Error("File has no parent!")
             }
 
             return new RegFile(serialized.name, parent, contents);
@@ -165,10 +172,12 @@ export class RegFile extends BaseFile {
     @tracked(FileAttribute.FILE_CONTENTS)
     accessor contents: string | ArrayBuffer;
     
-    constructor(name: string, parent: DirectoryFile | null, contents: string | ArrayBuffer) {
+    constructor(name: string, parent: DirectoryFile, contents: string | ArrayBuffer) {
         super(name, parent);
 
         this.contents = contents;
+        this.vfs.createFile(this);
+        this.createFinished();
     }
 
      open() {
@@ -186,8 +195,7 @@ export class RegFile extends BaseFile {
     }
 
     clone(parent: DirectoryFile) {
-        const file = new RegFile(this.name, null, this.contents);
-        parent.addFile(file, true);
+        const file = new RegFile(this.name, parent, this.contents);
         return file;
     }
 
@@ -201,7 +209,7 @@ export class RegFile extends BaseFile {
         return {
             name: this.name,
             contents,
-            type: JSONFileContent.REG,
+            type: FileType.REG,
             binary
         }
     }
@@ -232,8 +240,19 @@ export class DirectoryFile extends BaseFile {
     @tracked(FileAttribute.DIRECTORY_FILES)
     accessor files: BaseFile[] = []
 
-    constructor(name: string, parent: DirectoryFile | null) {
+    constructor(name: string, parent: DirectoryFile | null, virtual = false) {
         super(name, parent);
+        // folder is not root, but parent is null
+        if (this.name !== "" && this.parent === null && !virtual) {
+            throw new Error("Non root folder has no parent!");
+        }
+
+        // needed to prevent the reactive directory from unnecessarily creating a new folder
+        if (!virtual) {
+            this.vfs.createFolder(this);
+        }
+
+        this.createFinished();
     }
 
     getFile(filename: string) {
@@ -244,11 +263,11 @@ export class DirectoryFile extends BaseFile {
         return arr[0]!;
     }
 
-    generateNewName(file: BaseFile) {
-        const [curBaseFull, curExt, curHasExt] = file.splitExtension();
+    generateNewName(filename: string) {
+        const [curBaseFull, curExt, curHasExt] = this.splitExtension(filename);
         const curBase = curBaseFull.replace(/ \([0-9]+\)$/, "");
         const unavailableIndices = [];
-        for (const iterFile of file.parent!.files) {
+        for (const iterFile of this.files) {
             const [base, ext, hasExt] = iterFile.splitExtension();
 
             if (ext === curExt && hasExt === curHasExt) {
@@ -292,29 +311,72 @@ export class DirectoryFile extends BaseFile {
         return `${curBase} (${highestIndex})${curHasExt ? "." : ""}${curExt}`;
     }
 
-    addFile(file: BaseFile, autorename = false) {
-        const fileCompare = this.getFile(file.name);
+   
+    #createFileName(name: string, rename = false) {
+        const fileCompare = this.getFile(name);
         if (fileCompare !== null) {
-            
-            if (fileCompare.idx == file.idx) {
-                return;
-            }
-            
-            if (!autorename) {
+            if (!rename) {
                 throw new Error("File with the same name exists!");
             }
+            name = this.generateNewName(name);
+        }
+        return name;
+    }
 
+    // adds a file to a directory
+    // does not trigger a system call
+    _addFile(file: BaseFile, autorename = false) {
+        const name = this.#createFileName(file.name, autorename);
+        if (name != file.name) {
             // file has already been added
-            file.parent = this;
-
-            file.rename(this.generateNewName(file));
+            file.rename(this.generateNewName(file.name));
         }
         file.parent = this;
         this.files.push(file);
     }
+    
 
-    removeFile(file: BaseFile) {
-        this.files = this.files.filter(theFile => theFile != file);
+    // creates an empty file
+    createFile(
+        name: string, 
+        contents: string | ArrayBuffer, 
+        autorename = false
+    ) {
+        const filename = this.#createFileName(name, autorename);
+        return new RegFile(filename, this, contents);
+    }
+
+    // creates an empty folder
+    createFolder(
+        name: string,
+        autorename = false
+    ) {
+        const filename = this.#createFileName(name, autorename);
+        return new DirectoryFile(filename, this);
+    }
+    
+
+    relocate(file: BaseFile, autorename = false) {
+        file.parent?.removeFile(file, true);
+        this._addFile(file, autorename);
+        // call the relocate system call
+        this.vfs.relocate(file, this);
+    }
+
+    // temporary removes are for relocation
+    // logically removes the file without triggering the system call
+    removeFile(file: BaseFile, temporary = false) {
+        const index = this.files.findIndex(theFile => theFile.idx == file.idx);
+        if (index === -1) {
+            return;
+        }
+
+        this.files.splice(index, 1);
+
+        if (!temporary) {
+            // call remove "system call" to update the database
+            this.vfs.remove(file);
+        }
     }
 
     static isDirectory(file: BaseFile): file is DirectoryFile {
@@ -326,11 +388,10 @@ export class DirectoryFile extends BaseFile {
     }
 
     clone(parent: DirectoryFile) {
-        const directory = new DirectoryFile(this.name, null);
+        const directory = parent.createFolder(this.name, true)
         for (const file of this.files) {
             file.clone(directory);
         }
-        parent.addFile(directory, true);
         return directory;
     }
 
@@ -348,7 +409,7 @@ export class DirectoryFile extends BaseFile {
     async serialize() {
         return {
             name: this.name,
-            type: JSONFileContent.DIR,
+            type: FileType.DIR,
             contents: await Promise.all(
                 this.files.map(async (file) => file.serialize())
             )
@@ -446,14 +507,11 @@ export class FileSystem {
     
 
     addEmptyFile(filename = "empty.txt") {
-        const file = new RegFile(filename, null, "");
-        this.cwd.addFile(file, true);
-        return file;
+        return this.cwd.createFile(filename, "",  true);
     }
 
     addEmptyFolder(foldername = "folder") {
-        const folder = new DirectoryFile(foldername, null);
-        this.cwd.addFile(folder, true);
+        const folder = this.cwd.createFolder(foldername, true);
         return folder;
     }
 
@@ -476,9 +534,8 @@ export class FileSystem {
         return arr;
     }
 
-    addFile(file: BaseFile, autorename: boolean) {
-        this.cwd.addFile(file, autorename);
-        return file;
+    createFile(name: string, contents: string | ArrayBuffer) {
+        return this.cwd.createFile(name, contents, true);
     }
 
     rename(file: BaseFile, name: string) {
@@ -486,7 +543,7 @@ export class FileSystem {
     }
    
 
-    move(file: BaseFile, folder: DirectoryFile) {
+    move(file: BaseFile, folder: DirectoryFile, autorename = false) {
         // check if source folder is ancestor of destination folder
         // destination folder won't have ancestor
         if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
@@ -496,13 +553,18 @@ export class FileSystem {
         if (folder.getFile(file.name) !== null) {
             return;
         }
-        const parent = file.parent!;
-        folder.addFile(file);
-        parent!.removeFile(file);
+        // relocate the file to the
+        folder.relocate(file, autorename);
 
     }
 
     copy(file: BaseFile, folder: DirectoryFile) {
+        // check if source folder is ancestor of destination folder
+        // destination folder won't have ancestor
+        if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
+            throw new Error("Can't copy a directory inside of itself");
+        }
+
         file.clone(folder);
     }
 

@@ -4,13 +4,19 @@ import fsJson from "../fs.json";
 
 import { browser } from "$app/environment";
 import { BaseFile, DirectoryFile, FileSystem, type JSONFS } from "$scripts/fs";
+import { VirtualFile } from "$scripts/virtual/virtual";
 
 
 class ReactiveDirectory extends DirectoryFile {
     #filesInternal;
 
-    constructor(name: string, parent: null | DirectoryFile, files: BaseFile[] = []) {
-        super(name, parent);
+    constructor(
+        name: string, 
+        parent: null | DirectoryFile, 
+        files: BaseFile[] = [],
+        virtual = false
+    ) {
+        super(name, parent, virtual);
         this.#filesInternal = $state(files);
         
         // superGet is likely not needed, but for symmetric reasons I'll have it here
@@ -54,8 +60,19 @@ class ReactiveDirectory extends DirectoryFile {
     }
 
     static makeReactive(directory: DirectoryFile) {
-        const dir = new ReactiveDirectory(directory.name, null, directory.files);
+        VirtualFile.counter -= 1;
+        const dir = new ReactiveDirectory(
+            directory.name, null, directory.files, true
+        );
+
+        // set all children's parent to point to the reactive directory
+        for (const file of directory.files) {
+            file.parent = dir;
+        }
+
+        dir.idx = directory.idx;
         dir.parent = directory.parent;
+
         return dir;
     }
 }
@@ -65,14 +82,13 @@ class ReactiveFileSystem extends FileSystem {
 
     constructor(root: DirectoryFile, cwd: DirectoryFile) {
         super(root, cwd);
-        // console.log(Object.getOwnPropertyDescriptor(this, 'cwd'));
         this.#cwdInternal = $state(ReactiveDirectory.makeReactive(cwd));
         Object.defineProperty(this, "cwd", {
             get: () => this.#cwdInternal,
-            set: (value) => this.#cwdInternal = ReactiveDirectory.makeReactive(value)
+            set: (value) => {
+                this.#cwdInternal = ReactiveDirectory.makeReactive(value);
+            }
         })
-        
-        
     }
 
     static async init(fsFormat: JSONFS) {
