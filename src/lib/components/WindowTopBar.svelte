@@ -6,7 +6,9 @@
     
     let { children = undefined, 
         ondragstart = undefined, 
-        ondragend = undefined } = $props();
+        ondragend = undefined,
+        onexit = undefined } = $props();
+
 </script>
 
 <WindowTopBarDraggable {ondragstart} {ondragend} >
@@ -15,6 +17,9 @@
             {@render children?.()}
         </div>
 
-        <WindowTopBarIcon onclick={ dispatchClose } /> 
+        <WindowTopBarIcon onclick={e => {
+            onexit?.();
+            dispatchClose(e);
+        }} /> 
     </div>
 </WindowTopBarDraggable>

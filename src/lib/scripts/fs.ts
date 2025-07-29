@@ -2,48 +2,9 @@
 
 // create the file system
 
-import { defaultAction, extensionMap } from "./ui/extension.svelte";
-import { FileAttribute, tracked, VirtualFile } from "./virtual/virtual";
-import { IndexedDBVirtualSystem } from "./virtual/indexdb";
-import { LoggerSystem } from "./virtual/logger";
-
-export enum FileType {
-    REG = "reg",
-    DIR = "dir"
-}
-
-export interface JSONFS {
-    cwd: string,
-    files: SerializedFile
-}
-
-interface SerializedFile {
-    name: string,
-    type: FileType,
-    contents: SerializedFile[] | string,
-    binary?: boolean
-}
-
-
-
-// convert to base64 based on
-// https://stackoverflow.com/questions/12710001/how-to-convert-uint8-array-to-base64-encoded-string
-// likely the fastest solution since it uses native browser features
-// doesn't exactly convert to a base64 string, it converts to a base64 "url"
-async function toBase64(buffer: ArrayBuffer) {
-  // use a FileReader to generate a base64 data URI:
-  const base64url = await new Promise(r => {
-    const reader = new FileReader()
-    reader.onload = () => r(reader.result)
-    reader.readAsDataURL(new Blob([buffer]))
-  });
-  return base64url as string;
-}
-
-async function fromBase64(data: string) {
-    return (await (await fetch(data))
-        .arrayBuffer());
-}   
+import { defaultAction, extensionMap, MainFS, openTxt } from "./ui/config.svelte";
+import { FileAttribute, tracked, VirtualFile, VirtualSystem } from "./virtual/virtual";
+import { FileType, IndexedDBSystem, type Serialized, type SerializedFile, type SerializedFolder, type SerializedJSON, type SerializedSpec } from "./virtual/indexdb";
 
 
 export abstract class BaseFile extends VirtualFile {
@@ -52,11 +13,17 @@ export abstract class BaseFile extends VirtualFile {
 
     @tracked(FileAttribute.PARENT)
     accessor parent: DirectoryFile | null;
+    #savedName: string;
     
     constructor(name: string, parent: DirectoryFile | null) {
-        super(new LoggerSystem());
+        super(new MainFS());
+        this.isVirtual = parent !== null ? parent.isVirtual : false;
+        this.vfs = parent !== null ? parent.vfs : this.vfs;
+
         this.name = name;
         this.parent = parent;
+        this.#savedName = name; 
+             
         if (this.parent !== null) {
             this.parent._addFile(this);
         }
@@ -97,7 +64,7 @@ export abstract class BaseFile extends VirtualFile {
         }
         return !(name.length == 0 
             || name.length > 255
-            || !name.match(/^[0-9a-zA-Z. \(\)]+$/));
+            || !name.match(/^[0-9a-zA-Z.\-_ \(\)]+$/));
     }
 
 
@@ -130,52 +97,42 @@ export abstract class BaseFile extends VirtualFile {
         return null;
     }
 
-
-    abstract serialize(): Promise<SerializedFile>;
-
-    // note that deserialize creates files to the file system
-    // first arg is the serialized file after calling JSON.parse() on the file
-    // second arg is the parent
-    static async deserialize(serialized: SerializedFile, parent: DirectoryFile | null) {
-        if (serialized.type == FileType.DIR) {
-            const currentFile = new DirectoryFile(serialized.name, parent);
-            for (const file of serialized.contents) {
-               if (typeof(file) === "string") {
-                    throw new Error("Wrong Content Type");
-               }
-                await this.deserialize(file, currentFile);
-            }
-            return currentFile;
-        }
-
-        if (serialized.type == FileType.REG) {
-            
-            if (typeof(serialized.contents) !== "string" ) {
-                throw new Error("Wrong File Type");
-            }
-            let contents: string | ArrayBuffer = serialized.contents;
-            // if it is a binary data it's base64 encoded
-            if (serialized.binary) {
-                contents = await fromBase64(serialized.contents);
-            }
-            if (parent === null) {
-                throw new Error("File has no parent!")
-            }
-
-            return new RegFile(serialized.name, parent, contents);
-        }
-        throw new Error("Unknown File Type");
+    pathJoin(other: string[], sep="/") {
+        
+        return [this.path, ...other]
+            .join(sep).replace(new RegExp(sep+'{1,}', 'g'), sep);
     }
+
+    mount(vfs: VirtualSystem) {
+        this.#savedName = this.name;
+
+        super.mount(vfs);
+    }
+
+    unmount(): void {
+        this.vfs.disableTracking = true;
+        this.name = this.#savedName;
+        this.vfs.disableTracking = false;
+        
+        super.unmount();
+    }
+
+    abstract serialize(): Serialized;
 }
 
 export class RegFile extends BaseFile {
     @tracked(FileAttribute.FILE_CONTENTS)
     accessor contents: string | ArrayBuffer;
     
+    #savedContents;
+    regFile;
+
     constructor(name: string, parent: DirectoryFile, contents: string | ArrayBuffer) {
         super(name, parent);
-
         this.contents = contents;
+        this.#savedContents = contents;
+        this.regFile = true;
+
         this.vfs.createFile(this);
         this.createFinished();
     }
@@ -190,32 +147,23 @@ export class RegFile extends BaseFile {
         func(this);
     }
 
-    save(content: string) {
-        this.contents = content;
-    }
-
     clone(parent: DirectoryFile) {
-        const file = new RegFile(this.name, parent, this.contents);
+        const file = parent.createFile(this.name, this.contents, true);
         return file;
     }
 
-    async serialize(): Promise<SerializedFile> {
-        let contents = this.contents;
-        let binary = typeof(contents) !== "string";
-        if (typeof(contents) !== "string") {
-            // convert to base64
-            contents = await toBase64(contents);
-        }
+    serialize(): SerializedFile {
         return {
             name: this.name,
-            contents,
+            idx: this.idx,
+            contents: this.contents,
             type: FileType.REG,
-            binary
+            binary: typeof(this.contents) !== "string"
         }
     }
 
     static isRegFile(file: BaseFile): file is RegFile {
-        return (file as RegFile).contents !== undefined;
+        return (file as RegFile).regFile !== undefined;
     }
 
     isBinary() {
@@ -232,6 +180,22 @@ export class RegFile extends BaseFile {
         }
         return new File([buffer], this.name, {type: mimeType});
     }
+
+    mount(vfs: VirtualSystem) {
+        this.#savedContents = this.contents;
+
+        this.vfs.disableTracking = true;
+        this.contents = "";
+        this.vfs.disableTracking = false;
+        super.mount(vfs);
+    }
+
+    unmount(): void {
+        this.vfs.disableTracking = true;
+        this.contents = this.#savedContents;
+        this.vfs.disableTracking = false;
+        super.unmount();
+    }
 }
 
 
@@ -239,6 +203,8 @@ export class RegFile extends BaseFile {
 export class DirectoryFile extends BaseFile {
     @tracked(FileAttribute.DIRECTORY_FILES)
     accessor files: BaseFile[] = []
+
+    #savedFiles: BaseFile[] = [];
 
     constructor(name: string, parent: DirectoryFile | null, virtual = false) {
         super(name, parent);
@@ -357,15 +323,25 @@ export class DirectoryFile extends BaseFile {
     
 
     relocate(file: BaseFile, autorename = false) {
-        file.parent?.removeFile(file, true);
+        const parent = file.parent;
+        if (parent === null) {
+            throw new Error("Can't relocate root!");
+        }
+        if (file.isBaseMount) {
+            throw new Error("Can't move a mounted file!");
+        }
+        parent.removeFile(file, true);
         this._addFile(file, autorename);
         // call the relocate system call
-        this.vfs.relocate(file, this);
+        this.vfs.relocate(file, parent);
     }
 
     // temporary removes are for relocation
     // logically removes the file without triggering the system call
     removeFile(file: BaseFile, temporary = false) {
+        if (file.isBaseMount) {
+            throw new Error("Can't remove a mounted file!");
+        }
         const index = this.files.findIndex(theFile => theFile.idx == file.idx);
         if (index === -1) {
             return;
@@ -406,15 +382,93 @@ export class DirectoryFile extends BaseFile {
         return this.isAncestor(dir.parent);
     }
 
-    async serialize() {
+    serialize(): SerializedFolder  {
         return {
             name: this.name,
-            type: FileType.DIR,
-            contents: await Promise.all(
-                this.files.map(async (file) => file.serialize())
-            )
+            idx: this.idx,
+            contents: this.files.map(file => file.idx),
+            type: FileType.DIR
         }
     }
+
+    mount(vfs: VirtualSystem) {
+        this.#savedFiles = this.files.slice();
+
+        this.vfs.disableTracking = true;
+        this.files = [];
+        this.vfs.disableTracking = false;
+
+        super.mount(vfs);
+    }
+
+    unmount(): void {
+        this.vfs.disableTracking = true;
+        this.files = this.#savedFiles;
+        this.vfs.disableTracking = false;
+
+        super.unmount();
+    }
+}
+
+// similar to a regular file
+// except its contents are virtual
+// also its contents are not saved to the database
+// similar in concept to special files in linux like device files
+export class SpecialFile extends BaseFile {
+    #generator;
+    #identifier;
+    #consumer;
+    isSpecialFile;
+
+    constructor(
+        name: string, 
+        parent: DirectoryFile,
+        identifier: string,
+        generator: () => Promise<string>,
+        consumer: (value: string) => void,
+    ) {
+        super(name, parent);
+        this.#identifier = identifier
+        this.#generator = generator;
+        this.#consumer = consumer;
+        this.isSpecialFile = true;
+
+        // no need to call create finished
+        // tracking can and should be disabled
+        // this.createFinished();
+    }
+
+    get contents() {
+        return this.#generator();
+    }
+
+    set contents(value: Promise<string> | string) {
+        if (typeof(value) !== "string") {
+            throw new Error("Setting a promise instead of a string!");
+        }
+        this.#consumer(value);
+    }
+
+    serialize(): SerializedSpec {
+        return {
+            name: this.name,
+            idx: this.idx,
+            contents: this.#identifier,
+            type: FileType.SPEC
+        }
+    }
+    
+    open() {
+        openTxt(this);
+    }
+
+    clone(_: DirectoryFile): never {
+        throw new Error("Can't copy special file!");
+    }
+
+    static isSpecFile(file: BaseFile): file is SpecialFile {
+        return (file as SpecialFile).isSpecialFile !== undefined;
+    } 
 }
 
 export class FileSystem {
@@ -437,12 +491,30 @@ export class FileSystem {
     // singleton pattern
     static fs: FileSystem;
 
-    constructor(root: DirectoryFile, cwd: DirectoryFile) {
-        this.#cwd = cwd;
+    
+    constructor(root: DirectoryFile, cwdPath: string) {
         this.root = root;
+        const cwd = this.#findDir(cwdPath);
+        this.#cwd = cwd;
+        
         this.history = [cwd];
         this.backHistory = [];
     }
+
+    #findDir(path: string) {
+        const segments = path.split("/");
+        let children: BaseFile[] = [this.root];
+        let child: BaseFile = this.root;
+        for (const segment of segments) {
+            child = children.find(file => file.name === segment)!;
+            children = (child as DirectoryFile).files;
+        }
+        if (!DirectoryFile.isDirectory(child)) {
+            throw new Error("Child is not a directory!");
+        }
+        return child;
+    }
+
     
     // given a directory and a path
     // find the file specified by the path
@@ -471,40 +543,6 @@ export class FileSystem {
         const dir = first === "" ? this.root : this.cwd;
         return helper(dir, rest);
     }
-
-    static async fromJson(jsonFile: JSONFS) {
-        const root = await BaseFile.deserialize(jsonFile.files, null);
-        if (!DirectoryFile.isDirectory(root)) {
-            throw new Error("Root is not a directory!");
-        }
-
-
-        const fs = new FileSystem(root, root);
-        // the starting folder is not root
-        if (jsonFile.cwd.split("/").at(0) !== "") {
-            throw new Error("Invalid cwd path! Cwd needs to start with /.");
-        }
-
-        const cwd = fs.findFile(jsonFile.cwd);
-        if (cwd === null || !DirectoryFile.isDirectory(cwd)) {
-            throw new Error("Current working directory not found!");
-        }
-
-        fs.cwd = cwd;
-        fs.history = [cwd];
-
-        return fs;
-    }
-
-
-    async serialize() {
-        return {
-            // don't save the working directory
-            cwd: "/home",
-            files: await this.root.serialize()
-        }
-    }
-    
 
     addEmptyFile(filename = "empty.txt") {
         return this.cwd.createFile(filename, "",  true);
@@ -550,7 +588,7 @@ export class FileSystem {
             throw new Error("Can't put a directory inside of itself");
         }
         // check if folder already contains the file
-        if (folder.getFile(file.name) !== null) {
+        if (folder.getFile(file.name) !== null && !autorename) {
             return;
         }
         // relocate the file to the
@@ -599,10 +637,14 @@ export class FileSystem {
         return this.cwd.files.findIndex(cmp => cmp.name == file.name);
     }
 
-    static async init(object: JSONFS) {
-        FileSystem.fs = await FileSystem.fromJson(object);
+    // init loads the filesystem from indexeddb
+    static async init(serialized: SerializedJSON) {
+        VirtualFile.counter = 0;
+        const root = await IndexedDBSystem.createFileSystem(serialized);
+        FileSystem.fs = new FileSystem(root, "/home");
         return FileSystem.fs;
     }
 }
+
 
 

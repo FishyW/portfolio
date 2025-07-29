@@ -1,4 +1,4 @@
-import { FileType, type BaseFile, type DirectoryFile, type RegFile } from "$scripts/fs";
+import { type BaseFile, type DirectoryFile, type RegFile } from "$scripts/fs";
 
 export enum FileAttribute {
     NAME = "name",
@@ -75,9 +75,14 @@ export abstract class VirtualSystem {
     abstract createFile(file: RegFile): void;
     abstract createFolder(file: DirectoryFile): void;
 
-    abstract relocate(file: BaseFile, parent: DirectoryFile): void;
+    abstract relocate(file: BaseFile, oldParent: DirectoryFile): void;
 
-    abstract remove(file: VirtualFile): void;
+    abstract remove(file: BaseFile): void;
+
+    // all implementers of init must call createFinished()
+    static init(_path: string): VirtualSystem {
+        throw new Error("Not implemented!");
+    }
 }
 
 
@@ -86,15 +91,21 @@ export abstract class VirtualSystem {
 // set to "tracked", this "synchronizes"
 // the reads and writes of said property
 export class VirtualFile {
-    vfs: VirtualSystem
+    vfs: VirtualSystem;
     idx: number;
     static counter = 0;
-
+    isVirtual: boolean;
+    mainVFS: VirtualSystem;
+    isBaseMount: boolean;
+    fileCopy: VirtualFile | undefined;
 
     constructor(vfs: VirtualSystem) {
         this.vfs = vfs;
+        this.isBaseMount = false;
+        this.mainVFS = vfs;
         this.idx = VirtualFile.counter++;
         this.vfs.disableTracking = true;
+        this.isVirtual = false;
     }
 
     // child needs to call create finished when done
@@ -102,6 +113,19 @@ export class VirtualFile {
         this.vfs.disableTracking = false;
     }
 
+    // switch vfs
+    mount(vfs: VirtualSystem) {
+        this.isVirtual = true;
+        this.isBaseMount = true;
+        this.mainVFS = this.vfs;
+        this.vfs = vfs;
+    }
+
+    unmount() {
+        this.isVirtual = false;
+        this.isBaseMount = false;
+        this.vfs = this.mainVFS;
+    }
 }
 
 
@@ -117,6 +141,7 @@ export function tracked<T extends VirtualFile, U>(attribute: FileAttribute)
         let {get, set} = val;
         return  {
             get() {
+                
                 return this.vfs.operateGet(attribute, this, get);
             },
             set(val) {

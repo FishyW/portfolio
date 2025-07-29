@@ -3,8 +3,9 @@
 import fsJson from "../fs.json";
 
 import { browser } from "$app/environment";
-import { BaseFile, DirectoryFile, FileSystem, type JSONFS } from "$scripts/fs";
+import { BaseFile, DirectoryFile, FileSystem } from "$scripts/fs";
 import { VirtualFile } from "$scripts/virtual/virtual";
+import { type SerializedJSON } from "$scripts/virtual/indexdb";
 
 
 class ReactiveDirectory extends DirectoryFile {
@@ -70,7 +71,8 @@ class ReactiveDirectory extends DirectoryFile {
             file.parent = dir;
         }
 
-        dir.idx = directory.idx;
+        Object.assign(dir, directory);
+        
         dir.parent = directory.parent;
 
         return dir;
@@ -81,7 +83,7 @@ class ReactiveFileSystem extends FileSystem {
     #cwdInternal;
 
     constructor(root: DirectoryFile, cwd: DirectoryFile) {
-        super(root, cwd);
+        super(root, cwd.path);
         this.#cwdInternal = $state(ReactiveDirectory.makeReactive(cwd));
         Object.defineProperty(this, "cwd", {
             get: () => this.#cwdInternal,
@@ -91,7 +93,7 @@ class ReactiveFileSystem extends FileSystem {
         })
     }
 
-    static async init(fsFormat: JSONFS) {
+    static async init(fsFormat: SerializedJSON) {
         const fs = await FileSystem.init(fsFormat);
         const rfs =  new ReactiveFileSystem(fs.root, fs.cwd);
         FileSystem.fs = rfs;
@@ -99,17 +101,19 @@ class ReactiveFileSystem extends FileSystem {
     }
 }
 
-let fs = await ReactiveFileSystem.init(fsJson as JSONFS);
+let fs;
 
 if (browser) {
-    const fsStorage = localStorage.getItem("fs");
-    if (fsStorage !== null) {
-        fs = await ReactiveFileSystem.init(JSON.parse(fsStorage));
-    }
+    // IndexedDBSystem.createFileSystem(fsJson as SerializedJSON);
+    fs = await ReactiveFileSystem.init(fsJson as SerializedJSON);
+    // const fsStorage = IndexedDBSystem.ch
+    // if (fsStorage !== null) {
+    //     fs = await ReactiveFileSystem.init(JSON.parse(fsStorage));
+    // }
 } 
 
 
-export const fileSystem = fs;
+export const fileSystem = fs!;
 
 
 export { 
@@ -119,13 +123,4 @@ export {
     FileSystem 
 } from "$scripts/fs";
 
-
-
-// alternatively use a "save decorator", 
-// I'll do it if I'm dilligent enough
-// if (browser) {
-//     setInterval(async () => {
-//     localStorage.setItem("fs", JSON.stringify(await fs.serialize()));
-//     }, 1000);
-// }
 

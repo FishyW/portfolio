@@ -70,4 +70,7 @@ export class LoggerSystem extends VirtualSystem {
         }
     }
     
+    static init() {
+        return new LoggerSystem();
+    }
 }

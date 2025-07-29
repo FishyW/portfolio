@@ -3,9 +3,15 @@
 import { RegFile } from "./fs.svelte";
 import { open } from "$components/WindowManager.svelte";
 import { DocumentViewerInfo, ImageViewerInfo, TextEditorInfo } from "./windows";
+import { RealSystem } from "$scripts/virtual/real";
+import { VirtualSystem } from "$scripts/virtual/virtual";
+import { IndexedDBSystem } from "$scripts/virtual/indexdb";
+import { LoggerSystem } from "$scripts/virtual/logger";
+import { EphemeralSystem } from "$scripts/virtual/ephemeral";
+import type { SpecialFile } from "$scripts/fs";
 
 
-function openTxt(file: RegFile) {
+export function openTxt(file: RegFile | SpecialFile) {
     open(TextEditorInfo, { file } );
 }
 
@@ -42,5 +48,15 @@ const extMap = {
     ...imageExtMap
 };
 
+// IndexedDB is not here since it's technically not a virtual file system
+export const VFSMap: {[name: string]: typeof VirtualSystem} = {
+    "file": RealSystem,
+    "ephemeral": EphemeralSystem,
+    "logger": LoggerSystem
+};
+
 export const extensionMap = new Map(Object.entries(extMap));
+// export const specialFilesMap = new Map(Object.entries());
+
 export const defaultAction = openTxt;
+export const MainFS = IndexedDBSystem;

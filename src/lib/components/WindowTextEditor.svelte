@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-    import type { RegFile } from "$scripts/fs";
+    import { RegFile, SpecialFile } from "$scripts/fs";
     import WindowTopBar from "./WindowTopBar.svelte";
     import { EditorState, type Extension } from "@codemirror/state";
     import { lintKeymap } from "@codemirror/lint";
@@ -93,16 +93,21 @@
 
 
     
-   
+
+let buffer = $state("");
     
 
 function onViewChange(update: ViewUpdate) {
-    if (file.isBinary()) {
+    if (!RegFile.isRegFile(file) && !SpecialFile.isSpecFile(file)) {
+        return;
+    }
+
+    if (RegFile.isRegFile(file) && file.isBinary()) {
         // don't update!
         return;
     }
     if (update.docChanged) {
-        file.contents = update.state.doc.toString();
+        buffer = update.state.doc.toString();
     }
 }
 
@@ -186,10 +191,9 @@ const extensions = [
         })
   ]
 
-  export const ID = "Text Editor";
 
     interface Props {
-      file: RegFile
+      file: RegFile | SpecialFile
     }
 
     let { file }: Props = $props();
@@ -198,12 +202,28 @@ const extensions = [
     const fileExtension = $derived(file.getExtension() ?? "");
     let showMarkdownViewer = $state(true);
 
+    async function updateContentAsync(view: EditorView) {
+      if (!RegFile.isRegFile(file)) {
+          buffer = await file.contents;
+          view.dispatch({
+            changes: {
+              from: 0,
+              to: view.state.doc.length,
+              insert: buffer
+            }
+          })
+      }
+    }
+
     function createEditor(node: HTMLElement) {
       $effect(() => {
         
-        const contents = typeof(file.contents) === "string" 
+        const contents = !RegFile.isRegFile(file) ? "" :
+        typeof(file.contents) === "string" 
           ? file.contents : new TextDecoder().decode(file.contents);
 
+        
+        buffer = contents;
         const extension = fileExtension;
 
         const extensionMap: {[name: string]: Extension | undefined} = {
@@ -342,26 +362,30 @@ const extensions = [
             codeExtensions.push(codeExtension!);
           }
 
-
-        new EditorView({
+        
+        const view = new EditorView({
           doc: contents,
           parent: node,
           extensions: [...extensions, 
             EditorView.lineWrapping,
             ...codeExtensions,
-            EditorView.editable.of(!file.isBinary())]
+            EditorView.editable.of(
+              RegFile.isRegFile(file) && !file.isBinary()
+              || SpecialFile.isSpecFile(file)
+            )
+            ]
         });
-
-        
-     
+        updateContentAsync(view);
       })
     }
 
-    
+
     
 </script>
 
-<WindowTopBar>
+<WindowTopBar onexit={ () =>
+  file.contents = buffer
+}>
   {#if fileExtension === "md"}
 <div class="flex justify-end ">
   <WindowTopBarIcon onclick={() => {

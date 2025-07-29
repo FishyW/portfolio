@@ -5,6 +5,9 @@ import { focus as windowFileFocus, selected } from "$components/WindowFile.svelt
 import { decrypt, encrypt } from '../crypto';
 import saveAs from 'file-saver';
 import JSZip from 'jszip';
+import { IndexedDBSystem } from '$scripts/virtual/indexdb';
+import { VFSMap } from './config.svelte';
+import { SpecialFile } from '$scripts/fs';
 
 type Operation = "MOVE" | "COPY";
 
@@ -34,7 +37,6 @@ export function removeFile() {
     } else if (idx - 1 >= 0) {
         selected.file = fileSystem.cwd.files[idx - 1];
     }
-    
     fileSystem.removeFile(removedFile);
 }
 
@@ -89,7 +91,7 @@ export async function encryptFile() {
     if (password === null) {
         return;
     }
-    const serialized = JSON.stringify(await selected.file.serialize());
+    const serialized = JSON.stringify(await IndexedDBSystem.serialize(selected.file));
     const encrypted = await encrypt(password, serialized);
 
 
@@ -121,11 +123,11 @@ export async function decryptFile() {
     }
     
     const folder = fileSystem.addEmptyFolder("tmp");
-    const file = await BaseFile.deserialize(JSON.parse(serialized), folder);
+    const file = await IndexedDBSystem.deserialize(JSON.parse(serialized), folder);
     const [base, _1, _2] = selected.file.splitExtension();
     file.rename(base);
     fileSystem.move(file, fileSystem.cwd, true);
-    // fileSystem.removeFile(folder);
+    fileSystem.removeFile(folder);
 }
 
 
@@ -142,8 +144,8 @@ function zipFolder(folder: DirectoryFile, dir: JSZip) {
 
 export async function download() {
     if (selected.file === null) {return;}
-    if (RegFile.isRegFile(selected.file)) {
-        saveAs(new File([selected.file.contents], selected.file.name));
+    if (RegFile.isRegFile(selected.file) || SpecialFile.isSpecFile(selected.file)) {
+        saveAs(new File([await selected.file.contents], selected.file.name));
         return;
     }
 
@@ -151,4 +153,23 @@ export async function download() {
     zipFolder(selected.file as DirectoryFile, zip);
     const content = await zip.generateAsync({type:"blob"});
     saveAs(content, selected.file.name + ".zip")
+}
+
+export function mount(mountPath: string) {
+    if (selected.file === null) {
+        return;
+    }
+    let scheme = "";
+    const path = mountPath.replace(/^([a-zA-Z]+):\/\//g, 
+        (_m, n1, _o, _s) => {
+            scheme = n1;
+            return "";
+        })
+    
+    const vfs = VFSMap[scheme].init(path);
+    selected.file.mount(vfs);
+}
+
+export function unmount() {
+    selected.file?.unmount();
 }

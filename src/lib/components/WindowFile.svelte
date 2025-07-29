@@ -15,8 +15,14 @@
     // let _refs: ReturnType<>[] = $state([])
     // let refs = $derived(_refs.filter(Boolean))
 
+    let exit = $state(() => {});
+    let contextMenu: ReturnType<typeof ContextMenuFile>;
     
 </script>
+
+<div class="hidden">
+    <ContextMenuFile bind:this={contextMenu} />
+</div>
 
 <script lang="ts">
     import { BaseFile, fileSystem } from "$scripts/ui/fs.svelte";
@@ -26,9 +32,12 @@
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
     import { copy, move, paste, rename, removeFile } from "$scripts/ui/operations.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
-
+    import { tippy } from "./WindowFileElement.svelte";
 
     function deselect() {
+        if (tippy.on) {
+            return;
+        }
         selected.file = null;
     }
 
@@ -61,6 +70,8 @@
     })
 </script>
 
+
+
 <div class="w-[50vw]">
 <WindowTopBarFile />
 
@@ -91,15 +102,15 @@ ondrop={e => {
 }}
 
 
-class="h-[80vh] flex flex-wrap p-4 content-start overflow-y-auto" 
+class="h-[80vh] flex flex-wrap p-4 
+content-start overflow-y-auto outline-0" 
 oncontextmenu={e => {
     e.preventDefault();
     deselect();
-    show(e, ContextMenuFile);
+    show(e, contextMenu);
 }}>
-<div>
-    
-</div>
+
+
 {#each fileSystem.cwd.files as file (file.path)}
     
     <FileElement {file} bind:selected={selected.file} />

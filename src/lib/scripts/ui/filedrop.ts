@@ -16,13 +16,12 @@ async function readFileEntry(entry: FileSystemEntry, directory: DirectoryFile) {
             contents = new TextDecoder("utf-8", {fatal: true}).decode(contents);
         } catch (e) {}
 
-        const regFile = new RegFile(file.name, null, contents);
-        directory.addFile(regFile, true);
-        return;
+        
+        return directory.createFile(file.name, contents, true);
     }
+
     const directoryEntry = entry as FileSystemDirectoryEntry;
-    const dirFile = new DirectoryFile(directoryEntry.name, null);
-    directory.addFile(dirFile, true);
+    const dirFile = directory.createFolder(directoryEntry.name, true);
 
     const entries = await new Promise<FileSystemEntry[]>((res, rej) => {
         directoryEntry.createReader().readEntries(res, rej);

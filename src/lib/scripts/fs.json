@@ -1,19 +1,22 @@
-{
-    "cwd": "/home",
-    "files": {
-        "name": "",
-        "type": "dir",
-        "contents": [{
-            "name": "home",
-            "type": "dir",
-            "contents": [
-            {
-                "name": "README.txt",
-                "type": "reg",
-                "contents": "Hello world!",
-                "binary": false
-            }
-        ]
-        }]
-    }
-}
+[
+  {
+    "name": "",
+    "idx": 0,
+    "contents": [
+      1
+    ],
+    "type": "dir"
+  },
+  {
+    "name": "home",
+    "idx": 1,
+    "contents": [2],
+    "type": "dir"
+  },
+  {
+    "name": "fs.json",
+    "idx": 2,
+    "contents": "fs",
+    "type": "spec"
+  }
+]

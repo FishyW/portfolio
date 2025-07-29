@@ -8,7 +8,6 @@
     const pathTuple = $derived.by(() => {
         const splittedPath = fileSystem
             .cwd.path.split("/");
-
         const pathTuple: [string, string][] = [];
         
         splittedPath.reduce((acc, current) => {

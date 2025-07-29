@@ -1,22 +1,20 @@
 <script module lang="ts">
-    import type { Component } from "svelte";
-    import Empty from "./dummy/Empty.svelte";
+    import ContextMenuFile from "./ContextMenuFile.svelte";
 
     let shown = $state(false);
-    let innerProps = $state({});
 
-    let InnerMenuComponent: Component = $state(Empty);
+    let contextMenuDiv: HTMLElement;
 
     // call this after a mouse event
     // component is the ContextMenu component to render
-    export function show(e: MouseEvent, component: Component<any>, props?: {[name: string]: any}) {
+    export function show(e: MouseEvent, elem: ReturnType<typeof ContextMenuFile>) {
         rightClickContextMenu(e);
         shown = !shown;
         
-        if (props)
-            innerProps = props;
-        
-        InnerMenuComponent = component;
+        const child = elem.getChild();
+        elem.setExit(exit);
+        elem.update();
+        contextMenuDiv.replaceChildren(child);
     }
 
     // pos is cursor position when right click occur
@@ -73,9 +71,6 @@
 
     function exit() {
         shown = false;
-        // destroy the inner component
-        InnerMenuComponent = Empty;
-        innerProps = {};
     }
 </script>
 
@@ -90,16 +85,14 @@ onkeydown={(e => {
 
 />
 
-{#if shown}
-    <div 
-        onmousedown={e => e.preventDefault()}
-        class="fixed z-50" 
-        style:top="{pos.y}px"  
-        style:left="{pos.x}px"
-        use:getContextMenuDimension
-        oncontextmenu={e => e.preventDefault()}   
-        onclick={e => e.stopPropagation()} 
-    >
-    <InnerMenuComponent {exit} {...innerProps}/>
+<div bind:this={contextMenuDiv}
+    onmousedown={e => e.preventDefault()}
+    class="fixed z-50" 
+    style:display = {shown ? "block" : "none"}
+    style:top="{pos.y}px"  
+    style:left="{pos.x}px"
+    use:getContextMenuDimension
+    oncontextmenu={e => e.preventDefault()}   
+    onclick={e => e.stopPropagation()} 
+>
 </div>
-{/if}
