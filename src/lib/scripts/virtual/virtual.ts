@@ -80,7 +80,7 @@ export abstract class VirtualSystem {
     abstract remove(file: BaseFile): void;
 
     // all implementers of init must call createFinished()
-    static init(_path: string): VirtualSystem {
+    static async init(_path: string): Promise<VirtualSystem> {
         throw new Error("Not implemented!");
     }
 }

@@ -9,6 +9,11 @@
         fileToRename = filename;
     }
 
+    let fileUpdate = $state("");
+    export function updateFile(filename: string) {
+        fileUpdate = filename;
+    }
+
    import { pasteBuffer } from "$scripts/ui/operations.svelte";
    
 </script>
@@ -58,8 +63,22 @@
     $effect(() => {
         pasteBuffer.file;
         fileElement?.blur();
-    })
+    });
 
+    // needed to manually update the file
+    // since the file isn't reactive
+    // one way is to give a reactive view of the file
+    // but no way I'm doing that if this is a simpler solution
+    let updateToggle = $derived(fileUpdate === file.name);
+
+    $effect(() => {
+        updateToggle;
+        // note that I have to use a variable
+        // apparently objects are slower to update
+        // so I can't just update an object called fileDetails 
+        // when file.name changes
+        displayedName = file.name;
+    })
 
     $effect(() => {
         selected;
@@ -82,7 +101,7 @@
     function renameCallback(editedName: string) {
         try {
             file.rename(editedName);
-            displayedName = file.name;
+            updateToggle = !updateToggle;
         } catch(e) {
             return;
         }
@@ -93,9 +112,9 @@
         showMountInputBox = true;
     }
 
-    function mountCallback(mountPath: string) {
+    async function mountCallback(mountPath: string) {
         try {
-            mount(mountPath);
+            await mount(mountPath);
         } catch(e) {
             return;
         }
@@ -235,7 +254,6 @@ oncontextmenu={e => {
 
         <div class="w-full mt-1 h-[3.0em]">
             
-           
             <div class="w-full text-center h-full overflow-hidden line-clamp-2 overflow-ellipsis break-words"> 
                 { displayedName } 
             </div>
@@ -243,7 +261,7 @@ oncontextmenu={e => {
             
             <div class="hidden">
                 <div bind:this={tippyBox}>
-                    <WindowFileElementPopOver filename={file.name} {tippyOn} {mountCallback}
+                    <WindowFileElementPopOver filename={displayedName} {tippyOn} {mountCallback}
                      {renameCallback} mode={popOverMode} />
                 </div>
             </div>
@@ -252,6 +270,7 @@ oncontextmenu={e => {
             
         </div>
 </div>
+
 
 <style>
     @import "tailwindcss";

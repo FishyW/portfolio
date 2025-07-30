@@ -1,6 +1,6 @@
 // file UI operations
 import { BaseFile, DirectoryFile, RegFile, fileSystem } from './fs.svelte';
-import { renamePrompt } from '$components/WindowFileElement.svelte';
+import { renamePrompt, updateFile } from '$components/WindowFileElement.svelte';
 import { focus as windowFileFocus, selected } from "$components/WindowFile.svelte"
 import { decrypt, encrypt } from '../crypto';
 import saveAs from 'file-saver';
@@ -155,7 +155,7 @@ export async function download() {
     saveAs(content, selected.file.name + ".zip")
 }
 
-export function mount(mountPath: string) {
+export async function mount(mountPath: string) {
     if (selected.file === null) {
         return;
     }
@@ -166,10 +166,13 @@ export function mount(mountPath: string) {
             return "";
         })
     
-    const vfs = VFSMap[scheme].init(path);
+    const vfs = await VFSMap[scheme].init(path);
     selected.file.mount(vfs);
+    updateFile(selected.file.name);
 }
 
 export function unmount() {
     selected.file?.unmount();
+    if (selected.file !== null)
+        updateFile(selected.file.name);
 }

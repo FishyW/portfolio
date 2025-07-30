@@ -3,7 +3,6 @@ import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } fr
 
 
 export class EphemeralSystem extends VirtualSystem {
-    fileMap = new Map<number, VirtualFile>();
     
     createFile(file: RegFile): void {
     }
@@ -40,7 +39,7 @@ export class EphemeralSystem extends VirtualSystem {
         }
     }
 
-    static init() {
+    static async init() {
         return new EphemeralSystem();
     }
 

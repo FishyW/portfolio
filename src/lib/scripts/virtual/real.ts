@@ -1,10 +1,13 @@
 import { DirectoryFile, RegFile, type BaseFile } from "$scripts/fs";
-import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } from "./virtual";
-
+import { FileAttribute, VirtualSystem, register, type Accessor } from "./virtual";
+import { showDirectoryPicker, FileSystemDirectoryHandle } from "native-file-system-adapter";
 
 export class RealSystem extends VirtualSystem {
-    fileMap = new Map<number, VirtualFile>();
-    
+    constructor() {
+        super();
+        
+    }
+  
     createFile(file: RegFile): void {
     }
 
@@ -40,8 +43,13 @@ export class RealSystem extends VirtualSystem {
         }
     }
 
-    static init(path: string) {
-        
+    static async #navigate(dir: FileSystemDirectoryHandle, path: string[]) {
+        console.log(dir, path);
+    }
+
+    static async init(path: string) {
+        const dir = await showDirectoryPicker();
+        this.#navigate(dir, path.split("/"));
         return new RealSystem();
     }
 

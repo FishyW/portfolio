@@ -72,9 +72,9 @@
 		"file-saver": "^2.0.5",
 		"jszip": "^3.10.1",
 		"marked": "^16.1.1",
+		"native-file-system-adapter": "^3.0.1",
 		"pascal": "link:@codemirror/legacy-modes/mode/pascal",
 		"pdfjs-dist": "^5.3.93",
-		"show-open-file-picker": "^0.4.0",
 		"tippy.js": "^6.3.7",
 		"view": "link:@types/@codemirror/view"
 	}

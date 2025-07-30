@@ -3,7 +3,6 @@ import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } fr
 
 
 export class LoggerSystem extends VirtualSystem {
-    fileMap = new Map<number, VirtualFile>();
     
     createFile(file: RegFile): void {
         console.log(`CREATING FILE with index ${file.idx}`);
@@ -70,7 +69,7 @@ export class LoggerSystem extends VirtualSystem {
         }
     }
     
-    static init() {
+    static async init() {
         return new LoggerSystem();
     }
 }

@@ -202,9 +202,12 @@ const extensions = [
     const fileExtension = $derived(file.getExtension() ?? "");
     let showMarkdownViewer = $state(true);
 
+    let originalContents = file.contents;
+
     async function updateContentAsync(view: EditorView) {
       if (!RegFile.isRegFile(file)) {
           buffer = await file.contents;
+          originalContents = buffer;
           view.dispatch({
             changes: {
               from: 0,
@@ -383,8 +386,10 @@ const extensions = [
     
 </script>
 
-<WindowTopBar onexit={ () =>
-  file.contents = buffer
+<WindowTopBar onexit={ () => {
+    if (buffer !== originalContents)
+      file.contents = buffer
+}
 }>
   {#if fileExtension === "md"}
 <div class="flex justify-end ">
