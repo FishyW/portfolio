@@ -78,6 +78,7 @@
         // so I can't just update an object called fileDetails 
         // when file.name changes
         displayedName = file.name;
+        fileUpdate = "";
     })
 
     $effect(() => {
@@ -103,6 +104,7 @@
             file.rename(editedName);
             updateToggle = !updateToggle;
         } catch(e) {
+            console.error(e);
             return;
         }
         tippyInstance?.hide();
@@ -116,6 +118,7 @@
         try {
             await mount(mountPath);
         } catch(e) {
+            console.error(e);
             return;
         }
         tippyInstance?.hide();

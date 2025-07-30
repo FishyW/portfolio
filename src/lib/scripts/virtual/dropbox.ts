@@ -1,6 +1,6 @@
 import { DirectoryFile, RegFile, VirtualDirectoryFile, VirtualRegFile, type BaseFile, type VirtualFile } from "$scripts/fs";
 import { readContents } from "$scripts/ui/filedrop";
-import { FileAttribute, VirtualSystem, VirtualSystemFile, register, type Accessor } from "./virtual";
+import {  VirtualSystem } from "./virtual";
 import { showDirectoryPicker, type FileSystemDirectoryHandle, type FileSystemFileHandle } from "native-file-system-adapter";
 
 

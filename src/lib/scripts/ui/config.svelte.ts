@@ -60,3 +60,4 @@ export const extensionMap = new Map(Object.entries(extMap));
 
 export const defaultAction = openTxt;
 export const MainFS = IndexedDBSystem;
+

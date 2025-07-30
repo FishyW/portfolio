@@ -1,4 +1,4 @@
-import { type BaseFile, type DirectoryFile, type RegFile } from "$scripts/fs";
+import { DirectoryFile, RegFile, type BaseFile } from "$scripts/fs";
 
 export enum FileAttribute {
     NAME = "name",
@@ -7,7 +7,7 @@ export enum FileAttribute {
     DIRECTORY_FILES = "file list"
 }
 
-export interface Accessor<T, U extends VirtualFile> {
+export interface Accessor<T, U extends VirtualSystemFile> {
     get?(file: U, get: () => T): T;
     set?(value: T, file: U, set: (val: T) => void): void;
 }
@@ -17,7 +17,7 @@ type ClassMethodDecorator<T> = (value: T, context: ClassMethodDecoratorContext)
     => T | void;
 
 // registers a function that returns an accessor
-export function register<T, U extends VirtualFile>(attribute: FileAttribute)
+export function register<T, U extends VirtualSystemFile>(attribute: FileAttribute)
     : ClassMethodDecorator<() => Accessor<T, U>> {
     return (value, context) => {
         type InitializerFunc = (this: unknown) => void;
@@ -30,7 +30,7 @@ export function register<T, U extends VirtualFile>(attribute: FileAttribute)
 
 
 
-type FSMap = Map<FileAttribute, () => Accessor<unknown, VirtualFile>>;
+type FSMap = Map<FileAttribute, () => Accessor<unknown, VirtualSystemFile>>;
 
 // note that you can't put the decorator on a method instance of this class
 // otherwise the initialization order will be wrong
@@ -39,15 +39,15 @@ type FSMap = Map<FileAttribute, () => Accessor<unknown, VirtualFile>>;
 export abstract class VirtualSystem {
     #fsMap: FSMap;
     disableTracking: boolean;
-
-
-    constructor() {
-        this.#fsMap = new Map<FileAttribute, () => Accessor<unknown, VirtualFile>>();
+    isRenameSupported = true;
+    
+    constructor(..._args: any) {
+        this.#fsMap = new Map<FileAttribute, () => Accessor<unknown, VirtualSystemFile>>();
         this.disableTracking = false;
     }
 
 
-    operateGet<T>(attribute: FileAttribute, file: VirtualFile, get: () => T): T {
+    operateGet<T>(attribute: FileAttribute, file: VirtualSystemFile, get: () => T): T {
         const accessor = this.#fsMap.get(attribute);
         const func = accessor?.().get;
         if (func === undefined || this.disableTracking) {
@@ -56,9 +56,10 @@ export abstract class VirtualSystem {
         return func(file, get) as T;
     }
 
-    operateSet<T>(attribute: FileAttribute, value: T, file: VirtualFile, set: (val: T) => void) {
+    operateSet<T>(attribute: FileAttribute, value: T, file: VirtualSystemFile, set: (val: T) => void) {
         const accessor = this.#fsMap.get(attribute);
         const func = accessor?.().set;
+        // if the file is the base mount don't forward any changes to the file system
         if (func === undefined || this.disableTracking) {
             set.call(file, value);
             return;
@@ -67,7 +68,7 @@ export abstract class VirtualSystem {
     }
 
     // registers a function that returns an accessor
-    register<T>(attribute: FileAttribute, func: () => Accessor<T, VirtualFile>) {
+    register<T>(attribute: FileAttribute, func: () => Accessor<T, VirtualSystemFile>) {
         func = func.bind(this);
         this.#fsMap.set(attribute, func);
     }    
@@ -75,14 +76,14 @@ export abstract class VirtualSystem {
     abstract createFile(file: RegFile): void;
     abstract createFolder(file: DirectoryFile): void;
 
-    abstract relocate(file: BaseFile, oldParent: DirectoryFile): void;
-
     abstract remove(file: BaseFile): void;
-
+    
     // all implementers of init must call createFinished()
-    static async init(_path: string): Promise<VirtualSystem> {
+    static async init(_path: string, _file: BaseFile): Promise<VirtualSystem> {
         throw new Error("Not implemented!");
     }
+
+    mount(file: BaseFile) {}
 }
 
 
@@ -90,20 +91,33 @@ export abstract class VirtualSystem {
 // a virtual file needs to have properties
 // set to "tracked", this "synchronizes"
 // the reads and writes of said property
-export class VirtualFile {
+export class VirtualSystemFile {
     vfs: VirtualSystem;
     idx: number;
     static counter = 0;
     isVirtual: boolean;
     mainVFS: VirtualSystem;
     isBaseMount: boolean;
-    fileCopy: VirtualFile | undefined;
+    fileCopy: VirtualSystemFile | undefined;
+
+    static #VFS: VirtualSystem | undefined;
+
+    
+
+    static setVFS(vfs: VirtualSystem) {
+        this.#VFS = vfs;
+    }
 
     constructor(vfs: VirtualSystem) {
+
+        if (VirtualSystemFile.#VFS !== undefined) {
+            vfs = VirtualSystemFile.#VFS;
+            VirtualSystemFile.#VFS = undefined;
+        }
         this.vfs = vfs;
         this.isBaseMount = false;
         this.mainVFS = vfs;
-        this.idx = VirtualFile.counter++;
+        this.idx = VirtualSystemFile.counter++;
         this.vfs.disableTracking = true;
         this.isVirtual = false;
     }
@@ -135,7 +149,7 @@ type ClassAccessorDecorator<T, U> =
     ClassAccessorDecoratorResult<T, U>
 
 
-export function tracked<T extends VirtualFile, U>(attribute: FileAttribute)
+export function tracked<T extends VirtualSystemFile, U>(attribute: FileAttribute)
     : ClassAccessorDecorator<T, U> {
     return (val, _2) => {
         let {get, set} = val;
@@ -150,3 +164,5 @@ export function tracked<T extends VirtualFile, U>(attribute: FileAttribute)
         };
     };
 }
+
+

@@ -1,12 +1,13 @@
 import { browser } from "$app/environment";
 import { DirectoryFile, RegFile, SpecialFile, type BaseFile } from "$scripts/fs";
 import { specGenMap } from "./special";
-import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } from "./virtual";
+import { FileAttribute, VirtualSystemFile, VirtualSystem, register, type Accessor } from "./virtual";
 
 export enum FileType {
     REG = "reg",
     DIR = "dir",
-    SPEC = "spec"
+    SPEC = "spec",
+    INVALID = "invalid"
 }
 
 // used for the indexed db database
@@ -93,7 +94,7 @@ if (browser) {
 
 
 export class IndexedDBSystem extends VirtualSystem {
-    fileMap = new Map<number, VirtualFile>();
+    fileMap = new Map<number, VirtualSystemFile>();
     
     update(file: BaseFile) {
         Database.getDB().then(async db => {
@@ -150,12 +151,6 @@ export class IndexedDBSystem extends VirtualSystem {
         if (file.idx === 0 && file.name !== "") {
             throw new Error("Root folder does not have index 0");
         }
-        this.update(file);
-    }
-
-    // relocate called after the file has been relocated
-    relocate(file: BaseFile, oldParent: DirectoryFile): void {
-        this.update(oldParent);
         this.update(file);
     }
 

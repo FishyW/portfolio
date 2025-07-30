@@ -4,7 +4,7 @@ import fsJson from "../fs.json";
 
 import { browser } from "$app/environment";
 import { BaseFile, DirectoryFile, FileSystem } from "$scripts/fs";
-import { VirtualFile } from "$scripts/virtual/virtual";
+import { VirtualSystemFile } from "$scripts/virtual/virtual";
 import { type SerializedJSON } from "$scripts/virtual/indexdb";
 
 
@@ -61,7 +61,7 @@ class ReactiveDirectory extends DirectoryFile {
     }
 
     static makeReactive(directory: DirectoryFile) {
-        VirtualFile.counter -= 1;
+        VirtualSystemFile.counter -= 1;
         const dir = new ReactiveDirectory(
             directory.name, null, directory.files, true
         );

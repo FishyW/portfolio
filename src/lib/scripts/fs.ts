@@ -3,11 +3,12 @@
 // create the file system
 
 import { defaultAction, extensionMap, MainFS, openTxt } from "./ui/config.svelte";
-import { FileAttribute, tracked, VirtualFile, VirtualSystem } from "./virtual/virtual";
+import { FileAttribute, tracked, VirtualSystemFile, VirtualSystem } from "./virtual/virtual";
 import { FileType, IndexedDBSystem, type Serialized, type SerializedFile, type SerializedFolder, type SerializedJSON, type SerializedSpec } from "./virtual/indexdb";
+import { EphemeralSystem } from "./virtual/ephemeral";
 
 
-export abstract class BaseFile extends VirtualFile {
+export abstract class BaseFile extends VirtualSystemFile {
     @tracked(FileAttribute.NAME)
     accessor name = "";
 
@@ -25,7 +26,7 @@ export abstract class BaseFile extends VirtualFile {
         this.#savedName = name; 
              
         if (this.parent !== null) {
-            this.parent._addFile(this);
+            this.parent.addFile(this);
         }
     }
 
@@ -54,6 +55,8 @@ export abstract class BaseFile extends VirtualFile {
         this.name = name;
     }
 
+ 
+
     isValidName(name: string) {
         if (this.parent !== null) {
             const fileComp = this.parent.getFile(name);
@@ -68,7 +71,7 @@ export abstract class BaseFile extends VirtualFile {
     }
 
 
-    abstract clone(parent: DirectoryFile): BaseFile;
+    abstract clone(parent: DirectoryFile, _autorename: boolean): BaseFile;
     abstract open(): void; 
 
     // [base, extension, hasExtension?]
@@ -105,8 +108,8 @@ export abstract class BaseFile extends VirtualFile {
 
     mount(vfs: VirtualSystem) {
         this.#savedName = this.name;
-
         super.mount(vfs);
+        this.vfs.mount(this);
     }
 
     unmount(): void {
@@ -118,6 +121,21 @@ export abstract class BaseFile extends VirtualFile {
     }
 
     abstract serialize(): Serialized;
+
+    getType(): FileType  {
+        if (DirectoryFile.isDirectory(this)) {
+            return FileType.DIR;
+        }
+        if (RegFile.isRegFile(this)) {
+            return FileType.REG;
+        }
+        if (SpecialFile.isSpecFile(this)) {
+            return FileType.SPEC;
+        }
+        return FileType.INVALID
+    }
+
+    
 }
 
 export class RegFile extends BaseFile {
@@ -147,8 +165,8 @@ export class RegFile extends BaseFile {
         func(this);
     }
 
-    clone(parent: DirectoryFile) {
-        const file = parent.createFile(this.name, this.contents, true);
+    clone(parent: DirectoryFile, autorename = false) {
+        const file = parent.createFile(this.name, this.contents, autorename);
         return file;
     }
 
@@ -205,8 +223,12 @@ export class DirectoryFile extends BaseFile {
     accessor files: BaseFile[] = []
 
     #savedFiles: BaseFile[] = [];
+    
 
-    constructor(name: string, parent: DirectoryFile | null, virtual = false) {
+    constructor(name: string, 
+        parent: DirectoryFile | null, 
+        virtual = false
+    ) {
         super(name, parent);
         // folder is not root, but parent is null
         if (this.name !== "" && this.parent === null && !virtual) {
@@ -291,7 +313,7 @@ export class DirectoryFile extends BaseFile {
 
     // adds a file to a directory
     // does not trigger a system call
-    _addFile(file: BaseFile, autorename = false) {
+    addFile(file: BaseFile, autorename = false) {
         const name = this.#createFileName(file.name, autorename);
         if (name != file.name) {
             // file has already been added
@@ -330,10 +352,13 @@ export class DirectoryFile extends BaseFile {
         if (file.isBaseMount) {
             throw new Error("Can't move a mounted file!");
         }
-        parent.removeFile(file, true);
-        this._addFile(file, autorename);
-        // call the relocate system call
-        this.vfs.relocate(file, parent);
+
+        // copies the file to the new parent
+        file.clone(this, true);
+        // remove the file from the old parent
+        parent.removeFile(file);
+        
+        
     }
 
     // temporary removes are for relocation
@@ -363,10 +388,10 @@ export class DirectoryFile extends BaseFile {
         FileSystem.fs.changeDirectory(this);
     }
 
-    clone(parent: DirectoryFile) {
-        const directory = parent.createFolder(this.name, true)
+    clone(parent: DirectoryFile, autorename = false) {
+        const directory = parent.createFolder(this.name, autorename)
         for (const file of this.files) {
-            file.clone(directory);
+            file.clone(directory, autorename);
         }
         return directory;
     }
@@ -603,7 +628,7 @@ export class FileSystem {
             throw new Error("Can't copy a directory inside of itself");
         }
 
-        file.clone(folder);
+        file.clone(folder, true);
     }
 
     hasBack() {
@@ -639,7 +664,7 @@ export class FileSystem {
 
     // init loads the filesystem from indexeddb
     static async init(serialized: SerializedJSON) {
-        VirtualFile.counter = 0;
+        VirtualSystemFile.counter = 0;
         const root = await IndexedDBSystem.createFileSystem(serialized);
         FileSystem.fs = new FileSystem(root, "/home");
         return FileSystem.fs;
@@ -647,4 +672,43 @@ export class FileSystem {
 }
 
 
+export class VirtualRegFile extends RegFile {
+    constructor(name: string, 
+        parent: DirectoryFile, 
+        contents: string | ArrayBuffer,
+        vfs: VirtualSystem = new EphemeralSystem()
+    ) {
+        VirtualSystemFile.setVFS(new EphemeralSystem());
+        // bypass the "root" check
+        super("", parent, contents);
+        this.name = name;
+        this.vfs = vfs;
+    }
 
+    transform(vfs: VirtualSystem, parent: DirectoryFile) {
+        const file = new VirtualRegFile(this.name, new VirtualDirectoryFile("", null), this.contents, vfs);
+        file.parent = parent;
+        return file;
+    }
+}
+
+export class VirtualDirectoryFile extends DirectoryFile {
+    constructor(name: string, 
+        parents: DirectoryFile | null,
+        vfs: VirtualSystem = new EphemeralSystem()
+    ) {
+        VirtualSystemFile.setVFS(new EphemeralSystem());
+        super("", parents);
+        this.name = name;
+        this.vfs = vfs;
+    }
+
+    
+    transform(vfs: VirtualSystem, parent: DirectoryFile) {
+        const file = new VirtualDirectoryFile(this.name, null, vfs);
+        file.parent = parent;
+        return file;
+    }
+}
+
+export type VirtualFile = VirtualDirectoryFile | VirtualRegFile;

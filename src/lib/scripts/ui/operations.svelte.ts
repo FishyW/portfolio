@@ -17,12 +17,19 @@ export let pasteBuffer: PasteBuffer = $state({});
 
 export function newFile() {
     const file = fileSystem.addEmptyFile();
-    renamePrompt(file.name);
+    console.log(file.vfs);
+    console.log(file.vfs.isRenameSupported);
+    if (file.vfs.isRenameSupported) {
+        renamePrompt(file.name);
+    }
+    
 }
 
 export function newFolder() {
     const folder = fileSystem.addEmptyFolder();
-    renamePrompt(folder.name);
+    if (folder.vfs.isRenameSupported) {
+        renamePrompt(folder.name);
+    }
 }
 
 export function removeFile() {
@@ -42,7 +49,9 @@ export function removeFile() {
 
 export function rename() {
     if (selected.file === null) return;
-    renamePrompt(selected.file.name);
+    if (selected.file.vfs.isRenameSupported) {
+        renamePrompt(selected.file.name);
+    }
 }
 
 export function copy() {
@@ -165,13 +174,17 @@ export async function mount(mountPath: string) {
             scheme = n1;
             return "";
         })
-    
-    const vfs = await VFSMap[scheme].init(path);
+
+    const vfs = await VFSMap[scheme].init(path, selected.file );
     selected.file.mount(vfs);
     updateFile(selected.file.name);
 }
 
 export function unmount() {
+    if (!selected.file) {
+        return;
+    }
+    
     selected.file?.unmount();
     if (selected.file !== null)
         updateFile(selected.file.name);

@@ -1,5 +1,5 @@
 import type { BaseFile, DirectoryFile, RegFile } from "$scripts/fs";
-import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } from "./virtual";
+import { FileAttribute, VirtualSystemFile, VirtualSystem, register, type Accessor } from "./virtual";
 
 
 export class LoggerSystem extends VirtualSystem {
@@ -12,12 +12,8 @@ export class LoggerSystem extends VirtualSystem {
         console.log(`CREATING FOLDER with index ${file.idx}`);
     }
 
-    remove(file: VirtualFile): void {
+    remove(file: VirtualSystemFile): void {
         console.log(`REMOVING FILE with index ${file.idx}`);
-    }
-
-    relocate(file: BaseFile, parent: DirectoryFile): void {
-        console.log(`MOVING FILE with index ${file.idx} TO ${parent.idx}`);
     }
 
     @register(FileAttribute.NAME)

@@ -1,5 +1,5 @@
 import { DirectoryFile, RegFile, type BaseFile } from "$scripts/fs";
-import { FileAttribute, VirtualFile, VirtualSystem, register, type Accessor } from "./virtual";
+import { FileAttribute, VirtualSystem, register, type Accessor } from "./virtual";
 
 
 export class EphemeralSystem extends VirtualSystem {
@@ -13,9 +13,11 @@ export class EphemeralSystem extends VirtualSystem {
     }
 
     // relocate called after the file has been relocated
-    relocate(file: BaseFile, oldParent: DirectoryFile): void {
-   
-    }
+    relocateOldParent(file: BaseFile, oldParent: DirectoryFile): void {}
+
+    relocateChild(file: BaseFile, oldParent: DirectoryFile): void {}
+
+    relocateNewParent(file: BaseFile, oldParent: DirectoryFile): void {}
 
     remove(file: BaseFile) {
         

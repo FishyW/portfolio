@@ -1,8 +1,18 @@
-import { DirectoryFile, fileSystem, RegFile } from "./fs.svelte";
+import { DirectoryFile, fileSystem } from "./fs.svelte";
 
 
 function isFile(entry: FileSystemEntry): entry is FileSystemFileEntry {
     return entry.isFile;
+}
+
+export async function readContents(file: File) {
+   
+    let contents: string | ArrayBuffer = await file.arrayBuffer();
+    try {
+        contents = new TextDecoder("utf-8", {fatal: true}).decode(contents);
+    } catch (e) {}
+
+    return contents;
 }
 
 async function readFileEntry(entry: FileSystemEntry, directory: DirectoryFile) {
@@ -11,12 +21,7 @@ async function readFileEntry(entry: FileSystemEntry, directory: DirectoryFile) {
             entry.file(res, rej);
         });
         
-        let contents: string | ArrayBuffer = await file.arrayBuffer();
-        try {
-            contents = new TextDecoder("utf-8", {fatal: true}).decode(contents);
-        } catch (e) {}
-
-        
+        const contents = await readContents(file);
         return directory.createFile(file.name, contents, true);
     }
 
