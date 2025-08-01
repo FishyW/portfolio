@@ -59,6 +59,7 @@
 		"@codemirror/search": "^6.5.11",
 		"@codemirror/state": "^6.5.2",
 		"@codemirror/view": "^6.38.1",
+		"@fontsource-variable/inter": "^5.2.6",
 		"@plutojl/lang-julia": "^0.12.1",
 		"@replit/codemirror-lang-csharp": "^6.2.0",
 		"@replit/codemirror-lang-solidity": "^6.0.2",

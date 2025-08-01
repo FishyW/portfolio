@@ -1,8 +1,7 @@
 <script lang="ts">
     import { getContext } from "svelte";
 
-    const nothing = (e: DragEvent) => {};
-    let { children, ondragstart = nothing, ondragend = nothing} = $props();
+    let { children } = $props();
 
     const ctx:  {window: HTMLElement | null } = getContext("window");
 
@@ -47,17 +46,22 @@
 
 
 
-   <!-- Top bar -->
-<div draggable=true 
-
-ondrag = {e => {
+<svelte:body onmousemove={e =>{
+    e.preventDefault();
     mNow.x = e.clientX;
     mNow.y = e.clientY;
-}} 
 
-ondragstart={e => {
+}}/>
+
+   <!-- Top bar -->
+<div 
+
+
+
+
+onmousedown={e => {
+    e.preventDefault();
     // propagate onclick
-    
     mNow.x = e.clientX;
     mNow.y = e.clientY;
 
@@ -65,16 +69,15 @@ ondragstart={e => {
     requestAnimationFrame(drag);
     isDragging = true;
 
-    e.dataTransfer!.setDragImage(document.createElement("div"), 0, 0);
     
     e.target!.dispatchEvent(new Event("click", {bubbles: true}));
-    ondragstart(e);
 }} 
-ondragend={e => {
+
+onmouseup={e => {
+    e.preventDefault();
     isDragging = false;
-    ondragend(e);
         
-}} class="w-full h-10 p-2 bg-black">
+}} class="w-full h-10 p-2 rounded-t-xl shadow-2xl">
 
     {@render children()}
     

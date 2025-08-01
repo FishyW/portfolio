@@ -18,8 +18,8 @@
 
 </script>
 
-<div {onclick} bind:this={ctx.window} oncontextmenu={e => onclick(e)}
-class="bg-gray-600 flex-col pointer-events-auto"
+<div {onclick} bind:this={ctx.window}   oncontextmenu={e => onclick(e)}
+class="bg-white flex-col rounded-xl pointer-events-auto"
 >
     <ComponentWindow 
         {...props} 

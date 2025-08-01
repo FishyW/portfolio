@@ -107,7 +107,7 @@
 
 {#each openWindows as id (id) }
     {@const { component , propIndex } = windowMap.get(id)!}
-   
+    <div class="w-full flex-1 flex items-center">
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
         <div class="h-fit pointer-events-none" style:translate="{random(-10, 10)}% {random(-10, 10)}%">
                 <Window 
@@ -116,5 +116,6 @@
                 props={propArray[propIndex]}
         />
         </div>
+    </div>
     </div>
 {/each}

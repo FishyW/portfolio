@@ -2,7 +2,41 @@
 @import 'tailwindcss';
 
 
+
 @layer base {
+
+ 
+
+  @theme {
+  --color-secondary-5: #081120;
+  --color-secondary-10: #131c2c;
+  --color-secondary-20: #283041;
+  --color-secondary-30: #3f4759;
+  --color-secondary-40: #565e71;
+  --color-secondary-50: #6f778b;
+  --color-secondary-60: #8991a5;
+  --color-secondary-70: #a3abc0;
+  --color-secondary-80: #bec6dc;
+  --color-secondary-90: #dae2f9;
+  --color-secondary-95: #edf0ff;
+  --color-secondary-100: #ffffff;
+
+  --color-primary-5: #00102c;
+  --color-primary-10: #001a40;
+  --color-primary-20: #002f68;
+  --color-primary-30: #004492;
+  --color-primary-40: #005bbe;
+  --color-primary-50: #3075db;
+  --color-primary-60: #518ff7;
+  --color-primary-70: #7eabff;
+  --color-primary-80: #acc7ff;
+  --color-primary-90: #d7e2ff;
+  --color-primary-95: #edf0ff;
+  --color-primary-100: #ffffff;
+
+  }
+
+
   .twp {
     @import "tailwindcss/preflight.css";
   }

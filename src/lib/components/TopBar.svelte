@@ -24,21 +24,28 @@
 			clearInterval(interval);
 		}
     });
+	
 
 </script>
 
-<div class="absolute w-full bg-gray-500 text-center h-fit p-1 ">
+<div class="flex absolute w-full  bg-secondary-20 text-secondary-95 justify-center px-4">
+	<div class="flex-1 justify-left gap-6 flex flex-row py-2">
+		
+	</div>
+<div class=" font-bold text-center h-fit py-2 flex-1">
+	<button class="py-0.5 px-4 rounded-3xl">
     { dayFormatter.format(date) } 
-    <span class="inline-block w-2"></span>
+    <span class="inline-block w-4"></span>
     { timeFormatter.format(date) }
+	</button>
 </div>
 
 
-<div class="pointer-events-none absolute w-full text-right h-fit  ">
+<div class="pointer-events-none h-full text-right flex-1 py-2 flex justify-end gap-4">
 	<TopBarSettings />
 
 	<button 
-		class="pointer-events-auto hover:bg-gray-400 p-1 px-3 font-bold"
+		class="pointer-events-auto hover:bg-secondary-40 p-0.5 px-2 font-bold rounded-full"
 		ondblclick={() => {
 			// reset
 			localStorage.removeItem("fs");
@@ -46,3 +53,6 @@
 		}}
 		>R</button>
 </div>
+
+</div>
+

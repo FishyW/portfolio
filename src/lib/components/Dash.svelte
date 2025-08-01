@@ -24,16 +24,18 @@
 
 
 </script>
+<div class="flex w-full justify-center absolute bottom-6 ">
+    <div class="p-2 bg-secondary-80/40 gap-6 w-fit flex rounded-lg ">
 
-<div class="p-2 rounded-lg bg-white w-fit flex">
-    {#each openWindowsInfoFiltered as info}
-        <DashElement {info} isOpened={true}/>
-    {/each} 
-    {#each pinnedApps as info}
-        <DashElement {info} 
-            isOpened={openWindowFixed.includes(info.name)}
-            />
-    {/each} 
+        
+        {#each openWindowsInfoFiltered as info}
+            <DashElement {info} isOpened={true}/>
+        {/each} 
+        {#each pinnedApps as info}
+            <DashElement {info} 
+                isOpened={openWindowFixed.includes(info.name)}
+                />
+        {/each} 
+    </div>
 </div>
-
 

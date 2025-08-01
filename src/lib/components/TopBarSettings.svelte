@@ -37,7 +37,7 @@
 </div>
 
 <button 
-    class="pointer-events-auto hover:bg-gray-400 p-1 px-3 font-bold"
+    class="pointer-events-auto hover:bg-secondary-40 p-0.5 px-2 font-bold rounded-full"
     use:tooltip={() => (
 		{ content, 
 		trigger: 'click',
