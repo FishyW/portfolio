@@ -1,7 +1,7 @@
 <script lang="ts">
     import { getContext } from "svelte";
 
-    let { children } = $props();
+    let { children, ondragstart, ondragend } = $props();
 
     const ctx:  {window: HTMLElement | null } = getContext("window");
 
@@ -50,17 +50,25 @@
     e.preventDefault();
     mNow.x = e.clientX;
     mNow.y = e.clientY;
+}}
 
-}}/>
+onmouseup={e => {
+    e.preventDefault();
+    ondragend();
+    isDragging = false;
+}} 
+/>
 
    <!-- Top bar -->
 <div 
 
-
-
-
 onmousedown={e => {
+    // not a left click
+    if (e.button !== 0) {
+        return;
+    }
     e.preventDefault();
+    ondragstart();
     // propagate onclick
     mNow.x = e.clientX;
     mNow.y = e.clientY;
@@ -73,11 +81,7 @@ onmousedown={e => {
     e.target!.dispatchEvent(new Event("click", {bubbles: true}));
 }} 
 
-onmouseup={e => {
-    e.preventDefault();
-    isDragging = false;
-        
-}} class="w-full h-10 p-2 rounded-t-xl shadow-2xl">
+class="w-full h-12 p-2 shadow-sm/5 z-10 relative">
 
     {@render children()}
     

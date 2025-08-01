@@ -19,7 +19,7 @@ export interface WindowInfo {
 
 export const FilesInfo: WindowInfo = {
     name: "Files",
-    icon: "",
+    icon: "icons/dash/file_manager.svg",
     component: Files
 };
 
@@ -33,13 +33,13 @@ export const ImageViewerInfo: WindowInfo = {
 
  export const TextEditorInfo: WindowInfo = {
     name: "Text Editor",
-    icon: "",
+    icon: "icons/dash/textedit.svg",
     component: TextEditor
 };
 
 export const DocumentViewerInfo: WindowInfo = {
     name: "Document Viewer",
-    icon: "",
+    icon: "icons/dash/pdf.svg",
     component: PDFViewer
 };
 

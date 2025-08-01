@@ -25,7 +25,7 @@
 
 </script>
 <div class="flex w-full justify-center absolute bottom-6 ">
-    <div class="p-2 bg-secondary-80/40 gap-6 w-fit flex rounded-lg ">
+    <div class="p-2 bg-secondary-80/40 gap-1 w-fit flex rounded-lg ">
 
         
         {#each openWindowsInfoFiltered as info}

@@ -37,7 +37,7 @@
 </div>
 
 <button 
-    class="pointer-events-auto hover:bg-secondary-40 p-0.5 px-2 font-bold rounded-full"
+    class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
     use:tooltip={() => (
 		{ content, 
 		trigger: 'click',
@@ -45,4 +45,7 @@
 		appendTo: () => document.body
 		})}
    
-    >S</button>
+    ><img src="icons/symbols/settings-symbolic.svg" alt="settings" class="w-full h-full invert" /></button>
+
+
+  

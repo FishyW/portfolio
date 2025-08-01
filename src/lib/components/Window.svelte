@@ -1,5 +1,6 @@
 <script lang="ts">
     import { setContext, type Component } from "svelte";
+    import ResizableWindow from "./ResizableWindow.svelte";
     
 
     interface Props {
@@ -19,9 +20,16 @@
 </script>
 
 <div {onclick} bind:this={ctx.window}   oncontextmenu={e => onclick(e)}
-class="bg-white flex-col rounded-xl pointer-events-auto"
+class="pointer-events-auto relative"
 >
-    <ComponentWindow 
-        {...props} 
-    />
+    <ResizableWindow minWidth={630} minHeight={600}>
+             
+        <div class="bg-window-bg h-full
+        flex-col rounded-xl overflow-hidden shadow-[0_0_5px_5px_rgba(0,0,0,0.2)] ">
+            <ComponentWindow 
+                {...props} 
+            />
+        </div>
+    </ResizableWindow>
+    
 </div>

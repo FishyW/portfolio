@@ -47,7 +47,7 @@
     ondragend={() => hideOverlay = true} 
 />
 
-<div class="w-[50vw] h-[80vh] overflow-y-auto relative">
+<div class="overflow-y-auto relative">
     <!-- <canvas use:loadPDF></canvas> -->
      
     <embed {@attach loadPDF} class="w-full h-full" type="application/pdf"/>

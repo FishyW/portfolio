@@ -20,7 +20,15 @@ onclick={_ => {
         open(info);
 }}
 ondblclick={_ => {open(info)}}
-class="hover:bg-slate-800 w-16 h-16 bg-slate-900 m-1"
+class="w-20 h-20 flex justify-center items-center hover:bg-secondary-90/40 rounded-md p-2 m-1"
 >
-
+<img src={info.icon}  alt="Dash Element"/>
 </div>
+
+<style>
+    img {
+        max-height: none;
+        height: 60px;
+        max-width: none;
+    }
+</style>

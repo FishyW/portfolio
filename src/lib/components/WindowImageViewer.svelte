@@ -26,7 +26,7 @@
 
 <WindowTopBar />
 
-<div class="max-w-[50vw] max-h-[80vh] p-4 overflow-y-auto flex justify-center items-center">
+<div class=" p-4 overflow-y-auto flex justify-center items-center">
     <!-- <canvas use:loadPDF></canvas> -->
         <img {@attach getImageData}  alt={file.name} />
       

@@ -45,14 +45,21 @@
 	<TopBarSettings />
 
 	<button 
-		class="pointer-events-auto hover:bg-secondary-40 p-0.5 px-2 font-bold rounded-full"
+		class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
 		ondblclick={() => {
 			// reset
 			localStorage.removeItem("fs");
 			window.location.reload();
 		}}
-		>R</button>
+		>
+		<img src="icons/symbols/arrow-circular-small-top-left-symbolic.svg" alt="settings" 
+		class="w-full h-full invert mt-[0.5px]" />
+	</button>
 </div>
 
 </div>
+
+<style>
+
+</style>
 

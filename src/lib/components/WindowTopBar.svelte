@@ -5,14 +5,20 @@
 
     
     let { children = undefined, 
-        ondragstart = undefined, 
-        ondragend = undefined,
-        onexit = undefined } = $props();
+        onexit = undefined,
+        content="",
+        ondragstart = () => {},
+        ondragend = () => {} } = $props();
 
 </script>
 
-<WindowTopBarDraggable {ondragstart} {ondragend} >
-    <div class="flex w-full h-full items-center gap-1">
+<WindowTopBarDraggable {ondragend} {ondragstart}  >
+    <div class="flex w-full h-full items-center gap-1 relative ">
+        <div class="absolute top-0 w-full h-full flex items-center -z-10">
+            <div class="text-center select-none w-full">
+                {content}
+            </div>
+        </div>
         <div class="flex-1">
             {@render children?.()}
         </div>

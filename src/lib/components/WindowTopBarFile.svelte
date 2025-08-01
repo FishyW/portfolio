@@ -56,7 +56,7 @@
         {/if}
         <!-- <div class="w-4 h-4 bg-white hover:bg-gray-700" 
         onclick={() => fileSystem.forward()}></div> -->
-        <div use:scrollset class="text-nowrap no-scrollbar flex-1 mx-1 bg-secondary-95 rounded-md px-2  overflow-x-auto">
+        <div use:scrollset class="select-none text-nowrap no-scrollbar flex-1 mx-1 bg-secondary-95 rounded-md px-2  overflow-x-auto">
             {#each pathTuple as [fullpath, segment]}
                 /<button onclick={() => {
                     const directory = fileSystem.findFile(fullpath)
@@ -64,7 +64,7 @@
                         throw new Error("Directory not found!")
                     }
                     fileSystem.changeDirectory(directory);
-                }} class="hover:bg-gray-50">{segment}</button>
+                }} class="hover:bg-gray-50 ">{segment}</button>
             {/each}
         </div>    
     </div>

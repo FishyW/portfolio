@@ -175,14 +175,16 @@ const extensions = [
             },
             ".cm-content": {
               "padding-top": "1rem",
-              "padding-bottom": "1rem"
+              "padding-bottom": "1rem",
+              "background-color": "var(--color-window-bg)",
             },
             ".cm-line": {
               "padding-left": "1rem",
               "padding-right": "1rem"
             },
             ".cm-gutter": {
-               "background-color": "#e2e8f0",
+               "background-color": "var(--color-window-bg)",
+               "user-select": "none"
             },
             ".cm-gutters.cm-gutters-before": {
               "border-right-width": "2px"
@@ -389,15 +391,18 @@ const extensions = [
 <WindowTopBar onexit={ () => {
     if (buffer !== originalContents)
       file.contents = buffer
-}
-}>
+}}
+ content={file.name}
+>
+<div class="flex ">
   {#if fileExtension === "md"}
-<div class="flex justify-end ">
+<div class="flex justify-end flex-1">
   <WindowTopBarIcon onclick={() => {
     showMarkdownViewer = !showMarkdownViewer;
   }}>M</WindowTopBarIcon>
 </div>
 {/if}
+</div>
 </WindowTopBar>
 
 

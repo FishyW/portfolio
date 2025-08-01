@@ -68,11 +68,12 @@
         fileSystem.cwd.path;
         focus();
     })
+
+    
 </script>
 
 
-
-<div class="w-[50vw]">
+<div class="h-full flex flex-col">
 <WindowTopBarFile />
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -102,7 +103,7 @@ ondrop={e => {
 }}
 
 
-class="h-[80vh] flex flex-wrap p-4 
+class="flex-1 flex flex-wrap p-4 
 content-start overflow-y-auto outline-0" 
 oncontextmenu={e => {
     e.preventDefault();
@@ -111,6 +112,9 @@ oncontextmenu={e => {
 }}>
 
 
+<!-- <div class="w-20 h-20 bg-black p-4"> -->
+	
+<!-- </div> -->
 {#each fileSystem.cwd.files as file (file.path)}
     
     <FileElement {file} bind:selected={selected.file} />

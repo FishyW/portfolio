@@ -16,6 +16,16 @@
 	:global(button:hover) {
 		background-color: var(--color-secondary-40);
 	}
+
+	:global(img) {
+		user-drag: none;
+		-webkit-user-drag: none;
+		user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+
 </style>
 
 {@render children()}

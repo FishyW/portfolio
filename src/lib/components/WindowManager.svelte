@@ -5,6 +5,7 @@
     import type WindowEmpty from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from "svelte/reactivity";    
     import type { WindowInfo } from "$scripts/ui/windows";
+    import ResizableWindow from "./ResizableWindow.svelte";
 
    
     interface WindowDetails {
@@ -105,11 +106,13 @@
 
 
 
+
 {#each openWindows as id (id) }
     {@const { component , propIndex } = windowMap.get(id)!}
+    
     <div class="w-full flex-1 flex items-center">
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
-        <div class="h-fit pointer-events-none" style:translate="{random(-10, 10)}% {random(-10, 10)}%">
+        <div class="h-fit pointer-events-none" style:translate="{random(-100, 100)}px {random(-100, 100)}px">
                 <Window 
                 {component}
                 onclick={() => reorder(id)}
