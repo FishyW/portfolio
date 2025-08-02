@@ -1,11 +1,11 @@
 <script lang="ts">
     import { browser } from '$app/environment';
     import { tooltip } from '$scripts/ui/tippy.svelte';
-
+	import  resetImage from "$icons/symbols/settings-symbolic.svg";
+    import { IndexedDBSystem } from '$scripts/virtual/indexdb';
+	
 	let content: HTMLElement;
 
-	
-	
 	let isPersisted = $state(false);
 
 
@@ -35,7 +35,7 @@
 		</div>
 	</div>
 </div>
-
+	
 <button 
     class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
     use:tooltip={() => (
@@ -45,7 +45,7 @@
 		appendTo: () => document.body
 		})}
    
-    ><img src="icons/symbols/settings-symbolic.svg" alt="settings" class="w-full h-full invert" /></button>
+    ><img src={resetImage} alt="settings" class="w-full h-full invert" /></button>
 
 
   

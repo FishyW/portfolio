@@ -74,7 +74,7 @@ class Database {
 
     static async constructDB(): Promise<IDBDatabase> {
         return new Promise((res, rej) => {
-             const req = window.indexedDB.open('FileSystemDatabase');
+            const req = window.indexedDB.open('FileSystemDatabase');
             req.onsuccess = _ => {
                 res(req.result);
             }
@@ -351,5 +351,23 @@ export class IndexedDBSystem extends VirtualSystem {
         }
         return file;
 
+    }
+
+    static async reset(): Promise<void> {
+        return new Promise(async (res, rej) => {
+            const db = await Database.getDB();
+            db?.close();
+
+            const req = indexedDB.deleteDatabase('FileSystemDatabase');
+            req.onsuccess = () => {
+                res();
+            };
+            req.onblocked = () => {
+                res();
+            }
+            req.onerror = () => {
+                rej("Can't delete database!");
+            }
+        })
     }
 }

@@ -1,7 +1,9 @@
 <script>
 	import { SvelteDate } from 'svelte/reactivity';
     import TopBarSettings from './TopBarSettings.svelte';
-
+	
+	import resetImg from "$icons/symbols/arrow-circular-small-top-left-symbolic.svg";
+    import { IndexedDBSystem } from '$scripts/virtual/indexdb';
 
     const date = new SvelteDate();
 
@@ -46,13 +48,13 @@
 
 	<button 
 		class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
-		ondblclick={() => {
+		ondblclick={async () => {
 			// reset
-			localStorage.removeItem("fs");
+			await IndexedDBSystem.reset();
 			window.location.reload();
 		}}
 		>
-		<img src="icons/symbols/arrow-circular-small-top-left-symbolic.svg" alt="settings" 
+		<img src={resetImg} alt="reset" 
 		class="w-full h-full invert mt-[0.5px]" />
 	</button>
 </div>
