@@ -1,7 +1,7 @@
 <script lang="ts">
     import { dispatchClose } from "./WindowManager.svelte";
     import WindowTopBarDraggable from "./WindowTopBarDraggable.svelte";
-    import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
+    import closeImage from "$icons/symbols/cross-small-symbolic.svg"
 
     
     let { children = undefined, 
@@ -19,13 +19,25 @@
                 {content}
             </div>
         </div>
+
+        
         <div class="flex-1">
             {@render children?.()}
         </div>
 
-        <WindowTopBarIcon onclick={e => {
+        <button class="w-6 h-6 
+        p-1
+        rounded-full
+        text-xs 
+        justify-center items-center 
+        whitespace-nowrap flex
+        hover:bg-slate-200" 
+        onclick={e => {
             onexit?.();
             dispatchClose(e);
-        }} /> 
+        }}>
+            <img src={closeImage} alt="close"/>
+        </button>  
+
     </div>
 </WindowTopBarDraggable>

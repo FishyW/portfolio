@@ -29,7 +29,6 @@
 		onclick={async e => {
 			e.preventDefault();
 			const h = await navigator.storage.persist();
-			console.log(h);
 		}}
 		/>
 		</div>

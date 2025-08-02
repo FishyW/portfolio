@@ -48,14 +48,18 @@
 
 <svelte:body onmousemove={e =>{
     e.preventDefault();
-    mNow.x = e.clientX;
-    mNow.y = e.clientY;
+    if (isDragging) {
+        mNow.x = e.clientX;
+        mNow.y = e.clientY;
+    }
 }}
 
 onmouseup={e => {
     e.preventDefault();
-    ondragend();
-    isDragging = false;
+    if (isDragging) {
+        ondragend();
+        isDragging = false;
+    }
 }} 
 />
 

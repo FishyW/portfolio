@@ -103,8 +103,8 @@ ondrop={e => {
 }}
 
 
-class="flex-1 flex flex-wrap p-4 
-content-start overflow-y-auto outline-0" 
+class="flex-1 flex flex-wrap px-8 py-6
+content-start overflow-y-auto outline-0 gap-4" 
 oncontextmenu={e => {
     e.preventDefault();
     deselect();

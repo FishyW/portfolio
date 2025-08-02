@@ -33,6 +33,9 @@
     import type { Instance, Props as TippyProps } from "tippy.js";
     import { mount } from "$scripts/ui/operations.svelte";
 
+    import fileImageURL from "$icons/files/File.svg";
+    import folderImageURL from "$icons/files/Folder.svg";
+
     let tippyBox: HTMLElement;
 
   
@@ -147,6 +150,8 @@
 
 </script>
 
+<div class="h-fit w-fit">
+ 
 <div class="hidden">
     <ContextMenuFile  mountCallback={mountPrompt} {file} bind:this={contextMenu} />
 </div>
@@ -177,15 +182,17 @@ use:tooltip={() => ({
 tabindex="-1"
 bind:this={fileElement}
 draggable="true" 
-class={["w-32 p-4 \
-hover:bg-gray-500 \
-focus:bg-gray-500 \
+class={["p-3 py-2 h-fit \
+rounded-md \
+hover:bg-slate-200 \
+focus:bg-slate-300 \
 h-42 overflow-hidden \
 flex items-center flex-col outline-0",
-tippyOn && "bg-gray-500",
+tippyOn && "bg-slate-300" ,
 aboveDropZone && "dragging",
+aboveDropZone && "bg-slate-300",
 pasteBuffer.file?.path === file.path 
-    && pasteBuffer.active && "bg-gray-400"
+    && pasteBuffer.active && "bg-slate-300"
 ]}
 
 ondragstart={
@@ -213,8 +220,9 @@ onclick={(e => {
 
 
 ondblclick={() => {
-    select();
     file.open();
+    selected = null;
+    fileElement.blur();
 }}
 
 ondragleave = {() =>
@@ -232,6 +240,9 @@ ondragenter = {e =>  {
 
 ondrop = {e => {
     aboveDropZone = false;
+    selected = null;
+    fileElement.blur();
+
     if (!DirectoryFile.isDirectory(file)) {
         return;
     }
@@ -244,6 +255,8 @@ ondrop = {e => {
 
 ondragover = {e => {
     e.preventDefault();
+    selected = null;
+    fileElement.blur();
 }}
 
 oncontextmenu={e => {
@@ -252,12 +265,21 @@ oncontextmenu={e => {
     select();
     show(e, contextMenu);
 }}
->
-        <div class="aspect-square w-full bg-black"></div>
+>   
+        <div class="w-24">
+            {#if DirectoryFile.isDirectory(file)}
+            <img src={folderImageURL} alt="folder" class="drop-shadow-sm"/>
+            {:else }
+                <img src={fileImageURL} alt="file" class="drop-shadow-sm"/>
+            {/if}
 
-        <div class="w-full mt-1 h-[3.0em]">
+        </div>
+        
+        <div class="w-24 mt-1 h-fit">
             
-            <div class="w-full text-center h-full overflow-hidden line-clamp-2 overflow-ellipsis break-words"> 
+            <div class="text-sm w-full text-center h-fit
+            overflow-hidden line-clamp-2 
+            overflow-ellipsis break-words"> 
                 { displayedName } 
             </div>
    
@@ -273,14 +295,17 @@ oncontextmenu={e => {
             
         </div>
 </div>
-
+   
+</div>
 
 <style>
     @import "tailwindcss";
-    
-    .dragging {
-        @apply bg-gray-500;
+
+    img {
+        height: initial;
+        /* max-width: initial; */
     }
+   
 
     .dragging * {
         pointer-events: none;

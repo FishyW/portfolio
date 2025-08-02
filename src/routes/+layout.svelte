@@ -13,10 +13,6 @@
 		font-size: 1rem;
   	}
 
-	:global(button:hover) {
-		background-color: var(--color-secondary-40);
-	}
-
 	:global(img) {
 		user-drag: none;
 		-webkit-user-drag: none;

@@ -1,7 +1,7 @@
 
 <script lang="ts">
 
-    let { children, minHeight = 200, minWidth = 200 } = $props();
+    let { children, minHeight = 200, minWidth = 200, onresizestart, onresizeend } = $props();
 
 	let parent: HTMLDivElement = $state()!; 
     let child: HTMLDivElement = $state()!;
@@ -28,7 +28,7 @@
         return checkX  >= left && checkX <= right && checkY >= top && checkY <= bottom 
     }
 
-    function resize() {        
+    function resize() { 
         if (isDragging) {
             if (mNow.x >= document.documentElement.clientWidth - DELTA
                 || mNow.y >= document.documentElement.clientHeight - DELTA
@@ -42,7 +42,6 @@
 
             offset.x = directionX * (mNow.x - mInit.x) + currentTranslate.x;
             offset.y = directionY * (mNow.y - mInit.y) + currentTranslate.y;
-
             if (offset.x >= minWidth) {
                 parent.style.width = `${offset.x}px`;
             }
@@ -60,7 +59,7 @@
 
     }
 
-    function handleMove() {
+    function handleMove(e: MouseEvent) {
         // left region
         const rectParent = parent.getBoundingClientRect();
         const rectChild = child.getBoundingClientRect();
@@ -81,7 +80,7 @@
         let found = false;
         for (const [id, bound] of bounds.entries()) {
             if (
-                within(mNow.x, mNow.y, 
+                within(e.clientX, e.clientY, 
                 bound[0], bound[1], 
                 bound[2], bound[3])
             ) {
@@ -144,16 +143,25 @@
 
 onmouseup={e => {
      e.preventDefault();
-    isDragging = false;
-    document.body.style.cursor = "initial";
+     if (isDragging) {
+        onresizeend();
+        isDragging = false;
+        document.body.style.cursor = "initial";
+     }
+    
 }}
 
 onmousemove={e => {
-    e.preventDefault();
     
-    mNow.x = e.clientX;
-    mNow.y = e.clientY;
-    handleMove();
+    e.preventDefault();
+
+    handleMove(e);
+    
+    if (isDragging) {
+        mNow.x = e.clientX;
+        mNow.y = e.clientY;
+    }
+    
 }}
 
 />
@@ -183,7 +191,6 @@ onmousemove={e => {
 
     // lock the direction index
     directionIdx = directionIdxTrack; 
-    
     if (directionIdx === -1) {
         return;
     }
@@ -191,8 +198,8 @@ onmousemove={e => {
     e.preventDefault();
 
     initializeDrag();
+    onresizestart();
 
-    
     // propagate onclick
     mNow.x = e.clientX;
     mNow.y = e.clientY;
@@ -200,7 +207,7 @@ onmousemove={e => {
     mInit = structuredClone(mNow);
     requestAnimationFrame(resize);
     isDragging = true;
-
+    
     e.target!.dispatchEvent(new Event("click", {bubbles: true}));
 }}
 		bind:this={parent}

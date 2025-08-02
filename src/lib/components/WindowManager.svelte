@@ -5,7 +5,6 @@
     import type WindowEmpty from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from "svelte/reactivity";    
     import type { WindowInfo } from "$scripts/ui/windows";
-    import ResizableWindow from "./ResizableWindow.svelte";
 
    
     interface WindowDetails {

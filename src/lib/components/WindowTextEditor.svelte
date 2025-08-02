@@ -182,6 +182,9 @@ const extensions = [
               "padding-left": "1rem",
               "padding-right": "1rem"
             },
+            ".cm-scroller": {
+              "padding-bottom": "3rem"
+            },
             ".cm-gutter": {
                "background-color": "var(--color-window-bg)",
                "user-select": "none"
@@ -394,7 +397,7 @@ const extensions = [
 }}
  content={file.name}
 >
-<div class="flex ">
+<div class="flex">
   {#if fileExtension === "md"}
 <div class="flex justify-end flex-1">
   <WindowTopBarIcon onclick={() => {
@@ -410,12 +413,12 @@ const extensions = [
     if (e.key === "s" && e.ctrlKey) {
       e.preventDefault();
     }
-  }} class="w-[50vw] h-[80vh] bg-slate-200">
+  }} class="bg-slate-200 h-full w-full">
   {#if fileExtension !== "md" || !showMarkdownViewer }
       <div 
         use:createEditor tabindex="-1" class="w-full h-full outline-none"></div>
   {:else}
-    <div class="h-full w-full no-twp px-4 py-4 pt-0 pb-8 overflow-auto">
+    <div class="h-full w-full no-twp px-4 py-4 pt-0  overflow-auto">
       {@html DomPurify.sanitize(marked.parse(file.contents as string) as string) }
     </div>
     

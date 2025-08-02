@@ -17,8 +17,6 @@ export let pasteBuffer: PasteBuffer = $state({});
 
 export function newFile() {
     const file = fileSystem.addEmptyFile();
-    console.log(file.vfs);
-    console.log(file.vfs.isRenameSupported);
     if (file.vfs.isRenameSupported) {
         renamePrompt(file.name);
     }

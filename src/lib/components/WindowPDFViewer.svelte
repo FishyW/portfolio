@@ -6,10 +6,14 @@
 
 
     interface Props {
-      file: RegFile
+      file: RegFile,
+      onresizestart: () => void,
+      onresizeend: () => void
     }
 
-    let { file }: Props = $props();
+    let { file, 
+        onresizeend = $bindable(), 
+        onresizestart = $bindable() }: Props = $props();
     let hideOverlay = $state(true);
 
     // function loadPDF(node: HTMLElement) {
@@ -40,18 +44,30 @@
             === DocumentViewerInfo.name;
     })
 
+    onresizeend = () => {
+        
+        hideOverlay = true;
+    }
+
+    onresizestart = () => {
+        hideOverlay = false;
+    }
+
  </script>
 
+<div class="flex flex-col  h-full">
 <WindowTopBar 
+    content={file.name}
     ondragstart={() => hideOverlay = false}
     ondragend={() => hideOverlay = true} 
 />
 
-<div class="overflow-y-auto relative">
+<div class="overflow-y-auto relative flex-1">
     <!-- <canvas use:loadPDF></canvas> -->
      
     <embed {@attach loadPDF} class="w-full h-full" type="application/pdf"/>
      {#if !hideOverlay}
       <div class="absolute w-full h-full top-0"></div>
     {/if}
+</div>
 </div>
