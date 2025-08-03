@@ -18,7 +18,6 @@
     let contextMenu: ReturnType<typeof ContextMenuFile>;
     
 
-    export let mountFinished = false;
 
 </script>
 
@@ -98,9 +97,7 @@
     })
 
 
-    $effect(() => {
-        mountFinished = true;
-    })
+ 
     
 </script>
 

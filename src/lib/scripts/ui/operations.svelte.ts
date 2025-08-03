@@ -83,11 +83,14 @@ export function paste() {
         return;
     }
 
+    let file: BaseFile | null = null;
     if (pasteBuffer.operation === "COPY") {
-        fileSystem.copy(pasteBuffer.file!, targetDir);
+        file = fileSystem.copy(pasteBuffer.file!, targetDir);
     } else if (pasteBuffer.operation === "MOVE") {
-        fileSystem.move(pasteBuffer.file!, targetDir);
+        file = fileSystem.move(pasteBuffer.file!, targetDir) ?? null;
     }
+
+    selected.file = file;
     pasteBuffer.active = false;
 }
 

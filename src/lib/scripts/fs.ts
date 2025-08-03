@@ -354,10 +354,10 @@ export class DirectoryFile extends BaseFile {
         }
 
         // copies the file to the new parent
-        file.clone(this, true);
+        const newFile = file.clone(this, true);
         // remove the file from the old parent
         parent.removeFile(file);
-        
+        return newFile;
         
     }
 
@@ -617,8 +617,7 @@ export class FileSystem {
             return;
         }
         // relocate the file to the
-        folder.relocate(file, autorename);
-
+        return folder.relocate(file, autorename);
     }
 
     copy(file: BaseFile, folder: DirectoryFile) {
@@ -628,7 +627,7 @@ export class FileSystem {
             throw new Error("Can't copy a directory inside of itself");
         }
 
-        file.clone(folder, true);
+        return file.clone(folder, true);
     }
 
     hasBack() {

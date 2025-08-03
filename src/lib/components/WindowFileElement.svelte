@@ -36,7 +36,6 @@
     import fileImageURL from "$icons/files/File.svg";
     import folderImageURL from "$icons/files/Folder.svg";
 
-    import { mountFinished } from "./WindowFile.svelte";
 
     let tippyBox: HTMLElement;
 
@@ -153,13 +152,6 @@
         showMountInputBox ? 'mount'
         : 'none'
     ) 
-
-    $effect(() => {
-        if (mountFinished) {
-            select();
-        }
-        
-    })
 
 </script>
 
