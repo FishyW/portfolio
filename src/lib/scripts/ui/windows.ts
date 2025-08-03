@@ -11,6 +11,7 @@ import Empty from "$components/dummy/WindowEmpty.svelte";
 import filesImg from "$icons/dash/file_manager.svg";
 import textEditorImg from "$icons/dash/textedit.svg";
 import pdfViewerImg from "$icons/dash/pdf.svg";
+import imageViewerImg from "$icons/dash/photo-app.svg";
 
 // name must be unique
 // all windows need to have this 
@@ -30,7 +31,7 @@ export const FilesInfo: WindowInfo = {
 
 export const ImageViewerInfo: WindowInfo = {
     name: "Image Viewer",
-    icon: "",
+    icon: imageViewerImg,
     component: ImageViewer
 };
 

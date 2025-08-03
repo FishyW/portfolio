@@ -1,5 +1,7 @@
 <script module lang="ts">
     export let offscreenBuffer: {element?: HTMLElement} = $state({});
+    import backgroundImg from "$assets/bg.webp"
+    
 </script>
 
 <script>
@@ -10,7 +12,9 @@
 
 </script>
 
-<div class="h-full w-full bg-[url(/bg.png)] bg-cover flex flex-col relative">
+<div  
+style:background-image="url({backgroundImg})" 
+class="h-full w-full bg-cover flex flex-col relative">
     <!-- Position utility "breaks" out of the page flow -->
         <TopBar />
         
