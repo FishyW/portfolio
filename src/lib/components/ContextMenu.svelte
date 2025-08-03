@@ -76,7 +76,8 @@
 
 
 <svelte:window 
-onclick={exit} 
+
+onmousedown={exit} 
 onkeydown={(e => {
     if (e.key === "Escape") {
         exit()
@@ -86,7 +87,10 @@ onkeydown={(e => {
 />
 
 <div bind:this={contextMenuDiv}
-    onmousedown={e => e.preventDefault()}
+    onmousedown={e => {
+        e.stopImmediatePropagation();
+        e.preventDefault()
+    }}
     class="fixed z-50" 
     style:display = {shown ? "block" : "none"}
     style:top="{pos.y}px"  
