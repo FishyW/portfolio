@@ -89,7 +89,6 @@
         autocompletion, completionKeymap, closeBrackets,
         closeBracketsKeymap
       } from "@codemirror/autocomplete";
-    // import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 
 
     
@@ -166,9 +165,6 @@ const extensions = [
             "&.cm-focused": {
               outline: "none",
             },
-            "&": {
-              "background-color": "var(--color-window-bg)",
-            },
             "*": {
               "font-size": "0.9rem"
             },
@@ -178,21 +174,14 @@ const extensions = [
             },
             ".cm-content": {
               "padding-top": "1rem",
-              "padding-bottom": "1rem",
+              "padding-bottom": "1rem"
             },
             ".cm-line": {
               "padding-left": "1rem",
               "padding-right": "1rem"
             },
-            ".cm-scroller": {
-              "padding-bottom": "3rem"
-            },
-            "&.cm-focused .cm-selectionBackground": {
-                "background-color": "var(--color-primary-90) !important"
-            },
             ".cm-gutter": {
-               "background-color": "var(--color-window-bg)",
-               "user-select": "none"
+               "background-color": "#e2e8f0",
             },
             ".cm-gutters.cm-gutters-before": {
               "border-right-width": "2px"
@@ -399,18 +388,9 @@ const extensions = [
 <WindowTopBar onexit={ () => {
     if (buffer !== originalContents)
       file.contents = buffer
-}}
- content={file.name}
->
-<div class="flex">
-  {#if fileExtension === "md"}
-<!-- <div class="flex justify-end flex-1">
-  <WindowTopBarIcon onclick={() => {
-    showMarkdownViewer = !showMarkdownViewer;
-  }}>M</WindowTopBarIcon>
-</div> -->
-{/if}
-</div>
+}
+}>
+ 
 </WindowTopBar>
 
 
@@ -418,12 +398,12 @@ const extensions = [
     if (e.key === "s" && e.ctrlKey) {
       e.preventDefault();
     }
-  }} class="bg-slate-200 h-full w-full">
+  }} class="w-[50vw] h-[80vh] bg-slate-200">
   {#if fileExtension !== "md" || !showMarkdownViewer }
       <div 
         use:createEditor tabindex="-1" class="w-full h-full outline-none"></div>
   {:else}
-    <div class="h-full w-full no-twp px-4 py-4 pt-0  overflow-auto">
+    <div class="h-full w-full no-twp px-4 py-4 pt-0 pb-8 overflow-auto">
       {@html DomPurify.sanitize(marked.parse(file.contents as string) as string) }
     </div>
     

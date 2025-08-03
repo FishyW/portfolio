@@ -22,6 +22,14 @@
 		-ms-user-select: none;
 	}
 
+	:global(*) {
+		user-select: none;
+	}
+
+	:global(input) {
+		user-select: initial;
+	}
+
 </style>
 
 {@render children()}
