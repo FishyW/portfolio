@@ -62,7 +62,6 @@ export function copy() {
     pasteBuffer.file = selected.file;
     pasteBuffer.operation = "COPY";
     pasteBuffer.active = true;
-    windowFileFocus();
 }
 
 export function move() {
@@ -70,7 +69,6 @@ export function move() {
     pasteBuffer.file = selected.file;
     pasteBuffer.operation = "MOVE";
     pasteBuffer.active = true;
-    windowFileFocus();
 }
 
 

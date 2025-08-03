@@ -72,7 +72,6 @@
 
     $effect(() => {
         pasteBuffer.file;
-        fileElement?.blur();
     });
 
     // needed to manually update the file
@@ -154,6 +153,17 @@
         : 'none'
     ) 
 
+    let isBeingMoved = $derived(pasteBuffer.file?.path === file.path 
+        && pasteBuffer.active && pasteBuffer.operation === "MOVE")
+
+    function selectURL() {
+        if (DirectoryFile.isDirectory(file)) {
+            return folderImageURL;
+        } else {
+            return fileImageURL;
+        }
+    }
+
 </script>
 
 <div class="h-fit w-fit ">
@@ -197,8 +207,7 @@ flex items-center flex-col outline-0",
 tippyOn && "bg-slate-300" ,
 aboveDropZone && "dragging",
 aboveDropZone && "bg-slate-300",
-pasteBuffer.file?.path === file.path 
-    && pasteBuffer.active && "bg-slate-300"
+
 ]}
 
 ondragstart={
@@ -278,12 +287,8 @@ oncontextmenu={e => {
 }}
 >   
         <div class="h-26 w-26 flex justify-center items-center p-2">
-            {#if DirectoryFile.isDirectory(file)}
-            <img src={folderImageURL} alt="folder" class="h-full object-contain drop-shadow-sm"/>
-            {:else }
-                <img src={fileImageURL} alt="file" class="h-full object-contain drop-shadow-sm"/>
-            {/if}
-
+            <img src={selectURL()} alt="file" 
+            class={["h-full object-contain drop-shadow-sm", isBeingMoved && "brightness-90"]}/>
         </div>
         
         <div class="w-24 mt-1 h-fit">
