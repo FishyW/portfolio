@@ -265,9 +265,18 @@ export class DirectoryFile extends BaseFile {
                     unavailableIndices.push(0);
                     continue;
                 }
+
                 // basename "hello (0)"
 
-                const match = base.match(new RegExp(`${curBase} \\((?<id>[0-9]+)\\)$`));
+                const escaped = curBase
+                    .replaceAll(")", "\\)")
+                    .replaceAll("(", "\\(")
+                    .replaceAll("-", "\\-")
+                    .replaceAll(".", "\\.")
+                    .replaceAll("_", "\\_");
+
+                const match = base.match(new RegExp(`${escaped} \\((?<id>[0-9]+)\\)$`));
+
                 if (!match?.groups?.id) {
                     continue;
                 }

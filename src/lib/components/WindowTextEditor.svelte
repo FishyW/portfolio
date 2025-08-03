@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-    import { RegFile, SpecialFile } from "$scripts/fs";
+    import { BaseFile, RegFile, SpecialFile } from "$scripts/fs";
     import WindowTopBar from "./WindowTopBar.svelte";
     import { EditorState, type Extension } from "@codemirror/state";
     import { lintKeymap } from "@codemirror/lint";
@@ -93,8 +93,17 @@
 
     import mdImg from "$icons/symbols/markdown-line.svg";
 
-let buffer = $state("");
-    
+
+    interface Props {
+      file: RegFile | SpecialFile
+    }
+
+    let { file }: Props = $props();
+
+    let buffer = $state("");
+
+    let currentView: null | EditorView = null;
+    let currentFile: null | RegFile | SpecialFile = null;
 
 function onViewChange(update: ViewUpdate) {
     if (!RegFile.isRegFile(file) && !SpecialFile.isSpecFile(file)) {
@@ -200,23 +209,14 @@ const extensions = [
 
         })
   ]
-
-
-    interface Props {
-      file: RegFile | SpecialFile
-    }
-
-    let { file }: Props = $props();
       
-
     const fileExtension = $derived(file.getExtension() ?? "");
     let showMarkdownViewer = $state(true);
 
     let originalContents = file.contents;
 
-    async function updateContentAsync(view: EditorView) {
-      if (!RegFile.isRegFile(file)) {
-          buffer = await file.contents;
+    function updateContents(view: EditorView, contents: string) {
+          buffer = contents;
           originalContents = buffer;
           view.dispatch({
             changes: {
@@ -225,12 +225,26 @@ const extensions = [
               insert: buffer
             }
           })
-      }
+    }
+
+    async function updateAsyncFile(view: EditorView) {
+        if (!RegFile.isRegFile(file))
+          updateContents(view, await file.contents);
     }
 
     function createEditor(node: HTMLElement) {
       $effect(() => {
-        
+        // clean up the view and save the file
+        if (currentFile) {
+          save(currentFile);
+        }
+        if (currentView) {
+            currentView.destroy();
+            currentView = null;
+        }
+
+       
+
         const contents = !RegFile.isRegFile(file) ? "" :
         typeof(file.contents) === "string" 
           ? file.contents : new TextDecoder().decode(file.contents);
@@ -387,25 +401,29 @@ const extensions = [
             )
             ]
         });
-        updateContentAsync(view);
+        updateAsyncFile(view);
+
+        currentView = view;
+        currentFile = file;
       })
     }
 
-    function save() {
+    function save(saveFile: RegFile | SpecialFile) {
       if (buffer !== originalContents)
-        file.contents = buffer
+        saveFile.contents = buffer
     }
 
     function toggleMarkdown() {
       if (!showMarkdownViewer) {
-          save();
+          save(file);
       }
       showMarkdownViewer = !showMarkdownViewer;
     }
+
 </script>
 
 <div class="w-full h-full flex flex-col">
-<WindowTopBar onexit={save}
+<WindowTopBar onexit={() => {save(file)}}
  content={file.name}
 >
 <div class="flex">

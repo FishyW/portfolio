@@ -1,6 +1,7 @@
 <script lang="ts">
     import { setContext, type Component } from "svelte";
     import WindowResizable from "./WindowResizable.svelte";
+    import type { BaseFile } from "$scripts/fs";
     
 
     interface Props {
@@ -20,6 +21,9 @@
 
     let onresizestart = $state(() => {});
     let onresizeend = $state(() => {});
+
+    let file: BaseFile | undefined = props.file;
+
 </script>
 
 <div bind:this={ctx.window} {onmousedown}

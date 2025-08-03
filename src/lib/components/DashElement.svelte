@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { WindowInfo } from '$scripts/ui/windows';
-    import { open } from './WindowManager.svelte';
+    import { focusWindow, open } from './WindowManager.svelte';
 
     interface Props {
         info: WindowInfo,
@@ -17,9 +17,9 @@ tabindex="-1"
 role="button"
 onclick={_ => {
     if (isOpened) 
-        open(info);
+        focusWindow(info);
 }}
-ondblclick={_ => {open(info)}}
+ondblclick={_ => {!isOpened ? open(info) : focusWindow(info)}}
 class="w-20 h-20 flex justify-center items-center hover:bg-secondary-90/40 rounded-md p-2 m-1"
 >
 <img src={info.icon}  alt="Dash Element"/>

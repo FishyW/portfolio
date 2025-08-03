@@ -1,7 +1,7 @@
 <script>
     import DashElement from "./DashElement.svelte";
     import { FilesInfo  } from "$scripts/ui/windows";
-    import { intoWindowsInfo, openWindowFixed } from "./WindowManager.svelte";
+    import { intoWindowsInfo, openWindows } from "./WindowManager.svelte";
     
     
     const pinnedApps = [
@@ -10,7 +10,7 @@
                 
 
     const openWindowsInfo = $derived(
-       intoWindowsInfo(openWindowFixed)
+       intoWindowsInfo(openWindows)
     );
 
 
@@ -33,7 +33,7 @@
         {/each} 
         {#each pinnedApps as info}
             <DashElement {info} 
-                isOpened={openWindowFixed.includes(info.name)}
+                isOpened={openWindows.includes(info.name)}
                 />
         {/each} 
     </div>

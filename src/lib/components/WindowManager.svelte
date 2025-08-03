@@ -16,12 +16,9 @@
     const windowMap: Map<string, WindowDetails> = new SvelteMap();
 
 
-    // specify the ordering of the windows
+
     export const openWindows: string[] = $state([]);
-
-    // same with open windows except elements are not reordered
-    export const openWindowFixed: string[] = $state([]);
-
+    export const zArray: string[] = [];
     
 
     export function intoWindowsInfo(ids: string[]) {
@@ -30,13 +27,18 @@
 
     // we need a prop array since SvelteMaps are not deeply reactive
     const propArray: object[] = $state([]);
+
+    let components: HTMLElement[] = $state([])
     
+    export function focusWindow(info: WindowInfo) {
+        const id = info.name;
+        reorder(id);
+    }
 
     export function open(
         info: WindowInfo,
         props = {}
     ) {
-        
         const componentWindow = info.component as typeof WindowEmpty;
         const id = info.name;
 
@@ -55,8 +57,9 @@
             propIndex: propArray.length - 1,
             info
         });
+
         openWindows.push(id);
-        openWindowFixed.push(id);
+        zArray.push(id);
     }
 
 
@@ -64,9 +67,12 @@
         // remove id
         const idx = openWindows.indexOf(id);
         openWindows.splice(idx, 1);
-        openWindowFixed.splice(idx, 1);
+        components.splice(idx, 1);
+
+        const zIdx = zArray.indexOf(id);
+        zArray.splice(zIdx, 1);
+
         windowMap.delete(id);
-        
     }
 
 
@@ -75,13 +81,27 @@
         return Math.random() * (max - min) + min; 
     }
 
+    function setReorder() {
+        // set the z-indices
+        for (const [i, zId] of zArray.entries()) {
+            let component = components[openWindows.indexOf(zId)];
+            if (component !== undefined)
+                component.style.zIndex = `${i}`;
+        }
+    }
+
     function reorder(id: string) {
-        const idx = openWindows.indexOf(id);
+        const idx = zArray.indexOf(id);
         if (idx === -1 || idx == openWindows.length - 1) {
             return;
         }
-        openWindows.splice(idx, 1);
-        openWindows.push(id);
+        zArray.splice(idx, 1);
+        zArray.push(id);
+
+        setReorder();
+
+        // needed for to trigger the PDF overlay
+        window.dispatchEvent(new CustomEvent("reorder", {detail: id}));
     }
 
     function onclose(node: HTMLElement, id: string) {
@@ -100,21 +120,25 @@
             new CustomEvent("close", {bubbles: true})
         );
     }
-  
+    
+    
+    
 </script>
 
 
 
 
-{#each openWindows as id (id) }
+{#each openWindows as id, i (id) }
     {@const { component , propIndex } = windowMap.get(id)!}
     
-    <div class="w-full flex-1 flex items-center">
+    <div {@attach (_) => setReorder()} bind:this={components[i]} class="w-full flex-1 flex items-center pointer-events-none">
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
         <div class="h-fit pointer-events-none" style:translate="{random(-100, 100)}px {random(-100, 100)}px">
-                <Window 
+            <Window 
                 {component}
-                onmousedown={() => reorder(id)}
+                onmousedown={e => {
+                    reorder(id)
+                }}
                 props={propArray[propIndex]}
         />
         </div>

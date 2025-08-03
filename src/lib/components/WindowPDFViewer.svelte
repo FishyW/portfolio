@@ -39,13 +39,7 @@
 
     }
   
-    $effect(() => {
-        hideOverlay = openWindows.at(-1) 
-            === DocumentViewerInfo.name;
-    })
-
     onresizeend = () => {
-        
         hideOverlay = true;
     }
 
@@ -53,7 +47,13 @@
         hideOverlay = false;
     }
 
+    window.addEventListener("reorder", e => {
+        const id = (e as CustomEvent).detail;
+        hideOverlay = id === DocumentViewerInfo.name;
+    })
  </script>
+
+
 
 <div class="flex flex-col  h-full">
 <WindowTopBar 
@@ -61,6 +61,8 @@
     ondragstart={() => hideOverlay = false}
     ondragend={() => hideOverlay = true} 
 />
+
+
 
 <div class="overflow-y-auto relative flex-1">
     <!-- <canvas use:loadPDF></canvas> -->
