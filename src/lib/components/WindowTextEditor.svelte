@@ -89,7 +89,7 @@
         autocompletion, completionKeymap, closeBrackets,
         closeBracketsKeymap
       } from "@codemirror/autocomplete";
-    import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
+    // import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 
 
     
@@ -399,11 +399,11 @@ const extensions = [
 >
 <div class="flex">
   {#if fileExtension === "md"}
-<div class="flex justify-end flex-1">
+<!-- <div class="flex justify-end flex-1">
   <WindowTopBarIcon onclick={() => {
     showMarkdownViewer = !showMarkdownViewer;
   }}>M</WindowTopBarIcon>
-</div>
+</div> -->
 {/if}
 </div>
 </WindowTopBar>

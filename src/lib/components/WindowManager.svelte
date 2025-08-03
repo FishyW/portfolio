@@ -114,7 +114,7 @@
         <div class="h-fit pointer-events-none" style:translate="{random(-100, 100)}px {random(-100, 100)}px">
                 <Window 
                 {component}
-                onclick={() => reorder(id)}
+                onmousedown={() => reorder(id)}
                 props={propArray[propIndex]}
         />
         </div>

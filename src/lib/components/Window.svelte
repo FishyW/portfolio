@@ -6,10 +6,10 @@
     interface Props {
         component: Component<any>,
         props: any,
-        onclick: (arg: MouseEvent) => void
+        onmousedown: (arg: MouseEvent) => void
     };
 
-    let { component, props, onclick }: Props = $props();
+    let { component, props, onmousedown }: Props = $props();
     const ComponentWindow = component;
 
     let ctx: {window: null | HTMLElement} 
@@ -22,7 +22,7 @@
     let onresizeend = $state(() => {});
 </script>
 
-<div {onclick} bind:this={ctx.window}   oncontextmenu={e => onclick(e)}
+<div bind:this={ctx.window} {onmousedown}
 class="pointer-events-auto relative"
 >
     <WindowResizable {onresizeend} {onresizestart} minWidth={630} minHeight={600}>

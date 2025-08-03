@@ -21,7 +21,7 @@
         </div>
 
         
-        <div class="flex-1">
+        <div class="flex-1 overflow-hidden">
             {@render children?.()}
         </div>
 

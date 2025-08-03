@@ -82,7 +82,6 @@ onmousedown={e => {
     isDragging = true;
 
     
-    e.target!.dispatchEvent(new Event("click", {bubbles: true}));
 }} 
 
 class="w-full h-12 p-2 shadow-sm/5 z-10 relative">
