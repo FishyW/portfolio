@@ -15,9 +15,11 @@
     // let _refs: ReturnType<>[] = $state([])
     // let refs = $derived(_refs.filter(Boolean))
 
-    let exit = $state(() => {});
     let contextMenu: ReturnType<typeof ContextMenuFile>;
     
+
+    export let mountFinished = false;
+
 </script>
 
 <div class="hidden">
@@ -33,6 +35,7 @@
     import { copy, move, paste, rename, removeFile } from "$scripts/ui/operations.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
     import { tippy } from "./WindowFileElement.svelte";
+    import { tick } from "svelte";
 
     function deselect() {
         if (tippy.on) {
@@ -41,6 +44,23 @@
         selected.file = null;
     }
 
+    function selectOffset(offset:number) {
+        const selectedFile = selected.file;
+        if (selectedFile == null) {
+            return;
+        }
+        const files = fileSystem.cwd.files;
+        const idx = files.findIndex(file => file.name === selectedFile.name);
+        const newIdx = idx + offset;
+        if (newIdx < 0 || newIdx >= files.length) {
+            return;
+        }
+        selected.file = files[newIdx];
+    }
+
+    function getRowCount() {
+        return getComputedStyle(windowElement).gridTemplateColumns.split(" ").length;
+    }
 
     function bindShortcuts(node: HTMLElement) {
         function bindKeys(e: KeyboardEvent) {
@@ -54,8 +74,16 @@
                 rename();
             } else if (e.key === "Delete") {
                 removeFile();
+            } else if (e.key === "ArrowRight") {
+                selectOffset(1);
+            } else if (e.key === "ArrowLeft") {
+                selectOffset(-1);
+            } else if (e.key === "ArrowUp") {
+                selectOffset(-getRowCount());
+            } else if (e.key === "ArrowDown") {
+                selectOffset(getRowCount());
             }
-        }
+        } 
 
         $effect(() => {
             node.addEventListener("keydown", bindKeys);
@@ -69,6 +97,10 @@
         focus();
     })
 
+
+    $effect(() => {
+        mountFinished = true;
+    })
     
 </script>
 

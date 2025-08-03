@@ -20,7 +20,8 @@
             tippyOn;
             editedName = filename;
             node.focus();
-            node.setSelectionRange(0, node.value.lastIndexOf("."));
+            node.value = filename;
+            node.setSelectionRange(0, filename.lastIndexOf("."));
         })
     }
 

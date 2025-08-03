@@ -36,6 +36,8 @@
     import fileImageURL from "$icons/files/File.svg";
     import folderImageURL from "$icons/files/Folder.svg";
 
+    import { mountFinished } from "./WindowFile.svelte";
+
     let tippyBox: HTMLElement;
 
   
@@ -61,6 +63,11 @@
             return;
         }
         selected = file;
+        fileElement.focus();
+    }
+
+    function deselect() {
+        selected = null;
     }
 
     $effect(() => {
@@ -147,6 +154,12 @@
         : 'none'
     ) 
 
+    $effect(() => {
+        if (mountFinished) {
+            select();
+        }
+        
+    })
 
 </script>
 
@@ -225,7 +238,7 @@ onfocusin={(e => {
 
 ondblclick={() => {
     file.open();
-    selected = null;
+    deselect();
     fileElement.blur();
 }}
 
@@ -244,7 +257,7 @@ ondragenter = {e =>  {
 
 ondrop = {e => {
     aboveDropZone = false;
-    selected = null;
+    deselect();
     fileElement.blur();
 
     if (!DirectoryFile.isDirectory(file)) {
@@ -259,7 +272,7 @@ ondrop = {e => {
 
 ondragover = {e => {
     e.preventDefault();
-    selected = null;
+    deselect();
     fileElement.blur();
 }}
 
