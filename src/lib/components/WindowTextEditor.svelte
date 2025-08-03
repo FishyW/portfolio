@@ -89,10 +89,9 @@
         autocompletion, completionKeymap, closeBrackets,
         closeBracketsKeymap
       } from "@codemirror/autocomplete";
-    // import WindowTopBarIcon from "./WindowTopBarIcon.svelte";
 
 
-    
+    import mdImg from "$icons/symbols/markdown-line.svg";
 
 let buffer = $state("");
     
@@ -169,8 +168,9 @@ const extensions = [
             "&": {
               "background-color": "var(--color-window-bg)",
             },
-            "*": {
-              "font-size": "0.9rem"
+            "& *": {
+              "font-size": "0.9rem",
+              "font-family": "Inter Variable"
             },
             "&.cm-editor" : {
               "width": "100%",
@@ -235,7 +235,6 @@ const extensions = [
         typeof(file.contents) === "string" 
           ? file.contents : new TextDecoder().decode(file.contents);
 
-        
         buffer = contents;
         const extension = fileExtension;
 
@@ -392,24 +391,31 @@ const extensions = [
       })
     }
 
+    function save() {
+      if (buffer !== originalContents)
+        file.contents = buffer
+    }
 
-    
+    function toggleMarkdown() {
+      if (!showMarkdownViewer) {
+          save();
+      }
+      showMarkdownViewer = !showMarkdownViewer;
+    }
 </script>
 
 <div class="w-full h-full flex flex-col">
-<WindowTopBar onexit={ () => {
-    if (buffer !== originalContents)
-      file.contents = buffer
-}}
+<WindowTopBar onexit={save}
  content={file.name}
 >
 <div class="flex">
   {#if fileExtension === "md"}
-<!-- <div class="flex justify-end flex-1">
-  <WindowTopBarIcon onclick={() => {
-    showMarkdownViewer = !showMarkdownViewer;
-  }}>M</WindowTopBarIcon>
-</div> -->
+<div class="flex justify-end flex-1">
+  <button class="w-8 h-8 p-1 whitespace-nowrap flex rounded-md hover:bg-slate-200 mr-1"
+    onclick={() => toggleMarkdown()}>
+            <img src={mdImg} alt="toggle view"/>
+    </button>  
+</div>
 {/if}
 </div>
 </WindowTopBar>
@@ -424,7 +430,7 @@ const extensions = [
       <div 
         use:createEditor tabindex="-1" class="w-full h-full outline-none"></div>
   {:else}
-    <div class="h-full w-full no-twp px-4 py-4 pt-0  overflow-auto">
+    <div class="h-full w-full no-twp p-3.5 py-3.5 overflow-auto bg-window-bg">
       {@html DomPurify.sanitize(marked.parse(file.contents as string) as string) }
     </div>
     
@@ -432,10 +438,17 @@ const extensions = [
   </div>
 </div>
   <style>
+ 
+
     .no-twp :global(*) {
       margin: 0;
       margin: 2px;
     }
+
+    .no-twp > :global(:first-child) {
+      margin-top: 0 !important;
+    }
+    
 
     .no-twp :global(h1),
     .no-twp :global(h2),
@@ -446,4 +459,8 @@ const extensions = [
         margin-bottom: 5px;
         margin-top: 10px
       }
+
+    .no-twp :global(p) {
+      font-size: 0.9rem;
+    }
   </style>
