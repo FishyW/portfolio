@@ -185,7 +185,7 @@ const extensions = [
               "padding-right": "1rem"
             },
             ".cm-scroller": {
-              "padding-bottom": "3rem"
+              "padding-bottom": "1rem"
             },
             "&.cm-focused .cm-selectionBackground": {
                 "background-color": "var(--color-primary-90) !important"
@@ -396,6 +396,7 @@ const extensions = [
     
 </script>
 
+<div class="w-full h-full flex flex-col">
 <WindowTopBar onexit={ () => {
     if (buffer !== originalContents)
       file.contents = buffer
@@ -418,7 +419,7 @@ const extensions = [
     if (e.key === "s" && e.ctrlKey) {
       e.preventDefault();
     }
-  }} class="bg-slate-200 h-full w-full">
+  }} class="bg-slate-200 flex-1 overflow-hidden w-full">
   {#if fileExtension !== "md" || !showMarkdownViewer }
       <div 
         use:createEditor tabindex="-1" class="w-full h-full outline-none"></div>
@@ -429,7 +430,7 @@ const extensions = [
     
   {/if}
   </div>
-
+</div>
   <style>
     .no-twp :global(*) {
       margin: 0;
