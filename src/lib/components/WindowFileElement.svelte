@@ -150,7 +150,7 @@
 
 </script>
 
-<div class="h-fit w-fit">
+<div class="h-fit w-fit ">
  
 <div class="hidden">
     <ContextMenuFile  mountCallback={mountPrompt} {file} bind:this={contextMenu} />
@@ -217,7 +217,11 @@ onclick={(e => {
     select();
 })}
 
-
+onfocusin={(e => {
+    if(tippy.on) {
+        (e.target! as HTMLElement).blur();
+    }
+})}
 
 ondblclick={() => {
     file.open();
@@ -266,11 +270,11 @@ oncontextmenu={e => {
     show(e, contextMenu);
 }}
 >   
-        <div class="w-24">
+        <div class="h-26 w-26 flex justify-center items-center p-2">
             {#if DirectoryFile.isDirectory(file)}
-            <img src={folderImageURL} alt="folder" class="drop-shadow-sm"/>
+            <img src={folderImageURL} alt="folder" class="h-full object-contain drop-shadow-sm"/>
             {:else }
-                <img src={fileImageURL} alt="file" class="drop-shadow-sm"/>
+                <img src={fileImageURL} alt="file" class="h-full object-contain drop-shadow-sm"/>
             {/if}
 
         </div>
@@ -302,8 +306,8 @@ oncontextmenu={e => {
     @import "tailwindcss";
 
     img {
-        height: initial;
-        /* max-width: initial; */
+        /* height: initial; */
+        /* min-width: 100%; */
     }
    
 

@@ -103,8 +103,9 @@ ondrop={e => {
 }}
 
 
-class="flex-1 flex flex-wrap px-8 py-6
-content-start overflow-y-auto outline-0 gap-4" 
+class="flex-1 px-8 py-6 overflow-y-auto outline-0 
+grid gap-4 justify-items-center content-start 
+grid-cols-[repeat(auto-fill,_minmax(128px,_1fr))]" 
 oncontextmenu={e => {
     e.preventDefault();
     deselect();
