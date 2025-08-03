@@ -15,6 +15,11 @@ type PasteBuffer = { file?: BaseFile, operation?:  Operation, active?: boolean }
 
 export let pasteBuffer: PasteBuffer = $state({});
 
+export function fileOpen() {
+    if (selected.file === null) return;
+    selected.file.open();
+}
+
 export function newFile() {
     const file = fileSystem.addEmptyFile();
     if (file.vfs.isRenameSupported) {

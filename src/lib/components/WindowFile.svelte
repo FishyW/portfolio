@@ -31,10 +31,10 @@
     import FileElement from "./WindowFileElement.svelte";
     import ContextMenuFile from "./ContextMenuFile.svelte";
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
-    import { copy, move, paste, rename, removeFile } from "$scripts/ui/operations.svelte";
+    import { copy, move, paste, rename, removeFile, fileOpen } from "$scripts/ui/operations.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
     import { tippy } from "./WindowFileElement.svelte";
-    import { tick } from "svelte";
+
 
     function deselect() {
         if (tippy.on) {
@@ -81,6 +81,8 @@
                 selectOffset(-getRowCount());
             } else if (e.key === "ArrowDown") {
                 selectOffset(getRowCount());
+            } else if (e.key === "Enter") {
+                fileOpen();
             }
         } 
 

@@ -36,6 +36,7 @@
     import fileImageURL from "$icons/files/File.svg";
     import folderImageURL from "$icons/files/Folder.svg";
 
+    import { fileOpen } from "$scripts/ui/operations.svelte";
 
     let tippyBox: HTMLElement;
 
@@ -229,7 +230,8 @@ onfocusin={(e => {
 })}
 
 ondblclick={() => {
-    file.open();
+    select();
+    fileOpen();
     deselect();
     fileElement.blur();
 }}

@@ -18,7 +18,7 @@
 
     function drag() {        
         
-        if (isDragging) {
+        if (isDragging && ctx.window !== null) {
 
             if (mNow.x >= document.documentElement.clientWidth - DELTA 
                 || mNow.y >= document.documentElement.clientHeight - DELTA 
@@ -33,7 +33,7 @@
             offset.x = mNow.x - mInit.x + currentTranslate.x;
             offset.y = mNow.y - mInit.y + currentTranslate.y;
 
-            ctx.window!.style.translate = `${offset.x}px ${offset.y}px`;
+            ctx.window.style.translate = `${offset.x}px ${offset.y}px`;
             handler = requestAnimationFrame(drag);
         } else {
             currentTranslate.x = offset.x;
