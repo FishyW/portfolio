@@ -47,7 +47,6 @@
 
 
 <svelte:body onmousemove={e =>{
-    e.preventDefault();
     if (isDragging) {
         mNow.x = e.clientX;
         mNow.y = e.clientY;
@@ -55,7 +54,6 @@
 }}
 
 onmouseup={e => {
-    e.preventDefault();
     if (isDragging) {
         ondragend();
         isDragging = false;
@@ -71,7 +69,6 @@ onmousedown={e => {
     if (e.button !== 0) {
         return;
     }
-    e.preventDefault();
     ondragstart();
     // propagate onclick
     mNow.x = e.clientX;
