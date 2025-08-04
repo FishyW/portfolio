@@ -27,7 +27,7 @@
 
 <script lang="ts">
     import { BaseFile, fileSystem } from "$scripts/ui/fs.svelte";
-    import { show } from "./ContextMenu.svelte";
+    import { menu, show } from "./ContextMenu.svelte";
     import FileElement from "./WindowFileElement.svelte";
     import ContextMenuFile from "./ContextMenuFile.svelte";
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
@@ -103,7 +103,6 @@
     
 </script>
 
-
 <div class="h-full flex flex-col">
 <WindowTopBarFile />
 
@@ -139,8 +138,13 @@ grid gap-4 justify-items-center content-start
 grid-cols-[repeat(auto-fill,_minmax(128px,_1fr))]" 
 oncontextmenu={e => {
     e.preventDefault();
+    if (menu.on) {
+        return;
+    }
+    e.stopPropagation();
     deselect();
     show(e, contextMenu);
+    return;
 }}>
 
 

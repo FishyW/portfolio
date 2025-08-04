@@ -15,7 +15,7 @@
 <WindowTopBarDraggable {ondragend} {ondragstart}  >
     <div class="flex w-full h-full items-center gap-1 relative ">
         <div class="absolute top-0 w-full h-full flex items-center -z-10">
-            <div class="text-center select-none w-full">
+            <div class="text-center w-full">
                 {content}
             </div>
         </div>

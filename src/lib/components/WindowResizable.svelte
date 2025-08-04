@@ -142,7 +142,6 @@
 <svelte:window 
 
 onmouseup={e => {
-     e.preventDefault();
      if (isDragging) {
         onresizeend();
         isDragging = false;
@@ -152,9 +151,6 @@ onmouseup={e => {
 }}
 
 onmousemove={e => {
-    
-    e.preventDefault();
-
     handleMove(e);
     
     if (isDragging) {
@@ -195,7 +191,6 @@ onmousemove={e => {
         return;
     }
 
-    e.preventDefault();
 
     initializeDrag();
     onresizestart();
@@ -208,7 +203,6 @@ onmousemove={e => {
     requestAnimationFrame(resize);
     isDragging = true;
     
-    e.target!.dispatchEvent(new Event("click", {bubbles: true}));
 }}
 		bind:this={parent}
         style:width={`${minWidth}px`}

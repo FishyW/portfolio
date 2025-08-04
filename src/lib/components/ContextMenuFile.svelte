@@ -5,6 +5,20 @@
     import { copy, decryptFile, download, encryptFile, 
          move, newFile, newFolder, paste, pasteBuffer, 
          removeFile, rename, unmount } from '$scripts/ui/operations.svelte';
+    import ContextMenuFileButton from './ContextMenuFileButton.svelte';
+
+    import newFileIcon from "$icons/symbols/paper-symbolic.svg";
+    import newFolderIcon from "$icons/symbols/folder-visiting-symbolic.svg";
+    import removeIcon from "$icons/symbols/user-trash-symbolic.svg";
+    import copyIcon from "$icons/symbols/copy-symbolic.svg";
+    import encryptIcon from "$icons/symbols/lock-small-symbolic.svg";
+    import decryptIcon from "$icons/symbols/lock-small-open-symbolic.svg";
+    import downloadIcon from "$icons/symbols/arrow-pointing-at-line-down-symbolic.svg";
+    import renameIcon from "$icons/symbols/edit-symbolic.svg";
+
+    import mountIcon from "$icons/symbols/usb-stick-symbolic.svg";
+
+    // move, paste, and unmount
 
     interface Props {
         file?: BaseFile,
@@ -43,74 +57,78 @@
 
 </script>
 
-<ul class="p-2 w-40 bg-green-500" bind:this={mainElement}>
+<ul class="p-1 w-42 " bind:this={mainElement}>
 
     {#if !file}
-        <li onclick={exitWrapper(newFile)} 
-            class="hover:bg-green-400 select-none">New File</li>
-
-        <li class="hover:bg-green-400 select-none"
-        onclick={exitWrapper(newFolder)}
-        >New Folder</li>
+        
+        <ContextMenuFileButton onclick={exitWrapper(newFile)}>
+            New File
+        </ContextMenuFileButton>
+      
+        <ContextMenuFileButton onclick={exitWrapper(newFolder)}>
+            New Folder
+        </ContextMenuFileButton>
     {/if}
 
         
 
         {#if file}
-            <li
-                onclick={exitWrapper(removeFile)}
-                class="hover:bg-green-400 select-none">Remove
-            </li>
-
-             <li class="hover:bg-green-400 select-none"
-                onclick={exitWrapper(rename)}>Rename
-            </li>
+            <ContextMenuFileButton onclick={exitWrapper(removeFile)}>
+                Remove
+            </ContextMenuFileButton>
 
             
-             <li class="hover:bg-green-400 select-none"
-                onclick={exitWrapper(copy)}>Copy
-                </li>
+            <ContextMenuFileButton onclick={exitWrapper(rename)}>
+                Rename
+            </ContextMenuFileButton>
+        
+            <ContextMenuFileButton onclick={exitWrapper(copy)}>
+                Copy
+            </ContextMenuFileButton>
+        
+            <ContextMenuFileButton onclick={exitWrapper(move)}>
+                Move
+            </ContextMenuFileButton>
 
-            <li class="hover:bg-green-400 select-none"
-            onclick={exitWrapper(move)}>Move
-            </li>
             <!-- No upload since there's no APIs that allows selections of both
              directories and files in the same file picker -->
-             
-           <li
-            onclick={exitWrapper(download)}
-            class="hover:bg-green-400 select-none">Download
-            </li>
 
+            <ContextMenuFileButton onclick={exitWrapper(download)}>
+                Download
+            </ContextMenuFileButton>
+        {/if}
         {#if file && !isBaseMount}
-            <li class="hover:bg-green-400 select-none"
-                onclick={exitWrapper(mountCallback!)}>Mount
-            </li>
+            <ContextMenuFileButton onclick={exitWrapper(mountCallback!)}>
+                Mount
+            </ContextMenuFileButton>
         {/if}
         {#if file && isBaseMount}
-            <li class="hover:bg-green-400 select-none"
-                onclick={exitWrapper(unmount)}>Unmount
-            </li>
-        {/if}
+            <ContextMenuFileButton onclick={exitWrapper(unmount)}>
+                Unmount
+            </ContextMenuFileButton>
         {/if}
 
         {#if pasteBuffer.file !== undefined}
-            <li class="hover:bg-green-400 select-none"
-                    onclick={exitWrapper(paste)}>Paste
-            </li>
+            <ContextMenuFileButton onclick={exitWrapper(paste)}>
+                Paste
+            </ContextMenuFileButton>
         {/if}
 
         {#if file}
-            <li class="hover:bg-green-400 select-none"
-            onclick={exitWrapper(encryptFile)}>Encrypt
-            </li>
+            <ContextMenuFileButton onclick={exitWrapper(encryptFile)}>
+                Encrypt
+            </ContextMenuFileButton>
         {/if}
 
         {#if file && !DirectoryFile.isDirectory(file) 
             && (file.getExtension() === "enc"
             || file.getExtension() === "encdir")}
-            <li class="hover:bg-green-400 select-none"
-            onclick={exitWrapper(decryptFile)}>Decrypt
-            </li>
+            <ContextMenuFileButton onclick={exitWrapper(decryptFile)}>
+                Decrypt
+            </ContextMenuFileButton>
         {/if}
     </ul>
+
+    <style>
+
+    </style>

@@ -47,7 +47,7 @@
 	<TopBarSettings />
 
 	<button 
-		class="select-none w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
+		class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
 		ondblclick={async () => {
 			// reset
 			await IndexedDBSystem.reset();

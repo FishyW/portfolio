@@ -92,6 +92,7 @@
 
 
     import mdImg from "$icons/symbols/markdown-line.svg";
+    import editImg from "$icons/symbols/edit-symbolic.svg";
 
 
     interface Props {
@@ -100,7 +101,7 @@
 
     let { file }: Props = $props();
 
-    let buffer = $state("");
+    let buffer: string | null = $state(null);
 
     let currentView: null | EditorView = null;
     let currentFile: null | RegFile | SpecialFile = null;
@@ -238,12 +239,6 @@ const extensions = [
         if (currentFile) {
           save(currentFile);
         }
-        if (currentView) {
-            currentView.destroy();
-            currentView = null;
-        }
-
-       
 
         const contents = !RegFile.isRegFile(file) ? "" :
         typeof(file.contents) === "string" 
@@ -409,6 +404,9 @@ const extensions = [
     }
 
     function save(saveFile: RegFile | SpecialFile) {
+      if (buffer === null) {
+          return;
+      }
       if (buffer !== originalContents)
         saveFile.contents = buffer
     }
@@ -416,8 +414,11 @@ const extensions = [
     function toggleMarkdown() {
       if (!showMarkdownViewer) {
           save(file);
+          buffer = null;
       }
+      
       showMarkdownViewer = !showMarkdownViewer;
+      
     }
 
 </script>
@@ -429,9 +430,13 @@ const extensions = [
 <div class="flex">
   {#if fileExtension === "md"}
 <div class="flex justify-end flex-1">
-  <button class="w-8 h-8 p-1 whitespace-nowrap flex rounded-md hover:bg-slate-200 mr-1"
+  <button class="w-8 h-8 p-1 whitespace-nowrap justify-center items-center flex rounded-md hover:bg-slate-200 mr-1"
     onclick={() => toggleMarkdown()}>
+          {#if !showMarkdownViewer}
             <img src={mdImg} alt="toggle view"/>
+          {:else}
+            <img src={editImg} width="18" alt="toggle view"/>
+          {/if}
     </button>  
 </div>
 {/if}
@@ -461,10 +466,16 @@ const extensions = [
     .no-twp :global(*) {
       margin: 0;
       margin: 2px;
+      user-select: text;
+    }
+
+    .no-twp {
+      user-select: text;
     }
 
     .no-twp > :global(:first-child) {
       margin-top: 0 !important;
+      padding-top: 0 !important;
     }
     
 

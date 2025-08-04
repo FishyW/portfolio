@@ -21,7 +21,7 @@
 
 <script lang="ts">
     import { DirectoryFile, type BaseFile } from "$scripts/ui/fs.svelte";
-    import { show } from "./ContextMenu.svelte";
+    import { menu, show } from "./ContextMenu.svelte";
 
     import ContextMenuFile from "./ContextMenuFile.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
@@ -281,6 +281,10 @@ ondragover = {e => {
 
 oncontextmenu={e => {
     e.preventDefault();
+    if (menu.on) {
+        return;
+    }
+    
     e.stopPropagation();
     select();
     show(e, contextMenu);

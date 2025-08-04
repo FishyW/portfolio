@@ -66,7 +66,7 @@
         onclick={() => fileSystem.forward()}></div> -->
         <div use:scrollset class="
         flex items-center text-sm
-        select-none text-nowrap no-scrollbar flex-1 mx-1 bg-gray-200 
+        text-nowrap no-scrollbar flex-1 mx-1 bg-gray-200 
         p-0.5 rounded-md overflow-x-auto">
             {#each pathTuple as [fullpath, segment], idx}
                     {#if idx !== 0}
