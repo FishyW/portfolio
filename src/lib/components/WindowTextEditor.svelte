@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-    import { BaseFile, RegFile, SpecialFile } from "$scripts/fs";
+    import { RegFile, SpecialFile } from "$scripts/fs";
     import WindowTopBar from "./WindowTopBar.svelte";
     import { EditorState, type Extension } from "@codemirror/state";
     import { lintKeymap } from "@codemirror/lint";
@@ -91,7 +91,7 @@
       } from "@codemirror/autocomplete";
 
 
-    import mdImg from "$icons/symbols/markdown-line.svg";
+    import mdImg from "$icons/symbols/markdown-symbolic.svg";
     import editImg from "$icons/symbols/edit-symbolic.svg";
 
 

@@ -108,7 +108,7 @@ onkeydown={(e => {
     onmousedown={e => {
         e.stopImmediatePropagation();
     }}
-    class="fixed z-50 rounded-md bg-secondary-90 shadow-[0_0_1px_1px_rgba(120,120,120,0.1)]" 
+    class="fixed z-50 rounded-xl bg-window-bg shadow-[0_0_3px_3px_rgba(0,0,0,0.1)]" 
     style:top="{pos.y}px"  
     style:left="{pos.x}px"
     use:onContextMenuMount

@@ -11,12 +11,15 @@
     import newFolderIcon from "$icons/symbols/folder-visiting-symbolic.svg";
     import removeIcon from "$icons/symbols/user-trash-symbolic.svg";
     import copyIcon from "$icons/symbols/copy-symbolic.svg";
-    import encryptIcon from "$icons/symbols/lock-small-symbolic.svg";
-    import decryptIcon from "$icons/symbols/lock-small-open-symbolic.svg";
+    import encryptIcon from "$icons/symbols/padlock2-symbolic.svg";
+    import decryptIcon from "$icons/symbols/padlock2-open-symbolic.svg";
     import downloadIcon from "$icons/symbols/arrow-pointing-at-line-down-symbolic.svg";
     import renameIcon from "$icons/symbols/edit-symbolic.svg";
+    import pasteIcon from "$icons/symbols/clipboard-symbolic.svg";
+    import moveIcon from "$icons/symbols/move-tool-symbolic.svg";
 
     import mountIcon from "$icons/symbols/usb-stick-symbolic.svg";
+    import unmountIcon from "$icons/symbols/eject-symbolic.svg";
 
     // move, paste, and unmount
 
@@ -61,11 +64,15 @@
 
     {#if !file}
         
-        <ContextMenuFileButton onclick={exitWrapper(newFile)}>
+        <ContextMenuFileButton 
+            iconURL={newFileIcon}
+            onclick={exitWrapper(newFile)}>
             New File
         </ContextMenuFileButton>
       
-        <ContextMenuFileButton onclick={exitWrapper(newFolder)}>
+        <ContextMenuFileButton 
+            iconURL={newFolderIcon}
+            onclick={exitWrapper(newFolder)}>
             New Folder
         </ContextMenuFileButton>
     {/if}
@@ -73,49 +80,70 @@
         
 
         {#if file}
-            <ContextMenuFileButton onclick={exitWrapper(removeFile)}>
-                Remove
-            </ContextMenuFileButton>
 
             
-            <ContextMenuFileButton onclick={exitWrapper(rename)}>
+            <ContextMenuFileButton 
+                iconURL={renameIcon}
+                onclick={exitWrapper(rename)}>
                 Rename
             </ContextMenuFileButton>
         
-            <ContextMenuFileButton onclick={exitWrapper(copy)}>
+            <ContextMenuFileButton 
+                iconURL={copyIcon}
+                onclick={exitWrapper(copy)}>
                 Copy
             </ContextMenuFileButton>
         
-            <ContextMenuFileButton onclick={exitWrapper(move)}>
+            <ContextMenuFileButton 
+                iconURL={moveIcon}
+                onclick={exitWrapper(move)}>
                 Move
+            </ContextMenuFileButton>
+
+        {#if pasteBuffer.file !== undefined}
+            <ContextMenuFileButton 
+                iconURL={pasteIcon}
+                onclick={exitWrapper(paste)}>
+                Paste
+            </ContextMenuFileButton>
+        {/if}
+
+            <ContextMenuFileButton 
+                iconURL={removeIcon}
+                onclick={exitWrapper(removeFile)}>
+                Remove
             </ContextMenuFileButton>
 
             <!-- No upload since there's no APIs that allows selections of both
              directories and files in the same file picker -->
 
-            <ContextMenuFileButton onclick={exitWrapper(download)}>
+            <ContextMenuFileButton 
+                iconURL={downloadIcon}
+                onclick={exitWrapper(download)}>
                 Download
             </ContextMenuFileButton>
         {/if}
         {#if file && !isBaseMount}
-            <ContextMenuFileButton onclick={exitWrapper(mountCallback!)}>
+            <ContextMenuFileButton 
+                iconURL={mountIcon}
+                onclick={exitWrapper(mountCallback!)}>
                 Mount
             </ContextMenuFileButton>
         {/if}
         {#if file && isBaseMount}
-            <ContextMenuFileButton onclick={exitWrapper(unmount)}>
+            <ContextMenuFileButton 
+                iconURL={unmountIcon}
+                onclick={exitWrapper(unmount)}>
                 Unmount
             </ContextMenuFileButton>
         {/if}
 
-        {#if pasteBuffer.file !== undefined}
-            <ContextMenuFileButton onclick={exitWrapper(paste)}>
-                Paste
-            </ContextMenuFileButton>
-        {/if}
+        
 
         {#if file}
-            <ContextMenuFileButton onclick={exitWrapper(encryptFile)}>
+            <ContextMenuFileButton 
+                iconURL={encryptIcon}
+                onclick={exitWrapper(encryptFile)}>
                 Encrypt
             </ContextMenuFileButton>
         {/if}
@@ -123,7 +151,9 @@
         {#if file && !DirectoryFile.isDirectory(file) 
             && (file.getExtension() === "enc"
             || file.getExtension() === "encdir")}
-            <ContextMenuFileButton onclick={exitWrapper(decryptFile)}>
+            <ContextMenuFileButton 
+                iconURL={decryptIcon}
+                onclick={exitWrapper(decryptFile)}>
                 Decrypt
             </ContextMenuFileButton>
         {/if}
