@@ -12,6 +12,7 @@
 </script>
 
 <!-- Opens the File Window -->
+<div class="relative">
 <div 
 tabindex="-1"
 role="button"
@@ -20,9 +21,19 @@ onclick={_ => {
         focusWindow(info);
 }}
 ondblclick={_ => {!isOpened ? open(info) : focusWindow(info)}}
-class="w-20 h-20 flex justify-center items-center hover:bg-secondary-90/40 rounded-md p-2 m-1"
+class="w-20 h-20 flex justify-center items-center
+hover:bg-secondary-90/40 rounded-md p-2 m-1"
 >
 <img src={info.icon}  alt="Dash Element"/>
+
+
+</div>
+
+{#if isOpened}
+<div class="absolute -bottom-2 w-full h-4 flex justify-center">
+    <div class="w-1.5 h-1.5 bg-green-50 rounded-full"></div>
+</div>
+{/if}
 </div>
 
 <style>

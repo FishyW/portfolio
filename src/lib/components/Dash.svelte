@@ -31,6 +31,10 @@
         {#each openWindowsInfoFiltered as info}
             <DashElement {info} isOpened={true}/>
         {/each} 
+        <!-- vertical rule -->
+         {#if openWindowsInfoFiltered.length > 0}
+        <div class="w-[1px] h-9/12 my-auto bg-secondary-90/30"></div>
+        {/if}
         {#each pinnedApps as info}
             <DashElement {info} 
                 isOpened={openWindows.includes(info.name)}
