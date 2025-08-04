@@ -70,7 +70,7 @@
         p-0.5 rounded-md overflow-x-auto">
             {#each pathTuple as [fullpath, segment], idx}
                     {#if idx !== 0}
-                    <div class="mx-2">/</div>
+                    <div class="mx-2 text-secondary-70">/</div>
                     {/if}
                     <WindowTopBarFilePathButton  {fullpath} {segment} />
             {/each}
