@@ -16,6 +16,8 @@ export abstract class BaseFile extends VirtualSystemFile {
     accessor parent: DirectoryFile | null;
     #savedName: string;
     
+    isRemoved;
+    
     constructor(name: string, parent: DirectoryFile | null) {
         super(new MainFS());
         this.isVirtual = parent !== null ? parent.isVirtual : false;
@@ -24,6 +26,7 @@ export abstract class BaseFile extends VirtualSystemFile {
         this.name = name;
         this.parent = parent;
         this.#savedName = name; 
+        this.isRemoved = false;
              
         if (this.parent !== null) {
             this.parent.addFile(this);
@@ -34,7 +37,7 @@ export abstract class BaseFile extends VirtualSystemFile {
         let path = "";
         // root
         if (this.parent == null) {
-            return path = "/";
+            return "/";
         } else {
             // remove trailing slash
             path = this.parent.path!;
@@ -382,11 +385,13 @@ export class DirectoryFile extends BaseFile {
         }
 
         this.files.splice(index, 1);
+        file.isRemoved = true;
 
         if (!temporary) {
             // call remove "system call" to update the database
             this.vfs.remove(file);
         }
+
     }
 
     static isDirectory(file: BaseFile): file is DirectoryFile {
@@ -414,6 +419,10 @@ export class DirectoryFile extends BaseFile {
             return true;
         }
         return this.isAncestor(dir.parent);
+    }
+
+    isRoot() {
+        return this.path === "/" && this.name === "";
     }
 
     serialize(): SerializedFolder  {
@@ -591,10 +600,15 @@ export class FileSystem {
         this.cwd.removeFile(file);
     }
 
-    changeDirectory(dir: DirectoryFile) {
+    changeDirectory(dir: DirectoryFile, updateHistory = true) {
+        if (dir.isRemoved) {
+            throw new Error("File does not exist!");
+        }
         this.cwd = dir;
-        this.history.push(dir);
-        this.backHistory = [];
+        if (updateHistory) {
+            this.history.push(dir);
+            this.backHistory = [];
+        }
     }
 
 
@@ -651,18 +665,19 @@ export class FileSystem {
         if (this.history.length <= 1) {
             return;
         }
+        this.changeDirectory(this.history.at(-2)!, false);
         this.backHistory.push(this.history.at(-1)!);
         this.history.pop();
-        this.cwd = this.history.at(-1)!;
     }
 
     forward() {
         if (this.backHistory.length == 0) {
             return;
         }
-        this.cwd = this.backHistory.at(-1)!;
+        this.changeDirectory(this.backHistory.at(-1)!, false);
         this.history.push(this.cwd);
         this.backHistory.pop();
+       
     }
 
     // get index of a file with a certain filename

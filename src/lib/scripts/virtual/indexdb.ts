@@ -123,6 +123,7 @@ export class IndexedDBSystem extends VirtualSystem {
             if (file.parent == null) {
                 return;
             }
+
             // update parent files
             store?.put(file.parent.serialize());
         })
