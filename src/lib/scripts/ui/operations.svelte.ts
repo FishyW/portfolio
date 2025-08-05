@@ -8,7 +8,9 @@ import JSZip from 'jszip';
 import { IndexedDBSystem } from '$scripts/virtual/indexdb';
 import { VFSMap } from './config.svelte';
 import { SpecialFile } from '$scripts/fs';
-import { openErrorDialog } from '$components/WindowFileDialog.svelte';
+import { openErrorDialog, prompt } from '$components/WindowFileDialog.svelte';
+import { DecryptPromptInfo, EncryptPromptInfo } from './info';
+
 
 type PasteOperation = "MOVE" | "COPY";
 
@@ -19,7 +21,25 @@ export let pasteBuffer: PasteBuffer = $state({});
 function promptOnError(target: Function, context: ClassMethodDecoratorContext) {
     return function (...args: any[]) {
         try {
-            return target(...args);
+            const value = target(...args);
+            if (typeof(value) === "object" && value.then !== undefined && value.catch !== undefined) {
+                throw new Error("Object is potentially a promise!");
+            }
+            return value;
+        } catch(e) {
+            openErrorDialog((e as Error).message);
+        }
+    }
+}
+
+function promptOnErrorAsync(target: Function, context: ClassMethodDecoratorContext) {
+    return async function (...args: any[]) {
+        try {
+            const value = target(...args);
+            if (typeof(value) !== "object" || value.then === undefined) {
+                throw new Error("Object is not a promise!");
+            }
+            return await value;
         } catch(e) {
             openErrorDialog((e as Error).message);
         }
@@ -118,10 +138,10 @@ class Operation {
         pasteBuffer.active = false;
     }
 
-    @promptOnError
+    @promptOnErrorAsync
     static async encryptFile() {
         if (selected.file === null) {return;}
-        const password = window.prompt("Set a password");
+        const password = await prompt(EncryptPromptInfo);
         if (password === null) {
             return;
         }
@@ -136,10 +156,10 @@ class Operation {
         fileSystem.createFile(newName, encrypted);
     }
 
-    @promptOnError
+    @promptOnErrorAsync
     static async decryptFile() {
         if (selected.file === null) {return;}
-        const password = window.prompt("Enter password");
+        const password = await prompt(DecryptPromptInfo);
         if (password === null) {
             return;
         }
@@ -153,8 +173,7 @@ class Operation {
         
         const serialized = await decrypt(password, selected.file.contents);
         if (serialized === null) {
-            alert("Invalid password!");
-            return;
+            throw new Error("Invalid password!");
         }
         
         const folder = fileSystem.addEmptyFolder("tmp");
@@ -177,7 +196,7 @@ class Operation {
         }
     }
 
-    @promptOnError
+    @promptOnErrorAsync
     static async download() {
         if (selected.file === null) {return;}
         if (RegFile.isRegFile(selected.file) || SpecialFile.isSpecFile(selected.file)) {
@@ -191,7 +210,7 @@ class Operation {
         saveAs(content, selected.file.name + ".zip")
     }
 
-    @promptOnError
+    @promptOnErrorAsync
     static async mount(mountPath: string) {
         if (selected.file === null) {
             return;

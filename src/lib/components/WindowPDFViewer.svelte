@@ -1,6 +1,6 @@
 <script lang="ts">
     import { type RegFile } from "$scripts/fs";
-    import { DocumentViewerInfo } from "$scripts/ui/windows";
+    import { DocumentViewerInfo } from "$scripts/ui/info";
     import { openWindows } from "./WindowManager.svelte";
     import WindowTopBar from "./WindowTopBar.svelte";
 

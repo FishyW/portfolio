@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { WindowInfo } from '$scripts/ui/windows';
+    import type { WindowInfo } from '$scripts/ui/info';
     import { focusWindow, open } from './WindowManager.svelte';
 
     interface Props {

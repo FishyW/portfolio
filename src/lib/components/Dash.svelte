@@ -1,6 +1,6 @@
 <script>
     import DashElement from "./DashElement.svelte";
-    import { FilesInfo  } from "$scripts/ui/windows";
+    import { FilesInfo  } from "$scripts/ui/info";
     import { intoWindowsInfo, openWindows } from "./WindowManager.svelte";
     
     

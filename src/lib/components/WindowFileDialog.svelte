@@ -1,6 +1,8 @@
 <script module lang="ts">
+    import type { PromptInfo } from "$scripts/ui/info";
     import WindowFileDialogError from "./WindowFileDialogError.svelte";
     import WindowFileDialogPrompt from "./WindowFileDialogPrompt.svelte";
+
 
     enum DialogType {
         PROMPT, 
@@ -8,43 +10,40 @@
         NONE
     };
 
+   
+    let promptInfo: PromptInfo = $state({message: "", iconURL: ""});
+
     let type = $state(DialogType.NONE);
 
     let message = $state("");
+
 
     export function openErrorDialog(errorMessage: string) {
         message = errorMessage;
         type = DialogType.ERROR;
     }
 
-    let onPrompt = (_value: boolean) => {};
+    let onPrompt = (_value: string | null) => {};
 
-    export function prompt(promptMessage: string): Promise<boolean> {
+    export function prompt(info: PromptInfo): Promise<string | null> {
         return new Promise((res, rej) => {
             onPrompt = res;
-            message = promptMessage;
+            promptInfo = info;
             type = DialogType.PROMPT;
         })
     }
 
-    function promptExit(result: boolean) {
+    function promptExit(result: string | null) {
+        if (type != DialogType.PROMPT) {
+            return;
+        } 
         type = DialogType.NONE;
         onPrompt(result);
-        onPrompt = (value: boolean) => {};
+        onPrompt = (_value: null | string) => {};
     }
 
 </script>
 
-<svelte:window 
-    onkeydown={e => {
-        if (type === DialogType.NONE) {
-            return;
-        }
-        if (e.key === "Escape") {
-            promptExit(false);
-        }
-    }}
-/>
 
 {#if type !== DialogType.NONE}
 <div class="absolute flex justify-center items-center w-full h-full bg-black/30 z-50 pointer-events-auto">
@@ -53,10 +52,9 @@
             <WindowFileDialogError onclose={() => {type = DialogType.NONE}} message={message}/>
         {:else if type === DialogType.PROMPT}
             <WindowFileDialogPrompt 
-                onconfirm={() => promptExit(true)}
-                oncancel={() => promptExit(false)}
-                prompt={message}
-                iconURL={""}
+                onconfirm={value => promptExit(value)}
+                oncancel={() => promptExit(null)}
+                {...promptInfo}
                 />
         {/if}
     </div>

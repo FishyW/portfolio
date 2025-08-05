@@ -13,6 +13,8 @@ import textEditorImg from "$icons/dash/textedit.svg";
 import pdfViewerImg from "$icons/dash/pdf.svg";
 import imageViewerImg from "$icons/dash/photo-app.svg";
 
+import passwordImg from "$icons/symbols/password-entry-symbolic.svg";
+
 // name must be unique
 // all windows need to have this 
 // and they need to register the window details at the start
@@ -21,6 +23,12 @@ export interface WindowInfo {
     icon: string,
     component: Component<any>
 }
+
+ export interface PromptInfo {
+    message: string,
+    iconURL: string
+}
+
 
 export const FilesInfo: WindowInfo = {
     name: "Files",
@@ -54,3 +62,14 @@ export const EmptyInfo: WindowInfo = {
     icon: "",
     component: Empty
 };
+
+
+export const EncryptPromptInfo: PromptInfo = {
+    message: "Set a password",
+    iconURL: passwordImg
+}
+
+export const DecryptPromptInfo: PromptInfo = {
+    message: "Enter password",
+    iconURL: passwordImg
+}
