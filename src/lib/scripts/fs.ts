@@ -364,9 +364,8 @@ export class DirectoryFile extends BaseFile {
         if (file.isBaseMount) {
             throw new Error("Can't move a mounted file!");
         }
-
-        // copies the file to the new parent
-        const newFile = file.clone(this, true);
+        
+        const newFile = file.clone(this, autorename);
         // remove the file from the old parent
         parent.removeFile(file);
         return newFile;
@@ -378,6 +377,9 @@ export class DirectoryFile extends BaseFile {
     removeFile(file: BaseFile, temporary = false) {
         if (file.isBaseMount) {
             throw new Error("Can't remove a mounted file!");
+        }
+        if (SpecialFile.isSpecFile(file)) {
+            throw new Error("Can't remove a special file!");
         }
         const index = this.files.findIndex(theFile => theFile.idx == file.idx);
         if (index === -1) {
@@ -506,7 +508,7 @@ export class SpecialFile extends BaseFile {
     }
 
     clone(_: DirectoryFile): never {
-        throw new Error("Can't copy special file!");
+        throw new Error("Can't move/copy special file!");
     }
 
     static isSpecFile(file: BaseFile): file is SpecialFile {
@@ -640,6 +642,7 @@ export class FileSystem {
             return;
         }
         // relocate the file to the
+        
         return folder.relocate(file, autorename);
     }
 

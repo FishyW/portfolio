@@ -18,7 +18,7 @@ type PasteBuffer = { file?: BaseFile, operation?:  PasteOperation, active?: bool
 
 export let pasteBuffer: PasteBuffer = $state({});
 
-function promptOnError(target: Function, context: ClassMethodDecoratorContext) {
+export function promptOnError(target: Function, context: ClassMethodDecoratorContext) {
     return function (...args: any[]) {
         try {
             const value = target(...args);
@@ -32,7 +32,7 @@ function promptOnError(target: Function, context: ClassMethodDecoratorContext) {
     }
 }
 
-function promptOnErrorAsync(target: Function, context: ClassMethodDecoratorContext) {
+export function promptOnErrorAsync(target: Function, context: ClassMethodDecoratorContext) {
     return async function (...args: any[]) {
         try {
             const value = target(...args);

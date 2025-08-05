@@ -1,5 +1,5 @@
 import { DirectoryFile, fileSystem } from "./fs.svelte";
-
+import { promptOnErrorAsync } from "./operations.svelte"; 
 
 function isFile(entry: FileSystemEntry): entry is FileSystemFileEntry {
     return entry.isFile;
@@ -57,18 +57,19 @@ async function moveVirtualFile(item: DataTransferItem, directory: DirectoryFile)
 }
 
 // process dragged files from the file system
-export async function onFileDrop(items: DataTransferItemList, directory: DirectoryFile) {
-    for (const item of items) {
-        if (item.kind === "string") {
-            moveVirtualFile(item, directory);
-            continue;
-        }
+class FileDrop {
+    @promptOnErrorAsync
+    static async onFileDrop(items: DataTransferItemList, directory: DirectoryFile) {
+        for (const item of items) {
+            if (item.kind === "string") {
+                await moveVirtualFile(item, directory);
+                continue;
+            }
 
-        const entry = item.webkitGetAsEntry()!;
-        try {
-            readFileEntry(entry, directory);
-        } catch(e) {
-            console.log(e);
+            const entry = item.webkitGetAsEntry()!;
+            await readFileEntry(entry, directory);
         }
     }
 }
+
+export const onFileDrop = FileDrop.onFileDrop;
