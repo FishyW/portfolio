@@ -1,5 +1,6 @@
 <script>
     import { DirectoryFile, fileSystem } from "$scripts/ui/fs.svelte";
+    import { changeDirectory } from "$scripts/ui/operations.svelte";
 
     let { segment, fullpath } = $props();
 
@@ -8,7 +9,7 @@
     
     let isHovered = $state(false);
 
-    function changeDirectory() {
+    function segmentSelect() {
         const directory = fileSystem.findFile(fullpath);
         if (directory === null || !DirectoryFile.isDirectory(directory)) {
             throw new Error("Directory not found!")
@@ -16,11 +17,12 @@
         if (fullpath === fileSystem.cwd.path) {
             return;
         }
-        fileSystem.changeDirectory(directory);
+        
+        changeDirectory(directory);
     }   
 </script>
 
-<button onclick={() => changeDirectory()} 
+<button onclick={() => segmentSelect()} 
     onmouseenter={() => isHovered = true}
     onmouseleave={() => isHovered = false}
     class={["rounded-md font-bold  px-2 py-1",

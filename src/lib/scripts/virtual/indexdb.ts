@@ -150,7 +150,7 @@ export class IndexedDBSystem extends VirtualSystem {
     createFolder(file: DirectoryFile): void {
         // root folder doesn't have index 0
         if (file.idx === 0 && file.name !== "") {
-            throw new Error("Root folder does not have index 0");
+            throw new Error("Root folder does not have index 0!");
         }
         this.update(file);
     }

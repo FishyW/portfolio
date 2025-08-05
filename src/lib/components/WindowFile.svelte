@@ -34,6 +34,7 @@
     import { copy, move, paste, rename, removeFile, fileOpen } from "$scripts/ui/operations.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
     import { tippy } from "./WindowFileElement.svelte";
+    import WindowFileDialog from "./WindowFileDialog.svelte";
 
 
     function deselect() {
@@ -103,7 +104,8 @@
     
 </script>
 
-<div class="h-full flex flex-col">
+<div class="h-full flex flex-col relative">
+<WindowFileDialog />
 <WindowTopBarFile />
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

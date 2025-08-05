@@ -633,7 +633,7 @@ export class FileSystem {
         // check if source folder is ancestor of destination folder
         // destination folder won't have ancestor
         if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
-            throw new Error("Can't put a directory inside of itself");
+            throw new Error("Can't put a directory inside of itself!");
         }
         // check if folder already contains the file
         if (folder.getFile(file.name) !== null && !autorename) {
@@ -647,7 +647,7 @@ export class FileSystem {
         // check if source folder is ancestor of destination folder
         // destination folder won't have ancestor
         if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
-            throw new Error("Can't copy a directory inside of itself");
+            throw new Error("Can't copy a directory inside of itself!");
         }
 
         return file.clone(folder, true);

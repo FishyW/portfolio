@@ -30,6 +30,10 @@
 		user-select: initial;
 	}
 
+	:global(p) {
+		user-select: initial;
+	}
+
 </style>
 
 {@render children()}

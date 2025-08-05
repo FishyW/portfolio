@@ -1,8 +1,10 @@
 
 
 <script lang="ts">
-    import { fileSystem } from "$scripts/ui/fs.svelte";
     import WindowTopBar from "./WindowTopBar.svelte";
+
+    import { forward, back } from "$scripts/ui/operations.svelte";
+    import { fileSystem } from "$scripts/ui/fs.svelte";
 
     import backImg from "$icons/symbols/left-smaller-symbolic.svg";
     import backDisabledImg from "$icons/symbols/disabled/left-smaller-symbolic.svg";
@@ -26,15 +28,15 @@
     });
 
 
-    let back = $state(false);
-    let forward = $state(false);
+    let hasBack = $state(false);
+    let hasForward = $state(false);
     let pathBox: HTMLDivElement;
 
     $effect(() => {
         // listen to path array changes
         pathTuple;
-        back = fileSystem.hasBack();
-        forward = fileSystem.hasForward();
+        hasBack = fileSystem.hasBack();
+        hasForward = fileSystem.hasForward();
         scrollset(pathBox);
     })
 
@@ -48,22 +50,19 @@
 <WindowTopBar>
     <div class="flex items-center h-full gap-1 w-full">
         <button class={["w-7 h-7 p-0.5 whitespace-nowrap flex rounded-md",
-        back && "hover:bg-slate-200"]}
-     onclick={() => {if (back) {
-        fileSystem.back();
-        }}}>
-            <img src={back ? backImg : backDisabledImg} alt="back"/>
+        hasBack && "hover:bg-slate-200"]}
+     onclick={() => {if (hasBack) back()}}>
+            <img src={hasBack ? backImg : backDisabledImg} alt="back"/>
     </button>  
 
         <div class={["w-7 h-7 p-0.5 whitespace-nowrap flex rounded-md",
-        forward && "hover:bg-slate-200"]}
-     onclick={() => {if (forward) fileSystem.forward()}}>
-            <img src={forward ? forwardImg : forwardDisabledImg} alt="forward"/>
+        hasForward && "hover:bg-slate-200"]}
+     onclick={() => {if (hasForward) forward()}}>
+            <img src={hasForward ? forwardImg : forwardDisabledImg} alt="forward"/>
     </div>  
 
         
-        <!-- <div class="w-4 h-4 bg-white hover:bg-gray-700" 
-        onclick={() => fileSystem.forward()}></div> -->
+     
         <div use:scrollset class="
         flex items-center text-sm
         text-nowrap no-scrollbar flex-1 mx-1 bg-gray-200 
