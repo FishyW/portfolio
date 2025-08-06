@@ -19,17 +19,9 @@ async function notImplemented(...args: any[]): Promise<never> {
     throw new Error("Not implemented!");
 }
 
-function loadURL(file: SpecialFile) {
-    if (typeof(file.parameters) !== "string") {
-        throw new Error("Parameter has the wrong type!");
-    }
-    window.open(file.parameters, "_blank");
-}
-
 type SpecMap = {[name: string]: 
     [(file: SpecialFile) => void, () => Promise<string>, (contents: string) => void, ]} 
 
 export const specGenMap: SpecMap = {
-    "fs": [openTxt, serializeFileSystem, deserializeFileSystem],
-    "url": [loadURL, notImplemented, notImplemented]
+    "fs": [openTxt, serializeFileSystem, deserializeFileSystem]
 }

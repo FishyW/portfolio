@@ -87,18 +87,14 @@
   {
     "name": "linkedin.com",
     "idx": 11,
-    "program": "url",
-    "parameters": "https://linkedin.com/in/winston-wijaya-swe/",
-    "type": "spec",
-    "restricted": false
+    "contents": "https://linkedin.com/in/winston-wijaya-swe/",
+    "type": "reg"
   },
   {
     "name": "github.com",
     "idx": 12,
-    "program": "url",
-    "parameters": "https://github.com/FishyW",
-    "type": "spec",
-    "restricted": false
+    "contents": "https://github.com/FishyW",
+    "type": "reg"
   },
   {
     "name": "credits.txt",

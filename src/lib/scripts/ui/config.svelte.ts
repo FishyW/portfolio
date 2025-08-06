@@ -23,6 +23,13 @@ function openImage(file: RegFile) {
     open(ImageViewerInfo, { file });
 }
 
+function openURL(file: RegFile) {
+    if (typeof(file.contents) !== "string") {
+        throw new Error("File contents is not a string!");
+    } 
+    window.open(file.contents, "_blank");
+}
+
 export const imageMimeMap: { [name: string]: string } = {
     "jpg": "image/jpeg",
     "jpeg": "image/jpeg",
@@ -45,6 +52,7 @@ const imageExtMap = Object.fromEntries(
 const extMap = {
     "txt": openTxt,
     "pdf": openPDF,
+    "com": openURL,
     ...imageExtMap
 };
 
