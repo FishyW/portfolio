@@ -139,7 +139,9 @@ ondragleave={e => {
     showDropOverlay = false;
 }}
 
-
+ondragover = {e => {
+    e.preventDefault();
+}}
 
 ondrop={e => {
     e.preventDefault();

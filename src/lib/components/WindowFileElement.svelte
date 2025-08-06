@@ -25,7 +25,7 @@
 
 
     import { fileOpen } from "$scripts/ui/operations.svelte";
-    import { getIcon } from "$scripts/ui/icon_manager";
+    import { getIcon, getIconAsync } from "$scripts/ui/icon_manager";
 
     
 
@@ -48,7 +48,7 @@
 
     export function update() {
         displayedName = file.name;
-        iconURL = getIcon(file);
+        iconURL = getIconAsync(file);
     }
 
    
@@ -59,7 +59,7 @@
    
     let displayedName = $state(file.name);
     let fileElement: HTMLElement;
-    let iconURL = $state(getIcon(file));
+    let iconURL = $state(getIconAsync(file));
 
     function select() {
         if (tippy.on) {
@@ -277,8 +277,11 @@ oncontextmenu={e => {
 }}
 >   
         <div class="h-26 w-26 flex justify-center items-center p-2">
-            <img src={iconURL} alt="file" 
+            {#await iconURL then url} 
+                <img src={url} alt="file" 
             class={["h-full object-contain drop-shadow-sm", isBeingMoved && "brightness-90"]}/>
+            {/await}
+            
         </div>
         
         <div class="w-24 mt-1 h-fit">

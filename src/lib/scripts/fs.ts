@@ -319,28 +319,18 @@ export class DirectoryFile extends BaseFile {
                 unavailableIndices.push(num);
             }
         }
+        
 
         if (unavailableIndices.length == 0) {
             return `${curBase}${curHasExt ? "." : ""}${curExt}`;
         }
-
-        
-        let highestIndex = 0;
         
         // this is so stupid (sort doesn't sort numbers by default)
         const indices = unavailableIndices
             .sort((a, b) => a - b);
 
-        if (unavailableIndices[0] !== 0) {
-            return `${curBase}${curHasExt ? "." : ""}${curExt}`;
-        }
 
-        for (const index of indices) {
-            if (index == highestIndex) {
-                highestIndex += 1;
-            }
-        }
-        return `${curBase} (${highestIndex})${curHasExt ? "." : ""}${curExt}`;
+        return `${curBase} (${indices.at(-1)! + 1})${curHasExt ? "." : ""}${curExt}`;
     }
 
    
