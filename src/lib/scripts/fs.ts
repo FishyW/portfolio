@@ -8,6 +8,20 @@ import { FileType, IndexedDBSystem, type Serialized, type SerializedFile, type S
 import { EphemeralSystem } from "./virtual/ephemeral";
 
 
+function restrictedCheck(operation: string, treatFirstAsFile = false): (target: Function, context: ClassMethodDecoratorContext) => any {
+    return function (target: Function, context: ClassMethodDecoratorContext)  {
+        return function (this: BaseFile, ...args: any[]) {
+            const fileCheck = treatFirstAsFile ?  args[0] : this;
+
+            if (fileCheck.isRestricted) {
+                throw new Error(`Can't ${operation} a restricted file/folder.`);
+            }
+            return target.call(this, ...args);
+           
+        }
+    }
+}
+
 export abstract class BaseFile extends VirtualSystemFile {
     @tracked(FileAttribute.NAME)
     accessor name = "";
@@ -17,6 +31,7 @@ export abstract class BaseFile extends VirtualSystemFile {
     #savedName: string;
     
     isRemoved;
+    isRestricted;
     
     constructor(name: string, parent: DirectoryFile | null) {
         super(new MainFS());
@@ -27,6 +42,7 @@ export abstract class BaseFile extends VirtualSystemFile {
         this.parent = parent;
         this.#savedName = name; 
         this.isRemoved = false;
+        this.isRestricted = false;
              
         if (this.parent !== null) {
             this.parent.addFile(this);
@@ -48,6 +64,7 @@ export abstract class BaseFile extends VirtualSystemFile {
         return path;
     }
 
+    @restrictedCheck("rename")
     rename(name: string) {
         if (this.name == name) {
             return;
@@ -75,6 +92,8 @@ export abstract class BaseFile extends VirtualSystemFile {
 
 
     abstract clone(parent: DirectoryFile, _autorename: boolean): BaseFile;
+
+    
     abstract open(): void; 
 
     // [base, extension, hasExtension?]
@@ -123,6 +142,13 @@ export abstract class BaseFile extends VirtualSystemFile {
         super.unmount();
     }
 
+    removeSelf() {
+        if (this.parent === null) {
+            throw new Error("File does not have a parent!");
+        }
+        this.parent.removeFile(this);
+    }
+
     abstract serialize(): Serialized;
 
     getType(): FileType  {
@@ -158,7 +184,7 @@ export class RegFile extends BaseFile {
         this.createFinished();
     }
 
-     open() {
+    open() {
         const extension = this.name.split(".").at(-1)!;
         let func = extensionMap.get(extension);
         if (func === undefined) {
@@ -179,7 +205,8 @@ export class RegFile extends BaseFile {
             idx: this.idx,
             contents: this.contents,
             type: FileType.REG,
-            binary: typeof(this.contents) !== "string"
+            binary: typeof(this.contents) !== "string",
+            restricted: this.isRestricted
         }
     }
 
@@ -191,6 +218,7 @@ export class RegFile extends BaseFile {
         return typeof(this.contents) !== "string";
     }
 
+    
     
     intoFile(mimeType: string) {
         let buffer: ArrayBuffer;
@@ -252,6 +280,10 @@ export class DirectoryFile extends BaseFile {
             return null;
         }
         return arr[0]!;
+    }
+
+    hasFile(filename: string) {
+        return this.getFile(filename) !== null;
     }
 
     generateNewName(filename: string) {
@@ -356,14 +388,23 @@ export class DirectoryFile extends BaseFile {
     }
     
 
+    @restrictedCheck("move", true)
     relocate(file: BaseFile, autorename = false) {
         const parent = file.parent;
+        
         if (parent === null) {
             throw new Error("Can't relocate root!");
         }
         if (file.isBaseMount) {
             throw new Error("Can't move a mounted file!");
         }
+
+        // check if source folder is ancestor of destination folder
+        // destination folder won't have ancestor
+        if (DirectoryFile.isDirectory(file) && file.isAncestor(this)) {
+            throw new Error("Can't put a directory inside of itself!");
+        }
+
         
         const newFile = file.clone(this, autorename);
         // remove the file from the old parent
@@ -374,13 +415,12 @@ export class DirectoryFile extends BaseFile {
 
     // temporary removes are for relocation
     // logically removes the file without triggering the system call
+    @restrictedCheck("remove", true)
     removeFile(file: BaseFile, temporary = false) {
         if (file.isBaseMount) {
             throw new Error("Can't remove a mounted file!");
         }
-        if (SpecialFile.isSpecFile(file)) {
-            throw new Error("Can't remove a special file!");
-        }
+        
         const index = this.files.findIndex(theFile => theFile.idx == file.idx);
         if (index === -1) {
             return;
@@ -396,6 +436,14 @@ export class DirectoryFile extends BaseFile {
 
     }
 
+    remove(name: string) {
+        const file = this.getFile(name)
+        if (file === null) {
+            throw new Error("File does not exist!");
+        }
+        this.removeFile(file);
+    }
+
     static isDirectory(file: BaseFile): file is DirectoryFile {
         return (file as DirectoryFile).files !== undefined;
     }
@@ -404,7 +452,13 @@ export class DirectoryFile extends BaseFile {
         FileSystem.fs.changeDirectory(this);
     }
 
+    @restrictedCheck("copy")
     clone(parent: DirectoryFile, autorename = false) {
+        // check if source folder is ancestor of destination folder
+        // destination folder won't have ancestor
+        if (this.isAncestor(parent)) {
+            throw new Error("Can't copy a directory inside of itself!");
+        }
         const directory = parent.createFolder(this.name, autorename)
         for (const file of this.files) {
             file.clone(directory, autorename);
@@ -432,7 +486,8 @@ export class DirectoryFile extends BaseFile {
             name: this.name,
             idx: this.idx,
             contents: this.files.map(file => file.idx),
-            type: FileType.DIR
+            type: FileType.DIR,
+            restricted: this.isRestricted
         }
     }
 
@@ -460,20 +515,27 @@ export class DirectoryFile extends BaseFile {
 // also its contents are not saved to the database
 // similar in concept to special files in linux like device files
 export class SpecialFile extends BaseFile {
+    #program;
+    #opener;
     #generator;
-    #identifier;
     #consumer;
+
+    parameters;
     isSpecialFile;
 
     constructor(
         name: string, 
         parent: DirectoryFile,
-        identifier: string,
+        program: string,
+        parameters: string[] | string | undefined, 
+        opener: (file: SpecialFile) => void,
         generator: () => Promise<string>,
         consumer: (value: string) => void,
     ) {
         super(name, parent);
-        this.#identifier = identifier
+        this.#program = program;
+        this.parameters = parameters;
+        this.#opener = opener;
         this.#generator = generator;
         this.#consumer = consumer;
         this.isSpecialFile = true;
@@ -498,13 +560,15 @@ export class SpecialFile extends BaseFile {
         return {
             name: this.name,
             idx: this.idx,
-            contents: this.#identifier,
-            type: FileType.SPEC
+            program: this.#program,
+            parameters: this.parameters,
+            type: FileType.SPEC,
+            restricted: this.isRestricted
         }
     }
     
     open() {
-        openTxt(this);
+        this.#opener(this);
     }
 
     clone(_: DirectoryFile): never {
@@ -632,27 +696,14 @@ export class FileSystem {
    
 
     move(file: BaseFile, folder: DirectoryFile, autorename = false) {
-        // check if source folder is ancestor of destination folder
-        // destination folder won't have ancestor
-        if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
-            throw new Error("Can't put a directory inside of itself!");
-        }
-        // check if folder already contains the file
+         // check if folder already contains the file
         if (folder.getFile(file.name) !== null && !autorename) {
             return;
         }
-        // relocate the file to the
-        
         return folder.relocate(file, autorename);
     }
 
     copy(file: BaseFile, folder: DirectoryFile) {
-        // check if source folder is ancestor of destination folder
-        // destination folder won't have ancestor
-        if (DirectoryFile.isDirectory(file) && file.isAncestor(folder)) {
-            throw new Error("Can't copy a directory inside of itself!");
-        }
-
         return file.clone(folder, true);
     }
 

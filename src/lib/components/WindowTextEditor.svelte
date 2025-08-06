@@ -407,6 +407,9 @@ const extensions = [
       if (buffer === null) {
           return;
       }
+      if (typeof(file.contents) !== "string") {
+          return;
+      }
       if (buffer !== originalContents)
         saveFile.contents = buffer
     }

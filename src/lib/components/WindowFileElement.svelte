@@ -1,18 +1,7 @@
 <script module lang="ts">
     
-    let fileToRename = $state("");
     
     export let tippy = $state({on: false});
-
-    // this is a pretty ugly solution but I can't think of a better way
-    export function renamePrompt(filename: string) {
-        fileToRename = filename;
-    }
-
-    let fileUpdate = $state("");
-    export function updateFile(filename: string) {
-        fileUpdate = filename;
-    }
 
    import { pasteBuffer } from "$scripts/ui/operations.svelte";
    
@@ -27,36 +16,50 @@
     import { onFileDrop } from "$scripts/ui/filedrop";
     import { offscreenBuffer } from "./Desktop.svelte";
     import WindowFileElementPopOver from "./WindowFileElementPopOver.svelte";
+    
 
     import 'tippy.js/dist/tippy.css';
     import { hideOnEsc, tooltip } from "$scripts/ui/tippy.svelte";
     import type { Instance, Props as TippyProps } from "tippy.js";
     import { mount } from "$scripts/ui/operations.svelte";
 
-    import fileImageURL from "$icons/files/File.svg";
-    import folderImageURL from "$icons/files/Folder.svg";
 
     import { fileOpen } from "$scripts/ui/operations.svelte";
+    import { getIcon } from "$scripts/ui/icon_manager";
+
+    
 
     let tippyBox: HTMLElement;
-
+    
   
     interface Props {
         file: BaseFile,
         selected: BaseFile | null
     }
-    let { file, selected = $bindable() }: Props = $props();
+    let { file, selected = $bindable()}: Props = $props();
   
+    export function getName() {
+        return file.name;
+    }
 
-    let showRenameInputBox = $derived(
-        fileToRename === file.name
-    );
+    export function renamePrompt() {
+        showRenameInputBox = true;
+    }
 
+    export function update() {
+        displayedName = file.name;
+        iconURL = getIcon(file);
+    }
+
+   
+    let showRenameInputBox = $state(false);
+
+   
     let showMountInputBox = $state(false);
    
     let displayedName = $state(file.name);
     let fileElement: HTMLElement;
-
+    let iconURL = $state(getIcon(file));
 
     function select() {
         if (tippy.on) {
@@ -74,21 +77,7 @@
         pasteBuffer.file;
     });
 
-    // needed to manually update the file
-    // since the file isn't reactive
-    // one way is to give a reactive view of the file
-    // but no way I'm doing that if this is a simpler solution
-    let updateToggle = $derived(fileUpdate === file.name);
-
-    $effect(() => {
-        updateToggle;
-        // note that I have to use a variable
-        // apparently objects are slower to update
-        // so I can't just update an object called fileDetails 
-        // when file.name changes
-        displayedName = file.name;
-        fileUpdate = "";
-    })
+   
 
     $effect(() => {
         selected;
@@ -98,7 +87,6 @@
 
     function onTippyHide() {
         tippyOn = false;
-        fileToRename = "";
         showMountInputBox = false;
         tippy.on = false;
         fileElement.focus();
@@ -111,12 +99,14 @@
     function renameCallback(editedName: string) {
         try {
             file.rename(editedName);
-            updateToggle = !updateToggle;
         } catch(e) {
             console.error(e);
             return;
         }
+        showRenameInputBox = false;
+        update();
         tippyInstance?.hide();
+        
     }
 
     function mountPrompt() {
@@ -139,6 +129,8 @@
     let tippyOn = $state(false);
 
 
+
+
     $effect(() => {
         if (showRenameInputBox || showMountInputBox) {
             tippyInstance?.show();
@@ -156,14 +148,8 @@
     let isBeingMoved = $derived(pasteBuffer.file?.path === file.path 
         && pasteBuffer.active && pasteBuffer.operation === "MOVE")
 
-    function selectURL() {
-        if (DirectoryFile.isDirectory(file)) {
-            return folderImageURL;
-        } else {
-            return fileImageURL;
-        }
-    }
-
+    
+  
 </script>
 
 <div class="h-fit w-fit ">
@@ -291,7 +277,7 @@ oncontextmenu={e => {
 }}
 >   
         <div class="h-26 w-26 flex justify-center items-center p-2">
-            <img src={selectURL()} alt="file" 
+            <img src={iconURL} alt="file" 
             class={["h-full object-contain drop-shadow-sm", isBeingMoved && "brightness-90"]}/>
         </div>
         
@@ -302,7 +288,6 @@ oncontextmenu={e => {
             overflow-ellipsis break-words"> 
                 { displayedName } 
             </div>
-   
             
             <div class="hidden">
                 <div bind:this={tippyBox}>

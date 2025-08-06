@@ -1,7 +1,6 @@
 // file UI operations
 import { BaseFile, DirectoryFile, RegFile, fileSystem } from './fs.svelte';
-import { renamePrompt, updateFile } from '$components/WindowFileElement.svelte';
-import { selected } from "$components/WindowFile.svelte"
+import { getComponent, selected } from "$components/WindowFile.svelte"
 import { decrypt, encrypt } from '../crypto';
 import saveAs from 'file-saver';
 import JSZip from 'jszip';
@@ -55,21 +54,19 @@ class Operation {
         selected.file.open();
     }
 
-    @promptOnError
-    static newFile() {
+    @promptOnErrorAsync
+    static async newFile() {
         const file = fileSystem.addEmptyFile();
-        if (file.vfs.isRenameSupported) {
-            renamePrompt(file.name);
-        }
-        
+        const component = await getComponent(file);
+        component?.renamePrompt();        
     }
 
-    @promptOnError
-    static newFolder() {
+    @promptOnErrorAsync
+    static async newFolder() {
         const folder = fileSystem.addEmptyFolder();
-        if (folder.vfs.isRenameSupported) {
-            renamePrompt(folder.name);
-        }
+        const component = await getComponent(folder);
+        component?.renamePrompt();        
+        
     }
 
     @promptOnError
@@ -88,12 +85,13 @@ class Operation {
         fileSystem.removeFile(removedFile);
     }
 
-    @promptOnError
-    static rename() {
+    @promptOnErrorAsync
+    static async rename() {
         if (selected.file === null) return;
-        if (selected.file.vfs.isRenameSupported) {
-            renamePrompt(selected.file.name);
-        }
+
+        const component = await getComponent(selected.file);
+        component?.renamePrompt(); 
+        
     }
 
     @promptOnError
@@ -224,18 +222,24 @@ class Operation {
 
         const vfs = await VFSMap[scheme].init(path, selected.file );
         selected.file.mount(vfs);
-        updateFile(selected.file.name);
+
+        const component = await getComponent(selected.file);
+        component?.update();
     }
 
-    @promptOnError
-    static unmount() {
+    @promptOnErrorAsync
+    static async unmount() {
         if (!selected.file) {
             return;
         }
         
         selected.file?.unmount();
-        if (selected.file !== null)
-            updateFile(selected.file.name);
+        if (selected.file === null) {
+            return;
+        } 
+
+        const component = await getComponent(selected.file);
+        component?.update();
     }
 
     @promptOnError

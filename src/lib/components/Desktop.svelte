@@ -2,6 +2,8 @@
     export let offscreenBuffer: {element?: HTMLElement} = $state({});
     import backgroundImg from "$assets/bg.webp"
     
+    import "$scripts/ui/icon_manager";
+
     let showReset = $state(false);
 
     export function showResetPrompt() {
@@ -16,9 +18,13 @@
     import TopBar from "./TopBar.svelte"
     import WindowManager from "./WindowManager.svelte";
     import DesktopResetPrompt from "./DesktopResetPrompt.svelte";
+    import { fileSystemInit } from "$scripts/ui/fs.svelte";
 
 </script>
 
+
+
+    
 
 <div  
 style:background-image="url({backgroundImg})" 
@@ -26,14 +32,16 @@ class="h-full w-full bg-cover flex flex-col relative">
     <!-- Position utility "breaks" out of the page flow -->
         <TopBar />
         
+        {#await fileSystemInit() then }
         <Dash />
-
+    
 
         {#if !showReset}
             <WindowManager />
         {:else}
             <DesktopResetPrompt oncancel={() => showReset = false} />
         {/if}
+        {/await}
         
 </div>
 

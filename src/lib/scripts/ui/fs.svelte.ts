@@ -91,28 +91,54 @@ class ReactiveFileSystem extends FileSystem {
                 this.#cwdInternal = ReactiveDirectory.makeReactive(value);
             }
         })
+
     }
 
     static async init(fsFormat: SerializedJSON) {
         const fs = await FileSystem.init(fsFormat);
         const rfs =  new ReactiveFileSystem(fs.root, fs.cwd);
         FileSystem.fs = rfs;
+        FileSystemEvent.dispatchAllListeners();
         return rfs;
+    }
+
+    
+}
+
+
+class FileSystemEvent {
+    static listeners: (() => void)[] = [];
+   
+    static addListener(func: () => void) {
+        FileSystemEvent.listeners.push(func);
+    }
+
+    static dispatchAllListeners() {
+        for (const func of this.listeners) {
+            func();
+        }
+        this.listeners = [];
+    }
+
+    // wait until the file system has been initialized
+    static async wait(): Promise<void> {
+        return new Promise((res, _rej) => {
+            if (FileSystem.fs !== undefined) {
+                res();
+            }
+            this.addListener(res);
+        })
     }
 }
 
 let fs;
-
 if (browser) {
-    // IndexedDBSystem.createFileSystem(fsJson as SerializedJSON);
     fs = await ReactiveFileSystem.init(fsJson as SerializedJSON);
-    // const fsStorage = IndexedDBSystem.ch
-    // if (fsStorage !== null) {
-    //     fs = await ReactiveFileSystem.init(JSON.parse(fsStorage));
-    // }
 } 
 
 
+
+export const fileSystemInit = FileSystemEvent.wait;
 export const fileSystem = fs!;
 
 

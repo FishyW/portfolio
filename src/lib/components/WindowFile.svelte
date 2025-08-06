@@ -2,7 +2,10 @@
 <script module lang="ts">
     
 
-    export let selected: {file: null | BaseFile} = $state({file: null});
+    export let selected: {
+        file: null | BaseFile,
+        component: null | typeof WindowFileElement } = $state({file: null, component: null});
+
     let windowElement: HTMLElement;
 
     export function focus() {
@@ -12,12 +15,18 @@
     // bind an array to an each block
     // no clue why this isn't documented
     // for now not used
-    // let _refs: ReturnType<>[] = $state([])
-    // let refs = $derived(_refs.filter(Boolean))
+    let _components: ReturnType<typeof WindowFileElement>[] = $state([]);
+    let components = $derived(_components.filter(Boolean))
+
 
     let contextMenu: ReturnType<typeof ContextMenuFile>;
     
+    export async function getComponent(file: BaseFile) {
+        await tick();
+        return components.find(component => component.getName() === file.name);
+    }
 
+       
 
 </script>
 
@@ -33,9 +42,10 @@
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
     import { copy, move, paste, rename, removeFile, fileOpen } from "$scripts/ui/operations.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
-    import { tippy } from "./WindowFileElement.svelte";
+    import WindowFileElement, { tippy } from "./WindowFileElement.svelte";
     import WindowFileDialog from "./WindowFileDialog.svelte";
     import WindowFileDropOverlay from "./WindowFileDropOverlay.svelte";
+    import { tick } from "svelte";
 
 
     let showDropOverlay = $state(false);
@@ -101,9 +111,6 @@
         fileSystem.cwd.path;
         focus();
     })
-
-
- 
     
 </script>
 
@@ -132,12 +139,7 @@ ondragleave={e => {
     showDropOverlay = false;
 }}
 
-ondragover={e => {
-    e.preventDefault();
-    if (!showDropOverlay) {
-        showDropOverlay = true;
-    }
-}}
+
 
 ondrop={e => {
     e.preventDefault();
@@ -164,8 +166,11 @@ oncontextmenu={e => {
 	
 <!-- </div> -->
 {#if !showDropOverlay}
-{#each fileSystem.cwd.files as file (file.path)}
-    <FileElement {file} bind:selected={selected.file} />
+{#each fileSystem.cwd.files as file, i (file.idx)}
+    <FileElement {file} 
+    bind:selected={selected.file} 
+    bind:this={_components[i]} 
+    />
 {/each}
 
 {:else}

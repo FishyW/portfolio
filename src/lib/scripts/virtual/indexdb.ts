@@ -16,21 +16,25 @@ export interface SerializedFile {
     idx: number,
     contents: string | ArrayBuffer,
     binary: boolean,
-    type: FileType.REG
+    type: FileType.REG,
+    restricted?: boolean
 }
 
 export interface SerializedFolder {
     name: string,
     idx: number,
     contents: number[],
-    type: FileType.DIR
+    type: FileType.DIR,
+    restricted?: boolean
 }
 
 export interface SerializedSpec {
     name: string,
     idx: number,
-    contents: string,
-    type: FileType.SPEC
+    program: string,
+    parameters?: string | string[],
+    type: FileType.SPEC,
+    restricted?: boolean
 }
 
 
@@ -93,6 +97,11 @@ if (browser) {
 }
 
 
+//  set restricted helper function
+function setRestricted<T extends BaseFile>(file: T, restricted: boolean | undefined) {
+    file.isRestricted = restricted ?? false;
+    return file;
+}
 export class IndexedDBSystem extends VirtualSystem {
     fileMap = new Map<number, VirtualSystemFile>();
     
@@ -245,6 +254,7 @@ export class IndexedDBSystem extends VirtualSystem {
         // note that the root is always the first element in the array
         const serialized = root.serialize();
         if (RegFile.isRegFile(root)) {
+            const serialized = root.serialize();
             if (typeof(root.contents) !== "string") {
                 serialized.contents = await toBase64(root.contents);
             }
@@ -281,16 +291,17 @@ export class IndexedDBSystem extends VirtualSystem {
                 if (parent === null) {
                     throw new Error("Parent of a regular file is null!");
                 }
-                return new RegFile(file.name, parent, file.contents);
+                return setRestricted(new RegFile(file.name, parent, file.contents), file.restricted);
             }
             if (file.type === FileType.SPEC) {
                 if (parent === null) {
                     throw new Error("Parent of a regular file is null!");
                 }
-                return new SpecialFile(file.name, parent, file.contents, 
-                    ...specGenMap[file.contents]);
+                
+                return setRestricted(new SpecialFile(file.name, parent, file.program, 
+                    file.parameters, ...specGenMap[file.program]), file.restricted);
             }
-            const dir = new DirectoryFile(file.name, parent);
+            const dir = setRestricted(new DirectoryFile(file.name, parent), file.restricted);
             for (const dirNum of file.contents) {
                 const serializedFile = data.find(file => file.idx === dirNum);
                 if (serializedFile === undefined) {
