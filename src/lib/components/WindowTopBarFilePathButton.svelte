@@ -27,7 +27,7 @@
     onmouseleave={() => isHovered = false}
     class={["rounded-md font-bold  px-2 py-1",
     fullpath === fileSystem.cwd.path && "text-secondary-30",
-    fullpath !== fileSystem.cwd.path && "hover:bg-slate-300 text-secondary-70 hover:text-secondary-30"
+    fullpath !== fileSystem.cwd.path && "hover:bg-gray-300 text-secondary-70 hover:text-secondary-30"
 ]}>
 
 {#if fullpath === "/home"}
