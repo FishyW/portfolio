@@ -3,7 +3,7 @@
     import TopBarSettings from './TopBarSettings.svelte';
 	
 	import resetImg from "$icons/symbols/arrow-circular-small-top-left-symbolic.svg";
-    import { IndexedDBSystem } from '$scripts/virtual/indexdb';
+    import { showResetPrompt } from './Desktop.svelte';
 
     const date = new SvelteDate();
 
@@ -48,10 +48,8 @@
 
 	<button 
 		class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
-		ondblclick={async () => {
-			// reset
-			await IndexedDBSystem.reset();
-			window.location.reload();
+		ondblclick={() => {
+			showResetPrompt();
 		}}
 		>
 		<img src={resetImg} alt="reset" 
