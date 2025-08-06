@@ -35,7 +35,10 @@
     import { onFileDrop } from "$scripts/ui/filedrop";
     import { tippy } from "./WindowFileElement.svelte";
     import WindowFileDialog from "./WindowFileDialog.svelte";
+    import WindowFileDropOverlay from "./WindowFileDropOverlay.svelte";
 
+
+    let showDropOverlay = $state(false);
 
     function deselect() {
         if (tippy.on) {
@@ -120,23 +123,31 @@ ondragenter={e => {
         if (file.kind !== "file") {
             return;
         }
-
+        showDropOverlay = true;
     });
     
 }}
 
+ondragleave={e => {
+    showDropOverlay = false;
+}}
+
 ondragover={e => {
     e.preventDefault();
+    if (!showDropOverlay) {
+        showDropOverlay = true;
+    }
 }}
 
 ondrop={e => {
     e.preventDefault();
     onFileDrop(e.dataTransfer!.items, fileSystem.cwd);
+    showDropOverlay = false;
 }}
 
 
 class="flex-1 px-8 py-6 overflow-y-auto outline-0 
-grid gap-4 justify-items-center content-start 
+grid gap-4 justify-items-center content-start relative
 grid-cols-[repeat(auto-fill,_minmax(128px,_1fr))]" 
 oncontextmenu={e => {
     e.preventDefault();
@@ -149,14 +160,18 @@ oncontextmenu={e => {
     return;
 }}>
 
-
 <!-- <div class="w-20 h-20 bg-black p-4"> -->
 	
 <!-- </div> -->
+{#if !showDropOverlay}
 {#each fileSystem.cwd.files as file (file.path)}
-    
     <FileElement {file} bind:selected={selected.file} />
 {/each}
+
+{:else}
+<WindowFileDropOverlay />
+{/if}
+
 </div>
 </div>
 
