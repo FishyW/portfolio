@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { WindowInfo } from '$scripts/ui/info';
+    import { tooltip } from '$scripts/ui/tippy.svelte';
     import { focusWindow, open } from './WindowManager.svelte';
 
     interface Props {
@@ -13,9 +14,9 @@
 
 <!-- Opens the File Window -->
 <div class="relative">
-<div 
+<button 
+use:tooltip={info.name}
 tabindex="-1"
-role="button"
 onclick={_ => {
     if (isOpened) 
         focusWindow(info);
@@ -27,7 +28,7 @@ hover:bg-secondary-90/40 rounded-md p-2 m-1"
 <img src={info.icon}  alt="Dash Element"/>
 
 
-</div>
+</button>
 
 {#if isOpened}
 <div class="absolute -bottom-2 w-full h-4 flex justify-center">

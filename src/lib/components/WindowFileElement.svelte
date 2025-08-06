@@ -1,7 +1,7 @@
 <script module lang="ts">
     
     
-    export let tippy = $state({on: false});
+    export let tippyState = $state({on: false});
 
    import { pasteBuffer } from "$scripts/ui/operations.svelte";
    
@@ -18,8 +18,10 @@
     import WindowFileElementPopOver from "./WindowFileElementPopOver.svelte";
     
 
+    
+    import { hideOnEsc, tippy } from "$scripts/ui/tippy.svelte";
     import 'tippy.js/dist/tippy.css';
-    import { hideOnEsc, tooltip } from "$scripts/ui/tippy.svelte";
+    
     import type { Instance, Props as TippyProps } from "tippy.js";
     import { mount } from "$scripts/ui/operations.svelte";
 
@@ -62,7 +64,7 @@
     let iconURL = $state(getIconAsync(file));
 
     function select() {
-        if (tippy.on) {
+        if (tippyState.on) {
             return;
         }
         selected = file;
@@ -88,7 +90,7 @@
     function onTippyHide() {
         tippyOn = false;
         showMountInputBox = false;
-        tippy.on = false;
+        tippyState.on = false;
         fileElement.focus();
     }
   
@@ -161,7 +163,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div 
-use:tooltip={() => ({
+use:tippy={() => ({
     interactive: true,
     trigger: 'manual',
     appendTo: document.body,
@@ -172,7 +174,7 @@ use:tooltip={() => ({
     },
     onShow: (_) => {
         tippyOn = true;
-        tippy.on = true;
+        tippyState.on = true;
     },
     onHidden: (_) => {
         onTippyHide();
@@ -219,7 +221,7 @@ onclick={(e => {
 })}
 
 onfocusin={(e => {
-    if(tippy.on) {
+    if(tippyState.on) {
         (e.target! as HTMLElement).blur();
     }
 })}

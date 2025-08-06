@@ -1,8 +1,9 @@
 <script lang="ts">
     import { browser } from '$app/environment';
-    import { tooltip } from '$scripts/ui/tippy.svelte';
+    import { tippy, tooltip } from '$scripts/ui/tippy.svelte';
 	import  resetImage from "$icons/symbols/settings-symbolic.svg";
     import { IndexedDBSystem } from '$scripts/virtual/indexdb';
+    import type { Instance, Props } from 'tippy.js';
 	
 	let content: HTMLElement;
 
@@ -16,6 +17,8 @@
 				.persisted();
 		})();
 	}
+
+	let hoverInstance: Instance<Props>;
 	
 </script>
 
@@ -37,12 +40,25 @@
 	
 <button 
     class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
-    use:tooltip={() => (
-		{ content, 
+    
+	use:tippy={() => ({
+		content, 
 		trigger: 'click',
 		interactive: true,
-		appendTo: () => document.body
-		})}
+		onShow: () => {
+			hoverInstance.disable();
+		},
+		onHide: () => {
+			hoverInstance.enable();
+		}
+	})}
+
+	use:tippy={() => ({
+		content: "Settings",
+		onMount: (instance) => {
+			hoverInstance = instance;
+		}
+	})}
    
     ><img src={resetImage} alt="settings" class="w-full h-full invert" /></button>
 

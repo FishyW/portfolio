@@ -4,6 +4,7 @@
 	
 	import resetImg from "$icons/symbols/arrow-circular-small-top-left-symbolic.svg";
     import { showResetPrompt } from './Desktop.svelte';
+    import { tippy, tooltip } from '$scripts/ui/tippy.svelte';
 
     const date = new SvelteDate();
 
@@ -47,12 +48,13 @@
 	<TopBarSettings />
 
 	<button 
+		use:tooltip={"Reset"}
 		class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
 		ondblclick={() => {
 			showResetPrompt();
 		}}
 		>
-		<img src={resetImg} alt="reset" 
+		<img  src={resetImg} alt="reset" 
 		class="w-full h-full invert mt-[0.5px]" />
 	</button>
 </div>

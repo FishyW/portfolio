@@ -42,7 +42,7 @@
     import WindowTopBarFile from "./WindowTopBarFile.svelte";
     import { copy, move, paste, rename, removeFile, fileOpen } from "$scripts/ui/operations.svelte";
     import { onFileDrop } from "$scripts/ui/filedrop";
-    import WindowFileElement, { tippy } from "./WindowFileElement.svelte";
+    import WindowFileElement, { tippyState } from "./WindowFileElement.svelte";
     import WindowFileDialog from "./WindowFileDialog.svelte";
     import WindowFileDropOverlay from "./WindowFileDropOverlay.svelte";
     import { tick } from "svelte";
@@ -51,7 +51,7 @@
     let showDropOverlay = $state(false);
 
     function deselect() {
-        if (tippy.on) {
+        if (tippyState.on) {
             return;
         }
         selected.file = null;

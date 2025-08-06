@@ -1,14 +1,23 @@
 import type { Plugin, Props } from 'tippy.js';
-import tippy from 'tippy.js';
+import tippyFn from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 
-export function tooltip(node: HTMLElement, fn: () => Partial<Props>) {
+export function tippy(node: HTMLElement, fn: () => Partial<Props>) {
 		$effect(() => {
-			const tooltip = tippy(node, fn());
+			const tooltip = tippyFn(node, fn());
 
 			return tooltip.destroy;
 		});
 	}
+
+
+export function tooltip(node: HTMLElement, content: string) {
+    $effect(() => {
+			const tooltip = tippyFn(node, {content});
+
+			return tooltip.destroy;
+		});
+}
 
 
 export const hideOnEsc: Plugin = {
