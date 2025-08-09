@@ -258,18 +258,10 @@ class Operation {
     }
 }
 
-export const [
+export const {
     download, fileOpen, newFile, newFolder, 
     rename, mount, unmount, copy, 
     removeFile, move, paste, encryptFile, decryptFile,
     changeDirectory, forward, back
-] = [
-    Operation.download, Operation.fileOpen, 
-    Operation.newFile, Operation.newFolder, 
-    Operation.rename, Operation.mount, 
-    Operation.unmount, Operation.copy,
-    Operation.removeFile, Operation.move, Operation.paste,
-    Operation.encryptFile, Operation.decryptFile,
-    Operation.changeDirectory, Operation.forward, Operation.back
-];
+} = Operation;
 
