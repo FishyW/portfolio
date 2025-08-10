@@ -13,7 +13,7 @@ export function tippy(node: HTMLElement, fn: () => Partial<Props>) {
 
 export function tooltip(node: HTMLElement, content: string) {
     $effect(() => {
-			const tooltip = tippyFn(node, {content});
+			const tooltip = tippyFn(node, {content, appendTo: node, zIndex: 0});
 
 			return tooltip.destroy;
 		});

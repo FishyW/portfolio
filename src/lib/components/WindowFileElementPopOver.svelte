@@ -1,53 +1,117 @@
 <script lang="ts">
+    import type { BaseFile } from "$scripts/fs";
+    import { VFSMap } from "$scripts/ui/config.svelte";
 
     interface Props {
-        filename: string,
-        renameCallback: (editedName: string) => void,
-        mountCallback: (path: string) => void,
+        callback: (editedName: string) => void,
         mode: 'rename' | 'mount' | 'none',
         tippyOn: boolean,
+        file: BaseFile
+    }
+
+    let nameValid = $state(true);
+
+    let mountMode: string | undefined = $state();
+
+    function onconfirm() {
+        let finalInput = editedInput;
+        if (mode === "mount") {
+            finalInput = mountMode! + "://" + editedInput;
+        }
+        if (nameValid) {
+            callback(finalInput);
+        }
     }
 
 
-    let editedName = $state("");
-    let mountPath = $state("file://");
+    let editedInput = $state("");
+    // let mountPath = $state("file://");
+    
+    let inputBox: HTMLInputElement;
 
-    let { filename, renameCallback, mountCallback,
+    let {  callback, file,
             mode, tippyOn } : Props = $props();
 
-       function inputMount(node: HTMLInputElement) {
-        $effect(() => {
-            tippyOn;
-            editedName = filename;
-            node.focus();
-            node.value = filename;
-            node.setSelectionRange(0, filename.lastIndexOf("."));
-        })
+
+    function computeWidth(name: string) {
+        const elem = document.createElement("div");
+        elem.innerText = name;
+        elem.style.visibility = "hidden";
+        elem.style.position = "fixed";
+        elem.style.padding = "4px";
+        document.body.appendChild(elem);
+        const width =  elem.getBoundingClientRect().width;
+        elem.remove();
+        return width;
     }
 
     
+    function inputMount(node: HTMLInputElement) {
+        $effect(() => {
+            tippyOn;         
+            node.focus();
+
+            if (mode === "mount") {
+                editedInput = "";
+                return;
+            }
+
+            if (mode !== "rename") {
+                return;
+            }
+
+            nameValid = true;
+            editedInput = file.name;
+            node.value = file.name;
+            node.setSelectionRange(0, file.name.lastIndexOf("."));
+            
+            node.style.width = `${computeWidth(file.name)}px`;
+        })
+}
+
+
 </script>
 
-{#if mode === "rename"}
-<input 
-class="w-20"
-onkeydown={e => {
-    if (e.key === 'Enter') {
-        renameCallback(editedName)
-    }
-    
-}}
-    use:inputMount type="text" bind:value={editedName} />
-{:else if mode === "mount"}
 
-<input 
-class="w-20"
-onkeydown={e => {
-    if (e.key === 'Enter') {
-        mountCallback(mountPath)
-    }
-}}
-    type="text" use:inputMount bind:value={mountPath} />
+<div 
+class="mt-0.5 flex items-center"
+>
 
+{#if mode === "mount"}
+<select bind:value={mountMode} class="text-sm text-secondary-40 font-semibold">
+    {#each Object.keys(VFSMap) as item}
+        <option value={item} class="text-secondary-40 font-semibold text-sm">{item}</option>
+    {/each}
+
+</select>
+<div class="mx-1 text-secondary-40 font-semibold">
+://
+</div>
 {/if}
+<input 
+bind:this={inputBox}
+
+class="min-w-28 p-1 text-sm/tight line rounded-sm bg-gray-200 outline-primary-70"
+onkeydown={e => {
+    if (e.key === 'Enter' ) {
+        onconfirm();
+    }
+}}
+
+onkeyup={e => {
+    nameValid = mode === "rename" ? file.isValidName(editedInput) : true;
+}}
+    use:inputMount type="text" bind:value={editedInput} />
+<button onclick={() => {onconfirm()}} 
+    class={["ml-2 p-1 px-2 text-white rounded-md", 
+       nameValid && "bg-primary-60 hover:bg-primary-50",
+       !nameValid && "bg-primary-70"]}>
+   {#if mode === 'rename'}
+        Rename
+   {:else if mode === 'mount'}
+        Mount
+    {/if}
+</button>
+</div>
+
 

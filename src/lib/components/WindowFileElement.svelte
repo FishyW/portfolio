@@ -23,11 +23,11 @@
     import 'tippy.js/dist/tippy.css';
     
     import type { Instance, Props as TippyProps } from "tippy.js";
-    import { mount } from "$scripts/ui/operations.svelte";
 
 
     import { fileOpen } from "$scripts/ui/operations.svelte";
-    import { getIcon, getIconAsync } from "$scripts/ui/icon_manager";
+    import { getIconAsync } from "$scripts/ui/icon_manager";
+    import { getContext } from "svelte";
 
     
 
@@ -39,36 +39,55 @@
         selected: BaseFile | null
     }
     let { file, selected = $bindable()}: Props = $props();
-  
+
+    let popOverMode: "rename" | "mount" = $state("rename");
+
     export function getName() {
         return file.name;
     }
 
-    export function renamePrompt() {
-        showRenameInputBox = true;
+    let oncallback = (_name: string) => {};
+
+    function callback(editedName: string) {
+        oncallback(editedName);
     }
 
+    export function renamePrompt(): Promise<string> {
+        popOverMode = "rename";
+        tippyInstance?.show();
+        return new Promise((res, _rej) => {
+            oncallback = res;
+        });
+    }
+
+    export function mountPrompt(): Promise<string> {
+        popOverMode = "mount";
+        tippyInstance?.show();
+        return new Promise((res, _rej) => {
+            oncallback = res;
+        });
+    }
+
+    
     export function update() {
         displayedName = file.name;
         iconURL = getIconAsync(file);
+        tippyInstance?.hide();
     }
 
-   
-    let showRenameInputBox = $state(false);
+    let contextMenu: ReturnType<typeof ContextMenuFile>;
+    let tippyInstance: Instance<TippyProps> | undefined = $state();
+    let tippyOn = $state(false);
 
-   
-    let showMountInputBox = $state(false);
    
     let displayedName = $state(file.name);
     let fileElement: HTMLElement;
     let iconURL = $state(getIconAsync(file));
 
     function select() {
-        if (tippyState.on) {
-            return;
-        }
         selected = file;
         fileElement.focus();
+        fileElement.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: "smooth" });
     }
 
     function deselect() {
@@ -78,96 +97,58 @@
     $effect(() => {
         pasteBuffer.file;
     });
-
    
 
     $effect(() => {
         selected;
-        if (selected?.name === file.name)
+        if (selected?.name === file.name) {
             fileElement.focus();
+        }
+            
     })
-
-    function onTippyHide() {
-        tippyOn = false;
-        showMountInputBox = false;
-        tippyState.on = false;
-        fileElement.focus();
-    }
   
  
    let aboveDropZone = $state(false);
 
 
-    function renameCallback(editedName: string) {
-        try {
-            file.rename(editedName);
-        } catch(e) {
-            console.error(e);
-            return;
-        }
-        showRenameInputBox = false;
-        update();
-        tippyInstance?.hide();
-        
-    }
-
-    function mountPrompt() {
-        showMountInputBox = true;
-    }
-
-    async function mountCallback(mountPath: string) {
-        try {
-            await mount(mountPath);
-        } catch(e) {
-            console.error(e);
-            return;
-        }
-        tippyInstance?.hide();
-    }
-    
-
-    let contextMenu: ReturnType<typeof ContextMenuFile>;
-    let tippyInstance: Instance<TippyProps> | undefined = $state();
-    let tippyOn = $state(false);
-
-
-
-
-    $effect(() => {
-        if (showRenameInputBox || showMountInputBox) {
-            tippyInstance?.show();
-        } else {
-            tippyInstance?.hide();
-        }
-    })
-
-    let popOverMode: 'rename' | 'none' | 'mount' = $derived(
-        showRenameInputBox ? 'rename' :
-        showMountInputBox ? 'mount'
-        : 'none'
-    ) 
-
     let isBeingMoved = $derived(pasteBuffer.file?.path === file.path 
         && pasteBuffer.active && pasteBuffer.operation === "MOVE")
 
-    
-  
+    let isDoubleClick = false;
+    let isTippyClick = false;
+    let disableOpen = false;
+    let intermediateClick = false;
+    let forceFocus = false;
+
+    function onTippyHide() {
+        tippyOn = false;
+        
+        if (selected?.name === file.name) {
+            forceFocus = true;
+            select();
+        }
+        tippyState.on = false;
+    }
+
+    const getWindow: () => HTMLElement = (getContext("windowElement") as any).getWindow;
+ 
 </script>
 
 <div class="h-fit w-fit ">
- 
-<div class="hidden">
-    <ContextMenuFile  mountCallback={mountPrompt} {file} bind:this={contextMenu} />
-</div>
 
+<div class="hidden">
+    <ContextMenuFile {file} bind:this={contextMenu} />
+</div>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div 
 use:tippy={() => ({
     interactive: true,
     trigger: 'manual',
-    appendTo: document.body,
+    appendTo: getWindow(),
     placement: "bottom",
+    theme: "window",
+    zIndex: 10,
     content: tippyBox,
     onCreate: (instance) => {
         tippyInstance = instance;
@@ -186,17 +167,18 @@ use:tippy={() => ({
 tabindex="-1"
 bind:this={fileElement}
 draggable="true" 
-class={["p-3 py-2 h-fit \
+class={["p-3 py-2 \
 rounded-md \
 hover:bg-slate-200 \
 focus:bg-slate-300 \
 h-42 overflow-hidden \
 flex items-center flex-col outline-0",
-tippyOn && "bg-slate-300" ,
+tippyOn && "bg-slate-300 hover:bg-slate-300" ,
 aboveDropZone && "dragging",
 aboveDropZone && "bg-slate-300",
 
 ]}
+
 
 ondragstart={
     e => {
@@ -217,17 +199,43 @@ ondragstart={
 }
 
 onclick={(e => {
+    if (isTippyClick) {
+        disableOpen = true;
+        intermediateClick = true;
+        setTimeout(() => {disableOpen = false; intermediateClick = false}, 0);
+    }
+    isTippyClick = false;
+    if (tippyState.on) {
+        isTippyClick = true;
+        return;
+    }
     select();
 })}
 
+onmousedown={e => {
+    isDoubleClick = false;
+}}
+
 onfocusin={(e => {
-    if(tippyState.on) {
+
+    if (forceFocus) {
+        forceFocus = false;
+        return;
+    }
+    if((tippyState.on && !isDoubleClick) || intermediateClick) {
         (e.target! as HTMLElement).blur();
+        return;
     }
 })}
 
 ondblclick={() => {
+    intermediateClick = false;
+    isDoubleClick = true;
     select();
+    if (disableOpen) {
+        disableOpen = false;
+        return;
+    }
     fileOpen();
     deselect();
     fileElement.blur();
@@ -268,8 +276,12 @@ ondragover = {e => {
 }}
 
 oncontextmenu={e => {
+    isDoubleClick = false;
     e.preventDefault();
     if (menu.on) {
+        return;
+    }
+    if (tippyState.on) {
         return;
     }
     
@@ -296,8 +308,8 @@ oncontextmenu={e => {
             
             <div class="hidden">
                 <div bind:this={tippyBox}>
-                    <WindowFileElementPopOver filename={displayedName} {tippyOn} {mountCallback}
-                     {renameCallback} mode={popOverMode} />
+                    <WindowFileElementPopOver {file} {tippyOn}
+                        mode={popOverMode} {callback}  />
                 </div>
             </div>
            
@@ -319,5 +331,30 @@ oncontextmenu={e => {
 
     .dragging * {
         pointer-events: none;
+    }
+
+    :global(.tippy-box[data-theme~='window']) {
+        background-color: var(--color-window-bg);
+        color: var(--color-secondary-20);
+        filter: drop-shadow(0px 0px 1px rgba(0,0,0,.5));
+        @apply rounded-md;
+    }
+    
+
+
+    :global(.tippy-box[data-theme~='window'] > .tippy-arrow::before) {
+        filter: drop-shadow(0px -2px 1px rgba(128,128,128,.1));
+    }
+    :global(.tippy-box[data-theme~='window'][data-placement^='top'] > .tippy-arrow::before) {
+        border-top-color: var(--color-window-bg);
+    }
+    :global(.tippy-box[data-theme~='window'][data-placement^='bottom'] > .tippy-arrow::before) {
+        border-bottom-color: var(--color-window-bg);
+    }
+    :global(.tippy-box[data-theme~='window'][data-placement^='left'] > .tippy-arrow::before) {
+        border-left-color: var(--color-window-bg);
+    }
+    :global(.tippy-box[data-theme~='window'][data-placement^='right'] > .tippy-arrow::before) {
+        border-right-color: var(--color-window-bg);
     }
 </style>

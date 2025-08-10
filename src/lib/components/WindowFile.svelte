@@ -45,7 +45,7 @@
     import WindowFileElement, { tippyState } from "./WindowFileElement.svelte";
     import WindowFileDialog from "./WindowFileDialog.svelte";
     import WindowFileDropOverlay from "./WindowFileDropOverlay.svelte";
-    import { tick } from "svelte";
+    import { setContext, tick } from "svelte";
 
 
     let showDropOverlay = $state(false);
@@ -111,10 +111,17 @@
         fileSystem.cwd.path;
         focus();
     })
+
+    let fullWindow: HTMLDivElement;
+
+
+    setContext("windowElement", { getWindow: () => {
+        return fullWindow;
+    } });
     
 </script>
 
-<div class="h-full flex flex-col relative">
+<div  bind:this={fullWindow} class="h-full flex flex-col relative">
 <WindowFileDialog />
 <WindowTopBarFile />
 
@@ -148,6 +155,7 @@ ondrop={e => {
     onFileDrop(e.dataTransfer!.items, fileSystem.cwd);
     showDropOverlay = false;
 }}
+
 
 
 class="flex-1 px-8 py-6 overflow-y-auto outline-0 

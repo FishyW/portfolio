@@ -4,7 +4,7 @@
     
     import { copy, decryptFile, download, encryptFile, 
          move, newFile, newFolder, paste, pasteBuffer, 
-         removeFile, rename, unmount } from '$scripts/ui/operations.svelte';
+         removeFile, rename, mount, unmount } from '$scripts/ui/operations.svelte';
     import ContextMenuFileButton from './ContextMenuFileButton.svelte';
 
     import newFileIcon from "$icons/symbols/paper-symbolic.svg";
@@ -24,11 +24,10 @@
     // move, paste, and unmount
 
     interface Props {
-        file?: BaseFile,
-        mountCallback?: () => void
+        file?: BaseFile
     }
 
-    let { file, mountCallback }: Props = $props();
+    let { file }: Props = $props();
 
     let exit: () => void;
     let mainElement: HTMLElement;
@@ -126,7 +125,7 @@
         {#if file && !isBaseMount}
             <ContextMenuFileButton 
                 iconURL={mountIcon}
-                onclick={exitWrapper(mountCallback!)}>
+                onclick={exitWrapper(mount)}>
                 Mount
             </ContextMenuFileButton>
         {/if}

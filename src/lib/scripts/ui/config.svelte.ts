@@ -58,7 +58,7 @@ const extMap = {
 
 // IndexedDB is not here since it's technically not a virtual file system
 export const VFSMap: {[name: string]: typeof VirtualSystem} = {
-    "file": RealSystem,
+    // "file": RealSystem,
     "ephemeral": EphemeralSystem,
     "logger": LoggerSystem
 };

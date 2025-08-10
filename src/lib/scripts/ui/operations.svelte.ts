@@ -58,15 +58,18 @@ class Operation {
     static async newFile() {
         const file = fileSystem.addEmptyFile();
         const component = await getComponent(file);
-        component?.renamePrompt();        
+        const name = await component!.renamePrompt();
+        file.rename(name);  
+        component?.update();      
     }
 
     @promptOnErrorAsync
     static async newFolder() {
         const folder = fileSystem.addEmptyFolder();
         const component = await getComponent(folder);
-        component?.renamePrompt();        
-        
+        const name = await component!.renamePrompt();
+        folder.rename(name);   
+        component?.update();        
     }
 
     @promptOnError
@@ -90,8 +93,10 @@ class Operation {
         if (selected.file === null) return;
 
         const component = await getComponent(selected.file);
-        component?.renamePrompt(); 
         
+        const name = await component!.renamePrompt();
+        selected.file.rename(name);   
+        component?.update();
     }
 
     @promptOnError
@@ -204,15 +209,17 @@ class Operation {
 
         const zip = JSZip();
         this.zipFolder(selected.file as DirectoryFile, zip);
-        const content = await zip.generateAsync({type:"blob"});
+        const content = await zip.generateAsync({type: "blob"});
         saveAs(content, selected.file.name + ".zip")
     }
 
     @promptOnErrorAsync
-    static async mount(mountPath: string) {
+    static async mount() {
         if (selected.file === null) {
             return;
         }
+        const component = await getComponent(selected.file);
+        const mountPath = await component!.mountPrompt();
         let scheme = "";
         const path = mountPath.replace(/^([a-zA-Z]+):\/\//g, 
             (_m, n1, _o, _s) => {
@@ -223,7 +230,6 @@ class Operation {
         const vfs = await VFSMap[scheme].init(path, selected.file );
         selected.file.mount(vfs);
 
-        const component = await getComponent(selected.file);
         component?.update();
     }
 
