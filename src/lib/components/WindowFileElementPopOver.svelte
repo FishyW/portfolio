@@ -53,9 +53,11 @@
             tippyOn;         
             node.focus();
             
-
+            nameValid = true;
+            
             if (mode === "mount") {
                 editedInput = "";
+                node.style.width = "20px";
                 return;
             }
 
@@ -63,7 +65,7 @@
                 return;
             }
 
-            nameValid = true;
+            
             editedInput = file.name;
             node.value = file.name;
             node.setSelectionRange(0, file.name.lastIndexOf("."));
