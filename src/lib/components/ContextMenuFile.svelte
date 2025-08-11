@@ -98,6 +98,7 @@
                 onclick={exitWrapper(move)}>
                 Move
             </ContextMenuFileButton>
+        {/if}
 
         {#if pasteBuffer.file !== undefined}
             <ContextMenuFileButton 
@@ -107,6 +108,7 @@
             </ContextMenuFileButton>
         {/if}
 
+         {#if file}
             <ContextMenuFileButton 
                 iconURL={removeIcon}
                 onclick={exitWrapper(removeFile)}>
