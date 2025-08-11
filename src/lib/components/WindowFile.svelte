@@ -77,11 +77,11 @@
 
     function bindShortcuts(node: HTMLElement) {
         function bindKeys(e: KeyboardEvent) {
-            if (e.ctrlKey && e.key === "c") {
+            if ((e.ctrlKey || e.metaKey) && e.key === "c") {
                 copy();
-            } else if (e.ctrlKey && e.key === "x") {
+            } else if ((e.ctrlKey || e.metaKey) && e.key === "x") {
                 move();
-            } else if (e.ctrlKey && e.key === "v") {
+            } else if ((e.ctrlKey || e.metaKey)  && e.key === "v") {
                 paste();
             } else if (e.key === "F2") {
                 rename();
