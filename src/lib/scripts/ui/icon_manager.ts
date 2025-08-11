@@ -99,15 +99,10 @@ function checkCache(file: BaseFile) {
 
 
 
-export function getIcon(file: BaseFile): string {
+function getIcon(file: BaseFile): string {
 
     const icons = store.read();
-
-    if (file.isBaseMount) {
-        return DirectoryFile.isDirectory(file) ? 
-            icons.mountedFolder : icons.mountedFile;
-    }
-
+    
     // first check the path map
     if (file.path in icons.pathMap)  {
         return (icons.pathMap as any)[file.path];
@@ -167,6 +162,12 @@ async function intoBlob(contents: ArrayBuffer) {
 
 export async function getIconAsync(file: BaseFile) {
     const icons = store.read();
+
+    if (file.isBaseMount) {
+        return DirectoryFile.isDirectory(file) ? 
+            icons.mountedFolder : icons.mountedFile;
+    }
+    
     if (file.getExtension() !== "pdf") {
         return getIcon(file);
     }
