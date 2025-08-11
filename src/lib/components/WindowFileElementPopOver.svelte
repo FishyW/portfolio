@@ -1,6 +1,8 @@
 <script lang="ts">
     import type { BaseFile } from "$scripts/fs";
     import { VFSMap } from "$scripts/ui/config.svelte";
+    import WindowFileSelect from "./WindowFileSelect.svelte";
+    import WindowFileSelectOption from "./WindowFileSelectOption.svelte";
 
     interface Props {
         callback: (editedName: string) => void,
@@ -11,7 +13,7 @@
 
     let nameValid = $state(true);
 
-    let mountMode: string | undefined = $state();
+    let mountMode = $state(Object.keys(VFSMap)[0]);
 
     function onconfirm() {
         let finalInput = editedInput;
@@ -50,6 +52,7 @@
         $effect(() => {
             tippyOn;         
             node.focus();
+            
 
             if (mode === "mount") {
                 editedInput = "";
@@ -78,12 +81,11 @@ class="mt-0.5 flex items-center"
 >
 
 {#if mode === "mount"}
-<select bind:value={mountMode} class="text-sm text-secondary-40 font-semibold">
+<WindowFileSelect bind:value={mountMode}>
     {#each Object.keys(VFSMap) as item}
-        <option value={item} class="text-secondary-40 font-semibold text-sm">{item}</option>
+      <WindowFileSelectOption value={item}/>
     {/each}
-
-</select>
+</WindowFileSelect>
 <div class="mx-1 text-secondary-40 font-semibold">
 ://
 </div>

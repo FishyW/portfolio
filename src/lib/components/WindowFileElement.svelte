@@ -27,7 +27,7 @@
 
     import { fileOpen } from "$scripts/ui/operations.svelte";
     import { getIconAsync } from "$scripts/ui/icon_manager";
-    import { getContext } from "svelte";
+    import { getContext, tick } from "svelte";
 
     
 
@@ -52,17 +52,19 @@
         oncallback(editedName);
     }
 
-    export function renamePrompt(): Promise<string> {
+    export async function renamePrompt(): Promise<string> {
         popOverMode = "rename";
+        
         tippyInstance?.show();
         return new Promise((res, _rej) => {
             oncallback = res;
         });
     }
 
-    export function mountPrompt(): Promise<string> {
+    export async function mountPrompt(): Promise<string> {
         popOverMode = "mount";
         tippyInstance?.show();
+       
         return new Promise((res, _rej) => {
             oncallback = res;
         });
@@ -153,9 +155,10 @@ use:tippy={() => ({
     onCreate: (instance) => {
         tippyInstance = instance;
     },
-    onShow: (_) => {
+    onShow: (instance) => {
         tippyOn = true;
         tippyState.on = true;
+        // instance.popperInstance?.forceUpdate();
     },
     onHidden: (_) => {
         onTippyHide();
@@ -277,15 +280,17 @@ ondragover = {e => {
 
 oncontextmenu={e => {
     isDoubleClick = false;
+
     e.preventDefault();
     if (menu.on) {
         return;
     }
+
+    e.stopPropagation();
     if (tippyState.on) {
         return;
     }
     
-    e.stopPropagation();
     select();
     show(e, contextMenu);
 }}
@@ -307,7 +312,7 @@ oncontextmenu={e => {
             </div>
             
             <div class="hidden">
-                <div bind:this={tippyBox}>
+                <div bind:this={tippyBox} class="w-fit">
                     <WindowFileElementPopOver {file} {tippyOn}
                         mode={popOverMode} {callback}  />
                 </div>
