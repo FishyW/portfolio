@@ -23,15 +23,14 @@ jobs:
         run: pnpm install
       - name: build
         env: 
-          BASE_PATH: '/'
+          BASE_PATH: ''
         run: pnpm build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
           external_repository: FishyW/fishyw.github.io
           publish_dir: ./build
-          publish_branch: prod
           force_orphan: true
           
          
