@@ -17,7 +17,7 @@ export function tooltip(content: string, showFront = false, props: Partial<Props
       const tooltip = tippyFn(node, 
           {
             content, 
-            appendTo: !showFront ? node : document.body,
+            appendTo: document.body,
             zIndex: !showFront ? 0 : 9999,
             ...props
           });

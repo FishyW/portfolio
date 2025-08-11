@@ -86,7 +86,7 @@
         for (const [i, zId] of zArray.entries()) {
             let component = components[openWindows.indexOf(zId)];
             if (component !== undefined)
-                component.style.zIndex = `${i}`;
+                component.style.zIndex = `${i + 10}`;
         }
     }
 
