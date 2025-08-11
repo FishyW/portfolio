@@ -25,7 +25,7 @@
         }
     }
 
-
+    const MAX_WIDTH = 250;
     let editedInput = $state("");
     // let mountPath = $state("file://");
     
@@ -70,7 +70,8 @@
             node.value = file.name;
             node.setSelectionRange(0, file.name.lastIndexOf("."));
             
-            node.style.width = `${computeWidth(file.name)}px`;
+            const width = Math.min(computeWidth(file.name), MAX_WIDTH);
+            node.style.width = `${width}px`;
         })
 }
 
