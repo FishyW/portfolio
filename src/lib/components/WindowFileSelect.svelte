@@ -45,7 +45,7 @@ onclick={_ => {showOptions = !showOptions}}>
     {@render children()}
 </div>
 {#if showOptions}
-<div class="w-full flex-col flex bg-window-bg rounded-sm overflow-hidden -z-1">
+<div class="w-full flex-col flex bg-window-bg rounded-sm rounded-t-none overflow-hidden -z-1">
     <!-- <div class="w-full h-[1px] bg-black/10"></div> -->
         {@render children()}
 </div>
