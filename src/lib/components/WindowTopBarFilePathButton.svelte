@@ -31,8 +31,11 @@
 ]}>
 
 {#if fullpath === "/home"}
-<div class="flex items-center">
-    <img src={fullpath === fileSystem.cwd.path || isHovered ? homeImg : disabledHomeImg} alt="home" class="w-[1rem] h-[1rem] mr-1"/>Home
+<div class="w-max flex items-center">
+    <img src={fullpath === fileSystem.cwd.path || isHovered ? homeImg : disabledHomeImg} alt="home" class="w-[1rem] h-[1rem] mr-1"/>
+    <div>
+        Home
+    </div>
 </div>
 {:else}
     {segment}
