@@ -26,7 +26,7 @@ jobs:
           BASE_PATH: '/'
         run: pnpm build
       - name: Deploy
-        uses: peaceiris/actions-github-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.PERSONAL_TOKEN }}
           external_repository: FishyW/fishyw.github.io
