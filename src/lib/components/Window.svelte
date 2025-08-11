@@ -24,13 +24,17 @@
 
 
     const BREAKPOINT_DESKTOP = 630;
-    const PADDING = 50;
+    const BREAKPOINT_HEIGHT = 600;
+    const PADDING = 70;
 
     let minWidth = $state(BREAKPOINT_DESKTOP);
+    let minHeight = $state(BREAKPOINT_HEIGHT);
 
     if (browser) {
         minWidth = window.innerWidth > BREAKPOINT_DESKTOP - PADDING ? BREAKPOINT_DESKTOP 
         : window.innerWidth - PADDING;
+        minHeight = window.innerHeight > BREAKPOINT_HEIGHT - PADDING ? BREAKPOINT_HEIGHT 
+        : window.innerHeight - PADDING;
     }
     
 
@@ -39,7 +43,7 @@
 <div bind:this={ctx.window} {onmousedown}
 class="pointer-events-auto relative"
 >
-    <WindowResizable {onresizeend} {onresizestart} {minWidth} minHeight={600}>
+    <WindowResizable {onresizeend} {onresizestart} {minWidth} {minHeight}>
         <div class="bg-window-bg h-full
         flex-col rounded-xl overflow-hidden shadow-[0_0_5px_5px_rgba(0,0,0,0.2)] ">
             <ComponentWindow 
