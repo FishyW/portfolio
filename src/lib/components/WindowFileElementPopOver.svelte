@@ -27,7 +27,6 @@
 
     const MAX_WIDTH = 250;
     let editedInput = $state("");
-    // let mountPath = $state("file://");
     
     let inputBox: HTMLInputElement;
 

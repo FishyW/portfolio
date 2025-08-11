@@ -5,6 +5,7 @@
     import type WindowEmpty from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from "svelte/reactivity";    
     import type { WindowInfo } from "$scripts/ui/info";
+    import { browser } from "$app/environment";
 
    
     interface WindowDetails {
@@ -121,8 +122,18 @@
         );
     }
     
-    
-    
+    const BREAKPOINT_DESKTOP = 630;
+
+    let translationX = $state(100);
+    let translationY = $state(100);
+
+    if (browser) {
+        translationX = window.innerWidth >= BREAKPOINT_DESKTOP ? 100 : 10/100 * window.innerWidth;
+        translationY = window.innerWidth >= BREAKPOINT_DESKTOP ? 100 : 10/100 * window.innerHeight;
+    }
+
+   
+
 </script>
 
 
@@ -133,7 +144,7 @@
     
     <div {@attach (_) => setReorder()} bind:this={components[i]} class="w-full flex-1 flex items-center pointer-events-none">
     <div use:onclose={id} class="absolute left-1/2 top-1/2 -translate-1/2 pointer-events-none">
-        <div class="h-fit pointer-events-none" style:translate="{random(-100, 100)}px {random(-100, 100)}px">
+        <div class="h-fit pointer-events-none" style:translate="{random(-translationX, translationX)}px {random(-translationY, translationY)}px">
             <Window 
                 {component}
                 onmousedown={e => {
