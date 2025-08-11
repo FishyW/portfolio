@@ -4,7 +4,7 @@
        import Window from "./Window.svelte";
     import type WindowEmpty from "./dummy/WindowEmpty.svelte";
     import { SvelteMap } from "svelte/reactivity";    
-    import type { WindowInfo } from "$scripts/ui/info";
+    import { FilesInfo, type WindowInfo } from "$scripts/ui/info";
     import { browser } from "$app/environment";
 
    
@@ -128,11 +128,10 @@
     let translationY = $state(100);
 
     if (browser) {
-        translationX = window.innerWidth >= BREAKPOINT_DESKTOP ? 100 : 10/100 * window.innerWidth;
-        translationY = window.innerWidth >= BREAKPOINT_DESKTOP ? 100 : 10/100 * window.innerHeight;
+        translationX = window.innerWidth >= BREAKPOINT_DESKTOP ? 100 : 5/100 * window.innerWidth;
+        translationY = window.innerWidth >= BREAKPOINT_DESKTOP ? 100 : 5/100 * window.innerHeight;
     }
 
-   
 
 </script>
 

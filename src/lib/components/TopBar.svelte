@@ -5,6 +5,7 @@
 	import resetImg from "$icons/symbols/arrow-circular-small-top-left-symbolic.svg";
     import { showResetPrompt } from './Desktop.svelte';
     import { tippy, tooltip } from '$scripts/ui/tippy.svelte';
+    import { browser } from '$app/environment';
 
     const date = new SvelteDate();
 
@@ -31,6 +32,8 @@
 
 </script>
 
+{#if browser}
+
 <div class="flex absolute w-full  bg-secondary-20 text-secondary-95 justify-center px-4">
 	<div class="flex-1 justify-left gap-6 flex flex-row py-2">
 		
@@ -38,8 +41,10 @@
 <div class=" font-bold text-center h-fit py-2 flex-1">
 	<button class="py-0.5 px-4 rounded-3xl">
     { dayFormatter.format(date) } 
+	{#if !browser || browser &&  window.innerWidth >= 630}
     <span class="inline-block w-4"></span>
     { timeFormatter.format(date) }
+	{/if}
 	</button>
 </div>
 
@@ -60,6 +65,7 @@
 </div>
 
 </div>
+{/if}
 
 <style>
 
