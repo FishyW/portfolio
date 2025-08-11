@@ -29,7 +29,8 @@
 
     function loadPDF(node: HTMLEmbedElement) {
         if (typeof(file.contents) === "string") {
-            throw new Error("Invalid file content!");
+            console.error("Invalid file content!")
+            return;
         }
         const url  = URL.createObjectURL(file.intoFile("application/pdf"));
         node.src = url;
