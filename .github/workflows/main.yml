@@ -31,7 +31,6 @@ jobs:
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
           external_repository: FishyW/fishyw.github.io
           publish_dir: ./build
-          publish_branch: prod
           force_orphan: true
           
          
