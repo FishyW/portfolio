@@ -110,6 +110,9 @@ importers:
       '@replit/codemirror-lang-svelte':
         specifier: ^6.0.0
         version: 6.0.0(@codemirror/autocomplete@6.18.6)(@codemirror/lang-css@6.3.1)(@codemirror/lang-html@6.4.9)(@codemirror/lang-javascript@6.2.4)(@codemirror/language@6.11.2)(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(@lezer/common@1.2.3)(@lezer/highlight@1.2.1)(@lezer/javascript@1.5.1)(@lezer/lr@1.4.2)
+      '@sveltejs/adapter-static':
+        specifier: ^3.0.9
+        version: 3.0.9(@sveltejs/kit@2.22.2(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))
       '@tailwindcss/postcss':
         specifier: ^4.1.11
         version: 4.1.11
@@ -725,6 +728,11 @@ packages:
 
   '@sveltejs/adapter-auto@6.0.1':
     resolution: {integrity: sha512-mcWud3pYGPWM2Pphdj8G9Qiq24nZ8L4LB7coCUckUEy5Y7wOWGJ/enaZ4AtJTcSm5dNK1rIkBRoqt+ae4zlxcQ==}
+    peerDependencies:
+      '@sveltejs/kit': ^2.0.0
+
+  '@sveltejs/adapter-static@3.0.9':
+    resolution: {integrity: sha512-aytHXcMi7lb9ljsWUzXYQ0p5X1z9oWud2olu/EpmH7aCu4m84h7QLvb5Wp+CFirKcwoNnYvYWhyP/L8Vh1ztdw==}
     peerDependencies:
       '@sveltejs/kit': ^2.0.0
 
@@ -1881,6 +1889,10 @@ snapshots:
       acorn: 8.15.0
 
   '@sveltejs/adapter-auto@6.0.1(@sveltejs/kit@2.22.2(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))':
+    dependencies:
+      '@sveltejs/kit': 2.22.2(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1))
+
+  '@sveltejs/adapter-static@3.0.9(@sveltejs/kit@2.22.2(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))':
     dependencies:
       '@sveltejs/kit': 2.22.2(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.35.2)(vite@6.3.5(jiti@2.4.2)(lightningcss@1.30.1))
 

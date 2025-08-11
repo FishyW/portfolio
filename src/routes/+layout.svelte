@@ -5,6 +5,8 @@
 
 	let { children } = $props();
 	
+	export const prerender = true;
+
 </script>
 <style>
 	:global(body) {

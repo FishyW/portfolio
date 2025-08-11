@@ -64,6 +64,7 @@
 		"@replit/codemirror-lang-csharp": "^6.2.0",
 		"@replit/codemirror-lang-solidity": "^6.0.2",
 		"@replit/codemirror-lang-svelte": "^6.0.0",
+		"@sveltejs/adapter-static": "^3.0.9",
 		"@tailwindcss/postcss": "^4.1.11",
 		"codemirror": "^6.0.2",
 		"codemirror-lang-elixir": "^4.0.0",
