@@ -1,3 +1,4 @@
+import type { Attachment } from 'svelte/attachments';
 import type { Plugin, Props } from 'tippy.js';
 import tippyFn from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -11,12 +12,19 @@ export function tippy(node: HTMLElement, fn: () => Partial<Props>) {
 	}
 
 
-export function tooltip(node: HTMLElement, content: string) {
-    $effect(() => {
-			const tooltip = tippyFn(node, {content, appendTo: node, zIndex: 0});
+export function tooltip(content: string, showFront = false, props: Partial<Props> = {}): Attachment {
+  return (node) => {
+      const tooltip = tippyFn(node, 
+          {
+            content, 
+            appendTo: !showFront ? node : document.body,
+            zIndex: !showFront ? 0 : 9999,
+            ...props
+          });
 
 			return tooltip.destroy;
-		});
+  }
+			
 }
 
 

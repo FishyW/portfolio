@@ -2,7 +2,6 @@
     import { browser } from '$app/environment';
     import { tippy, tooltip } from '$scripts/ui/tippy.svelte';
 	import  resetImage from "$icons/symbols/settings-symbolic.svg";
-    import { IndexedDBSystem } from '$scripts/virtual/indexdb';
     import type { Instance, Props } from 'tippy.js';
 	
 	let content: HTMLElement;
@@ -53,8 +52,7 @@
 		}
 	})}
 
-	use:tippy={() => ({
-		content: "Settings",
+	{@attach tooltip("Settings", true, {
 		onMount: (instance) => {
 			hoverInstance = instance;
 		}

@@ -48,7 +48,7 @@
 	<TopBarSettings />
 
 	<button 
-		use:tooltip={"Reset"}
+		{@attach tooltip("Reset", true)}
 		class="w-6 h-6 pointer-events-auto hover:bg-secondary-40 p-0.5 font-bold rounded-full"
 		ondblclick={() => {
 			showResetPrompt();

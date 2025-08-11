@@ -15,7 +15,7 @@
 <!-- Opens the File Window -->
 <div class="relative">
 <button 
-use:tooltip={info.name}
+{@attach tooltip(info.name, false)}
 tabindex="-1"
 onclick={_ => {
     if (isOpened) 
