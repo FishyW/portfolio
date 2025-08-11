@@ -416,7 +416,16 @@ export class DirectoryFile extends BaseFile {
             return;
         }
 
+        if (DirectoryFile.isDirectory(file)) {
+            for (const f of file.files) {
+                file.removeFile(f);
+            }
+        }
+
         this.files.splice(index, 1);
+
+        
+
         file.isRemoved = true;
 
         if (!temporary) {
