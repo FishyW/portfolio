@@ -47,7 +47,7 @@ async function init() {
                 "/home/System": systemImg,
                 "/home/Share/linkedin.com": linkedinDocImg,
                 "/home/Share/github.com": githubDocImg,
-                "/home/Share/credits.txt": creditsImg
+                "/home/Share/credits.md": creditsImg
             },
             extensionMap: {
                 "enc": fileEncryptedImg,

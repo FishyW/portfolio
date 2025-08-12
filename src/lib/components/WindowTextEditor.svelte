@@ -233,13 +233,17 @@ const extensions = [
           updateContents(view, await file.contents);
     }
 
+    let regenerateEditor = $state(false);
+
     function createEditor(node: HTMLElement) {
       $effect(() => {
         // clean up the view and save the file
         if (currentFile) {
           save(currentFile);
+          currentFile = null;
+          regenerateEditor = !regenerateEditor;
+          return;
         }
-
         const contents = !RegFile.isRegFile(file) ? "" :
         typeof(file.contents) === "string" 
           ? file.contents : new TextDecoder().decode(file.contents);
@@ -407,7 +411,7 @@ const extensions = [
       if (buffer === null) {
           return;
       }
-      if (typeof(file.contents) !== "string") {
+      if (RegFile.isRegFile(saveFile) && typeof(saveFile.contents) !== "string" ) {
           return;
       }
       if (buffer !== originalContents)
@@ -453,8 +457,10 @@ const extensions = [
     }
   }} class="bg-slate-200 flex-1 overflow-hidden w-full">
   {#if fileExtension !== "md" || !showMarkdownViewer }
+  {#key regenerateEditor}
       <div 
         use:createEditor tabindex="-1" class="w-full h-full outline-none"></div>
+    {/key}
   {:else}
     <div class="h-full w-full no-twp p-3.5 py-3.5 overflow-auto bg-window-bg">
       {@html DomPurify.sanitize(marked.parse(file.contents as string) as string) }
@@ -483,16 +489,37 @@ const extensions = [
     
 
     .no-twp :global(h1),
-    .no-twp :global(h2),
+    .no-twp :global(h2)
+    {
+        margin-bottom: -10px;
+        margin-top: 10px
+      }
+
     .no-twp :global(h3),
     .no-twp :global(h4),
     .no-twp :global(h5),
     .no-twp :global(h6) {
-        margin-bottom: 5px;
-        margin-top: 10px
-      }
 
-    .no-twp :global(p) {
+        margin-bottom: -10px;
+        margin-top: 15px
+    }
+
+    .no-twp :global(p),
+    .no-twp :global(li) {
       font-size: 0.9rem;
+    }
+
+    .no-twp :global(p),
+    .no-twp :global(ul),
+    .no-twp :global(ol) {
+       margin-top: 0.75rem;
+    }
+
+    .no-twp :global(ol) :global(ol),
+    .no-twp :global(ol) :global(ul),
+    .no-twp :global(ul) :global(ol),
+    .no-twp :global(ul) :global(ul)
+     {
+      margin-top: 0rem;
     }
   </style>
