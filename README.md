@@ -13,7 +13,11 @@ npm run dev -- --open
 ```
 
 ## Password
-If you're really stuck these are the passwords.
+If you're really stuck, here are the passwords.
+
+<details>
+  <summary>Passwords</summary>
+  
 ```
 Chapter 1:
 AgendaCL
@@ -36,3 +40,5 @@ FunnyHatDesigns
 Features.md:
 This is a random piece of text that's in no way important at all.
 ```
+</details>
+
