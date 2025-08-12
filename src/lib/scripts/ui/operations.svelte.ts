@@ -46,6 +46,10 @@ export function promptOnErrorAsync(target: Function, context: ClassMethodDecorat
 }
 
 
+export function select(file: BaseFile) {
+    selected.file = file;
+}
+
 // static class, needed so that we can use TS decorators
 class Operation {
     @promptOnError
@@ -162,26 +166,27 @@ class Operation {
     @promptOnErrorAsync
     static async decryptFile() {
         if (selected.file === null) {return;}
+        const selectedFile = selected.file;
         const password = await prompt(DecryptPromptInfo);
         if (password === null) {
             return;
         }
-        if (!RegFile.isRegFile(selected.file)) {
+        if (!RegFile.isRegFile(selectedFile)) {
             throw new Error("Not a file!");
         }
 
-        if (typeof(selected.file.contents) === "string") {
+        if (typeof(selectedFile.contents) === "string") {
             throw new Error("Not a valid encrypted file!");
         }
         
-        const serialized = await decrypt(password, selected.file.contents);
+        const serialized = await decrypt(password, selectedFile.contents);
         if (serialized === null) {
             throw new Error("Invalid password!");
         }
         
         const folder = fileSystem.addEmptyFolder("tmp");
         const file = await IndexedDBSystem.deserialize(JSON.parse(serialized), folder);
-        const [base, _1, _2] = selected.file.splitExtension();
+        const [base, _1, _2] = selectedFile.splitExtension();
         file.rename(base);
         fileSystem.move(file, fileSystem.cwd, true);
         fileSystem.removeFile(folder);

@@ -25,7 +25,7 @@
 <div class="w-72 flex flex-col items-center justify-center  select-text pointer-events-auto">
     <img src={iconURL} alt="icon" class="w-10 h-10 mb-3"/>
     <p class="text-lg font-semibold mb-4">{message}</p>
-    <input bind:value type="password" placeholder="Password" class="w-full mb-4 p-2 px-2 text-sm outline-primary-60 bg-gray-200 rounded-md" />
+    <input {@attach (input) => input.focus()} bind:value type="password" placeholder="Password" class="w-full mb-4 p-2 px-2 text-sm outline-primary-60 bg-gray-200 rounded-md" />
     <div class="flex w-full justify-between">
         <button 
         class="bg-secondary-60 text-white 

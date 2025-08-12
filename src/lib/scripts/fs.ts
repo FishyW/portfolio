@@ -424,8 +424,6 @@ export class DirectoryFile extends BaseFile {
 
         this.files.splice(index, 1);
 
-        
-
         file.isRemoved = true;
 
         if (!temporary) {

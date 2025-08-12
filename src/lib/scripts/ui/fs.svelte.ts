@@ -1,6 +1,6 @@
 // reactive version of "$scripts/fs"
 
-import fsJson from "../fs.json";
+import fsJson from "../fs/default.json";
 
 import { browser } from "$app/environment";
 import { BaseFile, DirectoryFile, FileSystem } from "$scripts/fs";

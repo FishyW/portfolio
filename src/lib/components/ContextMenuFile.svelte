@@ -12,7 +12,6 @@
     import removeIcon from "$icons/symbols/user-trash-symbolic.svg";
     import copyIcon from "$icons/symbols/copy-symbolic.svg";
     import encryptIcon from "$icons/symbols/padlock2-symbolic.svg";
-    import decryptIcon from "$icons/symbols/padlock2-open-symbolic.svg";
     import downloadIcon from "$icons/symbols/arrow-pointing-at-line-down-symbolic.svg";
     import renameIcon from "$icons/symbols/edit-symbolic.svg";
     import pasteIcon from "$icons/symbols/clipboard-symbolic.svg";
@@ -149,15 +148,6 @@
             </ContextMenuFileButton>
         {/if}
 
-        {#if file && !DirectoryFile.isDirectory(file) 
-            && (file.getExtension() === "enc"
-            || file.getExtension() === "encdir")}
-            <ContextMenuFileButton 
-                iconURL={decryptIcon}
-                onclick={exitWrapper(decryptFile)}>
-                Decrypt
-            </ContextMenuFileButton>
-        {/if}
     </ul>
 
     <style>

@@ -3,13 +3,12 @@
 import { RegFile } from "./fs.svelte";
 import { open } from "$components/WindowManager.svelte";
 import { DocumentViewerInfo, ImageViewerInfo, TextEditorInfo } from "./info";
-import { RealSystem } from "$scripts/virtual/real";
 import { VirtualSystem } from "$scripts/virtual/virtual";
 import { IndexedDBSystem } from "$scripts/virtual/indexdb";
 import { LoggerSystem } from "$scripts/virtual/logger";
 import { EphemeralSystem } from "$scripts/virtual/ephemeral";
 import type { SpecialFile } from "$scripts/fs";
-
+import { decryptFile, select } from "$scripts/ui/operations.svelte";
 
 export function openTxt(file: RegFile | SpecialFile) {
     open(TextEditorInfo, { file } );
@@ -28,6 +27,11 @@ function openURL(file: RegFile) {
         throw new Error("File contents is not a string!");
     } 
     window.open(file.contents, "_blank");
+}
+
+function decrypt(file: RegFile) {
+    select(file);
+    decryptFile();
 }
 
 export const imageMimeMap: { [name: string]: string } = {
@@ -53,6 +57,8 @@ const extMap = {
     "txt": openTxt,
     "pdf": openPDF,
     "com": openURL,
+    "enc": decrypt,
+    "encdir": decrypt,
     ...imageExtMap
 };
 
