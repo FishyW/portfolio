@@ -1,0 +1,36 @@
+[
+  {
+    "name": "",
+    "idx": 0,
+    "contents": [
+      1
+    ],
+    "type": "dir",
+    "restricted": false
+  },
+  {
+    "name": "home",
+    "idx": 1,
+    "contents": [
+      2
+    ],
+    "type": "dir",
+    "restricted": false
+  },
+  {
+    "name": "System",
+    "idx": 2,
+    "contents": [
+      3
+    ],
+    "type": "dir",
+    "restricted": true
+  },
+  {
+    "name": "fs.json",
+    "idx": 3,
+    "program": "fs",
+    "type": "spec",
+    "restricted": true
+  }
+]
