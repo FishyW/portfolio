@@ -12,14 +12,33 @@ npm run dev
 npm run dev -- --open
 ```
 
-## Building
+## Password
+If you're really stuck, here are the passwords.
 
-To create a production version of your app:
-
-```bash
-npm run build
+<details>
+  <summary>Passwords</summary>
+  
 ```
+Chapter 1:
+AgendaCL
 
-You can preview the production build with `npm run preview`.
+Chapter 2:
+COMP2017
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Chapter 3:
+std::cell::RefCell::new(ahash::HashMap::new());
+
+Chapter 4:
+Sydney Interplanetary Rover Initiative
+
+Chapter 5:
+Anusha
+
+Chapter 6:
+FunnyHatDesigns
+
+Features.md:
+This is a random piece of text that's in no way important at all.
+```
+</details>
+
