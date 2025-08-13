@@ -1,5 +1,5 @@
 # FishyW Portfolio
-OS-inspired website, open the website and enjoy :)
+OS-inspired website, open the website @ [fishyw.github.io](https://fishyw.github.io) and enjoy :)
 
 ## Developing
 
